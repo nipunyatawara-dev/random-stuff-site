@@ -6,7 +6,7 @@ import {
   PolaroidCard,
   InlineBadge,
   ProjectsFolderIcon,
-  ChameleonLogo,
+  OtterLogo,
 } from './studio';
 import { Sparkles, Plus, ArrowDown } from 'lucide-react';
 
@@ -39,7 +39,7 @@ export default function HeroSection({
       {/* Main Display Headline */}
       <div className="max-w-[860px] mx-auto text-center px-2 sm:px-4 mb-3 sm:mb-4">
         <h1 className="font-sans text-2xl sm:text-4xl md:text-5xl lg:text-[58px] font-semibold text-[#304F67] leading-[1.2] sm:leading-[1.16] tracking-[-0.035em]">
-          The <InlineBadge type="chameleon" /> directory{' '}
+          The <InlineBadge type="otter" /> directory{' '}
           <span className="text-[#A0AFBB] font-normal">for builders</span>{' '}
           <br className="hidden md:inline" />
           <span className="text-[#A0AFBB] font-normal">who simply</span> can&apos;t afford to waste time
@@ -135,7 +135,7 @@ export default function HeroSection({
                 </span>
                 <div className="my-auto flex flex-col items-center">
                   <div className="w-12 h-12 rounded-2xl bg-white/80 shadow-studio-button flex items-center justify-center mb-1.5">
-                    <ChameleonLogo size={28} />
+                    <OtterLogo size={28} />
                   </div>
                   <span className="font-phudu text-lg font-black text-[#14334D]">
                     Developer & Design

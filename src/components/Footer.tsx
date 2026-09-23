@@ -1,16 +1,16 @@
 "use client";
 
 import React from "react";
-import { ChameleonLogo, MagneticButton } from "./studio";
+import { OtterLogo, MagneticButton } from "./studio";
 import { Plus, Github, ExternalLink, Instagram } from "lucide-react";
 
 export default function Footer() {
   return (
     <footer className="w-full mt-12 mb-6 px-3 sm:px-6 select-none">
       <div className="w-full max-w-[1600px] mx-auto bg-white/90 backdrop-blur-md rounded-[32px] md:rounded-[40px] p-8 md:p-12 shadow-studio-card border border-white/90 flex flex-col items-center text-center">
-        {/* Top Chameleon Brand Badge */}
+        {/* Top Otter Brand Badge */}
         <div className="flex items-center gap-2.5 mb-4">
-          <ChameleonLogo size={36} />
+          <OtterLogo size={36} />
           <span className="font-phudu text-2xl font-black text-[#14334D] tracking-tight">
             RANDOM STUFF
           </span>

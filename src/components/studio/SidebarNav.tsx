@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { ChameleonLogo } from './Icons';
+import { OtterLogo } from './Icons';
 import {
   Compass,
   Globe,
@@ -14,7 +14,6 @@ import {
   Github,
   ArrowRight,
   ExternalLink,
-  MessageCircle,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -87,7 +86,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
       <div>
         {/* Brand Header */}
         <div className="flex items-center gap-2.5 px-2 mb-8">
-          <ChameleonLogo size={34} />
+          <OtterLogo size={34} />
           <div>
             <div className="font-phudu text-xl font-black tracking-tight text-[#14334D] leading-none">
               RANDOM STUFF

@@ -48,30 +48,77 @@ export const DiscordIcon: React.FC<{ size?: number; className?: string }> = ({ s
   </svg>
 );
 
-export const ChameleonLogo: React.FC<{ size?: number; className?: string }> = ({ size = 32, className = '' }) => (
+export const OtterLogo: React.FC<{ size?: number; className?: string }> = ({ size = 32, className = '' }) => (
   <div className={`relative inline-flex items-center justify-center shrink-0 ${className}`} style={{ width: size, height: size }}>
     <svg viewBox="0 0 100 100" fill="none" className="w-full h-full">
-      <path
-        d="M25 60 C 20 40, 35 20, 60 20 C 85 20, 95 38, 90 60 C 85 80, 65 85, 45 85 C 30 85, 20 75, 25 60 Z"
-        fill="url(#chameleon-gradient)"
-      />
-      {/* Eye */}
-      <circle cx="68" cy="38" r="9" fill="#14334D" />
-      <circle cx="71" cy="35" r="3.5" fill="#FFFFFF" />
-      {/* Curl tail */}
-      <path
-        d="M28 65 C 22 72, 12 70, 10 60 C 8 50, 18 45, 22 52"
-        stroke="#89E00F"
-        strokeWidth="6"
-        strokeLinecap="round"
-        fill="none"
-      />
       <defs>
-        <linearGradient id="chameleon-gradient" x1="10" y1="20" x2="90" y2="85" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#B3FF2E" />
-          <stop offset="1" stopColor="#7CD005" />
+        <linearGradient id="otter-star-grad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#B5FF2E" />
+          <stop offset="100%" stopColor="#00D2FF" />
         </linearGradient>
+        <filter id="otter-glow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="1.5" stdDeviation="2.5" floodColor="#89E00F" floodOpacity="0.4" />
+        </filter>
       </defs>
+
+      {/* Ears */}
+      <circle cx="28" cy="28" r="9" fill="#14334D" />
+      <circle cx="28" cy="28" r="5" fill="#89E00F" />
+      <circle cx="72" cy="28" r="9" fill="#14334D" />
+      <circle cx="72" cy="28" r="5" fill="#89E00F" />
+
+      {/* Head */}
+      <ellipse cx="50" cy="46" rx="28" ry="24" fill="#14334D" />
+
+      {/* Body / Chest */}
+      <path
+        d="M32 64 C26 72, 24 88, 30 94 C42 96, 58 96, 70 94 C76 88, 74 72, 68 64 Z"
+        fill="#14334D"
+      />
+      {/* Cream Belly */}
+      <ellipse cx="50" cy="78" rx="14" ry="14" fill="#FAFCFD" />
+      <ellipse cx="50" cy="78" rx="11" ry="11" fill="#E8ECEF" />
+
+      {/* Muzzle */}
+      <ellipse cx="50" cy="52" rx="13" ry="9" fill="#FAFCFD" />
+      {/* Nose */}
+      <path d="M46 47 C48 45, 52 45, 54 47 C54 50, 46 50, 46 47 Z" fill="#14334D" />
+      {/* Smile */}
+      <path d="M46 51 Q50 55 54 51" stroke="#14334D" strokeWidth="2" strokeLinecap="round" fill="none" />
+
+      {/* Round Glasses */}
+      <circle cx="39" cy="41" r="9.5" stroke="#89E00F" strokeWidth="3" fill="#14334D" />
+      <circle cx="61" cy="41" r="9.5" stroke="#89E00F" strokeWidth="3" fill="#14334D" />
+      <path d="M48.5 41 Q50 39 51.5 41" stroke="#89E00F" strokeWidth="3" strokeLinecap="round" />
+
+      {/* Eyes & Catchlights */}
+      <circle cx="39" cy="41" r="4.5" fill="#FFFFFF" />
+      <circle cx="39.5" cy="41" r="2.5" fill="#14334D" />
+      <circle cx="40.5" cy="40" r="1" fill="#FFFFFF" />
+
+      <circle cx="61" cy="41" r="4.5" fill="#FFFFFF" />
+      <circle cx="60.5" cy="41" r="2.5" fill="#14334D" />
+      <circle cx="61.5" cy="40" r="1" fill="#FFFFFF" />
+
+      {/* Whiskers */}
+      <line x1="23" y1="50" x2="33" y2="52" stroke="#14334D" strokeWidth="2" strokeLinecap="round" />
+      <line x1="22" y1="55" x2="33" y2="55" stroke="#14334D" strokeWidth="2" strokeLinecap="round" />
+      <line x1="77" y1="50" x2="67" y2="52" stroke="#14334D" strokeWidth="2" strokeLinecap="round" />
+      <line x1="78" y1="55" x2="67" y2="55" stroke="#14334D" strokeWidth="2" strokeLinecap="round" />
+
+      {/* Holding Star in Paw */}
+      <g filter="url(#otter-glow)">
+        <polygon
+          points="74,62 77,71 86,74 77,77 74,86 71,77 62,74 71,71"
+          fill="url(#otter-star-grad)"
+        />
+        <circle cx="74" cy="74" r="3" fill="#FFFFFF" />
+      </g>
+      {/* Paws */}
+      <ellipse cx="66" cy="74" rx="4.5" ry="3.5" fill="#14334D" />
+      <ellipse cx="34" cy="74" rx="4.5" ry="3.5" fill="#14334D" />
     </svg>
   </div>
 );
+
+export const ChameleonLogo = OtterLogo;

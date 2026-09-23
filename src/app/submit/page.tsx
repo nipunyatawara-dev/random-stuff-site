@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, CheckCircle2, AlertCircle, Send } from "lucide-react";
 import {
-  ChameleonLogo,
+  OtterLogo,
   MagneticButton,
   PolaroidCard,
   InlineBadge,
@@ -72,7 +72,7 @@ export default function SubmitPage() {
       <header className="sticky top-0 z-40 bg-[#F0F2F5]/85 backdrop-blur-md border-b border-[#D6DCE1] px-4 md:px-8 py-3 select-none">
         <div className="max-w-[1400px] mx-auto flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <ChameleonLogo size={32} />
+            <OtterLogo size={32} />
             <span className="font-phudu font-bold text-lg text-[#14334D] tracking-tight">
               RANDOM STUFF
             </span>
@@ -103,7 +103,7 @@ export default function SubmitPage() {
             {/* Left Column: Form */}
             <div className="lg:col-span-7">
               <h1 className="font-sans text-3xl sm:text-4xl font-semibold text-[#304F67] leading-[1.2] tracking-[-0.035em] mb-2">
-                Submit a <InlineBadge type="chameleon" /> tool{" "}
+                Submit a <InlineBadge type="otter" /> tool{" "}
                 <span className="text-[#A0AFBB] font-normal">to the</span> directory
               </h1>
 

@@ -20,7 +20,7 @@ interface CommandPaletteProps {
   onSelectItem: (item: Item) => void;
   onOpenRandom: () => void;
   onOpenFavorites: () => void;
-  onOpenSandbox: () => void;
+  onOpenSandbox?: () => void;
   onOpenCompare: () => void;
   onExportFavorites: () => void;
 }
@@ -42,7 +42,6 @@ export default function CommandPalette({
   onSelectItem,
   onOpenRandom,
   onOpenFavorites,
-  onOpenSandbox,
   onOpenCompare,
   onExportFavorites,
 }: CommandPaletteProps) {

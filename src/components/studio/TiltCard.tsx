@@ -88,11 +88,14 @@ export const TiltCard: React.FC<TiltCardProps> = ({
           style={{ background: glareBackground }}
         />
 
-        {/* Chameleon Watermark graphic in background */}
-        <div className="pointer-events-none absolute -right-6 -bottom-6 w-[200px] h-[200px] opacity-20">
+        {/* Otter Watermark graphic in background */}
+        <div className="pointer-events-none absolute -right-6 -bottom-6 w-[200px] h-[200px] opacity-15">
           <svg viewBox="0 0 100 100" fill="currentColor" className={`w-full h-full ${theme.textColor}`}>
-            <path d="M25 60 C 20 40, 35 20, 60 20 C 85 20, 95 38, 90 60 C 85 80, 65 85, 45 85 C 30 85, 20 75, 25 60 Z" />
-            <circle cx="68" cy="38" r="9" />
+            <circle cx="30" cy="30" r="9" />
+            <circle cx="70" cy="30" r="9" />
+            <ellipse cx="50" cy="50" rx="28" ry="24" />
+            <path d="M32 68 C26 76, 24 90, 30 96 C42 98, 58 98, 70 96 C76 90, 74 76, 68 68 Z" />
+            <polygon points="76,62 79,70 87,73 79,76 76,84 73,76 65,73 73,70" />
           </svg>
         </div>
 

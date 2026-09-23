@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import type { Item } from "@/data/items";
-import { ChameleonLogo, MagneticButton } from "./studio";
+import { OtterLogo, MagneticButton } from "./studio";
 import HeroSection from "./HeroSection";
 import ContentSection from "./ContentSection";
 import Footer from "./Footer";
@@ -110,7 +110,7 @@ export default function ClientPageLayout({ items }: { items: Item[] }) {
       <header className="sticky top-0 z-40 bg-[#F0F2F5]/85 backdrop-blur-md border-b border-[#D6DCE1] px-4 md:px-8 py-3 select-none">
         <div className="max-w-[1400px] mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <ChameleonLogo size={32} />
+            <OtterLogo size={32} />
             <span className="font-phudu font-bold text-lg md:text-xl text-[#14334D] tracking-tight">
               RANDOM STUFF
             </span>
@@ -180,7 +180,7 @@ export default function ClientPageLayout({ items }: { items: Item[] }) {
                 {/* Drawer Header */}
                 <div className="flex items-center justify-between pb-5 border-b border-slate-100 mb-6">
                   <div className="flex items-center gap-2.5">
-                    <ChameleonLogo size={28} />
+                    <OtterLogo size={28} />
                     <span className="font-phudu font-bold text-base text-[#14334D]">
                       RANDOM STUFF
                     </span>

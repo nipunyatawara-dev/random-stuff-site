@@ -1,25 +1,48 @@
 import React from 'react';
 
 export interface InlineBadgeProps {
-  type: 'chameleon' | 'app-store' | 'play-store' | 'tools' | 'star';
+  type: 'otter' | 'chameleon' | 'app-store' | 'play-store' | 'tools' | 'star';
   className?: string;
 }
 
 export const InlineBadge: React.FC<InlineBadgeProps> = ({ type, className = '' }) => {
-  if (type === 'chameleon') {
+  if (type === 'otter' || type === 'chameleon') {
     return (
       <span
-        className={`inline-flex items-center justify-center align-middle mx-1 w-8 h-8 md:w-9 md:h-9 rounded-xl bg-gradient-to-br from-[#B5FF2E] to-[#73C800] p-1.5 shadow-[0_4px_8px_rgba(115,200,0,0.35),inset_0_1px_1px_rgba(255,255,255,0.8)] border border-white/60 -translate-y-0.5 ${className}`}
+        className={`inline-flex items-center justify-center align-middle mx-1 w-8 h-8 md:w-9 md:h-9 rounded-xl bg-gradient-to-br from-[#14334D] to-[#254563] p-1 shadow-[0_4px_8px_rgba(20,51,77,0.25),inset_0_1px_1px_rgba(255,255,255,0.2)] border border-white/40 -translate-y-0.5 ${className}`}
       >
         <svg viewBox="0 0 100 100" fill="none" className="w-full h-full">
-          <circle cx="68" cy="38" r="12" fill="#14334D" />
-          <circle cx="72" cy="34" r="4.5" fill="#FFFFFF" />
-          <path
-            d="M30 65 C 22 72, 12 70, 10 60 C 8 50, 18 45, 22 52"
-            stroke="#14334D"
-            strokeWidth="8"
-            strokeLinecap="round"
-            fill="none"
+          {/* Ears */}
+          <circle cx="28" cy="28" r="8" fill="#0E2336" />
+          <circle cx="28" cy="28" r="4.5" fill="#89E00F" />
+          <circle cx="72" cy="28" r="8" fill="#0E2336" />
+          <circle cx="72" cy="28" r="4.5" fill="#89E00F" />
+
+          {/* Head */}
+          <ellipse cx="50" cy="48" rx="26" ry="22" fill="#E8ECEF" />
+
+          {/* Muzzle */}
+          <ellipse cx="50" cy="56" rx="12" ry="8" fill="#FFFFFF" />
+          {/* Nose */}
+          <path d="M46 51 C48 49, 52 49, 54 51 C54 54, 46 54, 46 51 Z" fill="#14334D" />
+          {/* Smile */}
+          <path d="M46 55 Q50 58 54 55" stroke="#14334D" strokeWidth="1.8" strokeLinecap="round" fill="none" />
+
+          {/* Glasses */}
+          <circle cx="40" cy="44" r="8.5" stroke="#89E00F" strokeWidth="2.5" fill="none" />
+          <circle cx="60" cy="44" r="8.5" stroke="#89E00F" strokeWidth="2.5" fill="none" />
+          <path d="M48.5 44 H51.5" stroke="#89E00F" strokeWidth="2.5" strokeLinecap="round" />
+
+          {/* Eyes */}
+          <circle cx="40" cy="44" r="3.5" fill="#14334D" />
+          <circle cx="41" cy="43" r="1.2" fill="#FFFFFF" />
+          <circle cx="60" cy="44" r="3.5" fill="#14334D" />
+          <circle cx="61" cy="43" r="1.2" fill="#FFFFFF" />
+
+          {/* Star Spark in corner */}
+          <polygon
+            points="76,64 78,71 85,73 78,75 76,82 74,75 67,73 74,71"
+            fill="#B5FF2E"
           />
         </svg>
       </span>
