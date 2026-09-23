@@ -1,13 +1,12 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, CheckCircle2, AlertCircle, Sparkles, Send } from "lucide-react";
+import { ArrowLeft, CheckCircle2, AlertCircle, Send } from "lucide-react";
 import {
   ChameleonLogo,
   MagneticButton,
   PolaroidCard,
-  TextHighlight,
   InlineBadge,
 } from "@/components/studio";
 
@@ -124,7 +123,7 @@ export default function SubmitPage() {
                     Submission Received!
                   </h3>
                   <p className="text-sm text-emerald-800 max-w-md mb-6 leading-relaxed">
-                    Thank you for contributing to Random Stuff! We'll review your submission and add it to the directory shortly.
+                    Thank you for contributing to Random Stuff! We&apos;ll review your submission and add it to the directory shortly.
                   </p>
                   <div className="flex flex-wrap items-center justify-center gap-3">
                     <MagneticButton variant="primary-light" size="md" onClick={resetForm}>

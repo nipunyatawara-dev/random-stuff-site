@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import { X, Scale, Plus, ExternalLink, Trash2, Heart } from "lucide-react";
 import type { Item } from "@/data/items";
 import { playClickSound } from "@/lib/sound-fx";
-import { MagneticButton } from "./studio/MagneticButton";
 
 interface CompareModalProps {
   isOpen: boolean;
@@ -67,7 +66,7 @@ export default function CompareModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-5xl bg-white rounded-[32px] p-6 sm:p-8 shadow-studio-card border border-white/90 overflow-hidden flex flex-col max-h-[90vh] relative select-none"
+        className="w-full max-w-5xl bg-white rounded-[22px] sm:rounded-[32px] p-4 sm:p-8 shadow-studio-card border border-white/90 overflow-hidden flex flex-col max-h-[90vh] relative select-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

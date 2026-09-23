@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Sparkles, ExternalLink, Github, RotateCw, X, Heart } from "lucide-react";
+import { Sparkles, ExternalLink, RotateCw, X, Heart } from "lucide-react";
 import type { Item } from "@/data/items";
 import { playRollSound, playSuccessSound, playClickSound } from "@/lib/sound-fx";
 import { MagneticButton } from "./studio/MagneticButton";
@@ -92,7 +92,7 @@ export default function RandomRouletteModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg bg-white rounded-[32px] p-6 sm:p-8 shadow-studio-card border border-white/90 overflow-hidden flex flex-col relative select-none"
+        className="w-full max-w-lg bg-white rounded-[22px] sm:rounded-[32px] p-4 sm:p-8 shadow-studio-card border border-white/90 overflow-y-auto max-h-[90vh] flex flex-col relative select-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -116,9 +116,9 @@ export default function RandomRouletteModal({
         </div>
 
         {/* Content & Roll Stage */}
-        <div className="py-6 flex flex-col items-center text-center">
+        <div className="py-4 sm:py-6 flex flex-col items-center text-center">
           <div
-            className={`w-full py-8 px-6 rounded-2xl border transition-all duration-300 relative overflow-hidden mb-6 ${
+            className={`w-full py-6 sm:py-8 px-4 sm:px-6 rounded-2xl border transition-all duration-300 relative overflow-hidden mb-6 ${
               isRolling
                 ? "border-[#82CCFF] bg-[#F0F7FF] shadow-inner"
                 : "border-slate-200 bg-[#FAFCFD] shadow-studio-button"

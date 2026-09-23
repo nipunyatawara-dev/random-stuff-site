@@ -244,7 +244,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
                 </div>
               </div>
               <p className="text-xs leading-relaxed text-[#304F67] italic font-sans">
-                "{COMMUNITY_QUOTES[hoveredQuote].quote}"
+                &ldquo;{COMMUNITY_QUOTES[hoveredQuote].quote}&rdquo;
               </p>
             </motion.div>
           )}

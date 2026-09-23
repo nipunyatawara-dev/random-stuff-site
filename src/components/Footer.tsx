@@ -2,8 +2,7 @@
 
 import React from "react";
 import { ChameleonLogo, MagneticButton } from "./studio";
-import { Heart, Plus, Github, ExternalLink, Instagram } from "lucide-react";
-import Link from "next/link";
+import { Plus, Github, ExternalLink, Instagram } from "lucide-react";
 
 export default function Footer() {
   return (

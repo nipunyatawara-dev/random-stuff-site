@@ -156,3 +156,14 @@ html.lenis body {
 .directory-card {
   contain-intrinsic-size: auto 240px;
 }
+
+/* Hide scrollbar while preserving smooth touch scroll */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}

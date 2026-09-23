@@ -3,7 +3,7 @@
 import Image from "next/image";
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { type Item, CATEGORY_COLORS } from "@/data/items";
+import { type Item } from "@/data/items";
 import { CURATED_STACKS, type CuratedStack } from "@/data/stacks";
 import {
   Search,
@@ -13,14 +13,11 @@ import {
   Scale,
   Download,
   Upload,
-  Layers,
   X,
   Check,
-  Globe,
   ExternalLink,
   Share2,
   Trash2,
-  Compass,
   Github,
 } from "lucide-react";
 import { useFavorites } from "@/hooks/useFavorites";
@@ -37,10 +34,7 @@ import { playClickSound, playSuccessSound } from "@/lib/sound-fx";
 import {
   PillTabs,
   TiltCard,
-  PolaroidCard,
   MagneticButton,
-  TextHighlight,
-  InlineBadge,
 } from "./studio";
 import CommandPalette from "./CommandPalette";
 import CompareModal from "./CompareModal";
@@ -146,6 +140,13 @@ export default function ContentSection({
     setVisibleCount(INITIAL_VISIBLE_ITEMS);
   }, [activeCategory, activeTag, searchQuery, activeStack]);
 
+  // Reset active stack when navigating to another category
+  useEffect(() => {
+    if (activeCategory !== "stacks") {
+      setActiveStack(null);
+    }
+  }, [activeCategory]);
+
   // Handle favorites batch actions
   const handleSelectFav = (id: string) => {
     setSelectedFavs((prev) =>
@@ -248,20 +249,25 @@ export default function ContentSection({
       {/* Top Filter & Navigation Bar */}
       <div className="flex flex-col gap-6 mb-8">
         {/* Category Pill Tabs */}
-        <div className="flex justify-center overflow-x-auto pb-1">
-          <PillTabs
-            tabs={categoryTabs}
-            activeTab={activeCategory}
-            onChange={(id) => {
-              playClickSound();
-              setActiveCategory(id);
-              if (id !== "stacks") setActiveStack(null);
-            }}
-          />
+        <div className="w-full relative">
+          <div
+            data-lenis-prevent
+            className="w-full overflow-x-auto no-scrollbar flex items-center justify-start md:justify-center py-1.5 px-0.5"
+          >
+            <PillTabs
+              tabs={categoryTabs}
+              activeTab={activeCategory}
+              onChange={(id) => {
+                playClickSound();
+                setActiveCategory(id);
+                if (id !== "stacks") setActiveStack(null);
+              }}
+            />
+          </div>
         </div>
 
         {/* Search Bar & Quick Tool Actions */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
           {/* Tactile Clay Search Input */}
           <div className="relative w-full sm:max-w-md">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#007BE5]" />
@@ -292,7 +298,7 @@ export default function ContentSection({
           </div>
 
           {/* Quick Utility Actions */}
-          <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto justify-end">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full sm:w-auto justify-start sm:justify-end">
             <MagneticButton
               variant="primary-light"
               size="sm"
@@ -370,7 +376,10 @@ export default function ContentSection({
 
         {/* Platform Tags Filter Bar */}
         {activeCategory !== "stacks" && (
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+          <div
+            data-lenis-prevent
+            className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 py-1"
+          >
             <span className="text-[11px] font-mono uppercase tracking-wider text-[#304F68]/50 font-bold mr-1 shrink-0">
               Filter:
             </span>
@@ -384,7 +393,7 @@ export default function ContentSection({
                     playClickSound();
                     setActiveTag(tag.id);
                   }}
-                  className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shrink-0 transition-all duration-200 cursor-pointer ${
                     isActive
                       ? "bg-white text-[#14334D] shadow-studio-button font-bold border border-white/80"
                       : "bg-[#F0F2F5] text-[#456176] hover:text-[#14334D] hover:bg-slate-200/80"
@@ -576,7 +585,8 @@ export default function ContentSection({
             return (
               <div
                 key={item.id}
-                className="directory-card group relative bg-white rounded-[24px] p-5 md:p-6 shadow-studio-card border border-slate-100/90 hover:border-[#82CCFF]/70 hover:shadow-xl transition-all duration-300 flex flex-col justify-between h-full overflow-hidden select-none"
+                onClick={() => setPreviewItem(item)}
+                className="directory-card group relative bg-white rounded-[20px] sm:rounded-[24px] p-4 sm:p-5 md:p-6 shadow-studio-card border border-slate-100/90 hover:border-[#82CCFF]/70 hover:shadow-xl transition-all duration-300 flex flex-col justify-between h-full overflow-hidden select-none cursor-pointer"
               >
                 <div>
                   {/* Top Row: Avatar Icon + Category / New badges */}
@@ -615,7 +625,8 @@ export default function ContentSection({
                       href={item.website || item.github}
                       target="_blank"
                       rel="noreferrer"
-                      className="font-phudu text-lg font-bold text-[#14334D] group-hover:text-[#007BE5] transition-colors inline-flex items-center gap-1.5 tracking-tight"
+                      onClick={(e) => e.stopPropagation()}
+                      className="font-phudu text-lg font-bold text-[#14334D] group-hover:text-[#007BE5] active:text-[#007BE5] transition-colors inline-flex items-center gap-1.5 tracking-tight"
                     >
                       <span className="line-clamp-1">{item.title}</span>
                       <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-[#007BE5] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
@@ -656,11 +667,12 @@ export default function ContentSection({
                         href={item.github}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#F0F2F5] hover:bg-[#14334D] text-[#14334D] hover:text-white text-xs font-semibold transition-colors cursor-pointer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#F0F2F5] hover:bg-[#14334D] text-[#14334D] hover:text-white text-xs font-semibold transition-colors cursor-pointer min-h-[36px] touch-manipulation"
                         title="Go to Source Code on GitHub"
                       >
                         <Github className="w-3.5 h-3.5" />
-                        <span>Go to Source</span>
+                        <span>Source</span>
                       </a>
                     )}
                   </div>
@@ -669,8 +681,11 @@ export default function ContentSection({
                     {isSelectionMode && (
                       <button
                         type="button"
-                        onClick={() => handleSelectFav(item.id)}
-                        className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSelectFav(item.id);
+                        }}
+                        className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
                           isSelected
                             ? "bg-[#14334D] text-white"
                             : "bg-slate-100 text-slate-400 hover:bg-slate-200"
@@ -682,11 +697,12 @@ export default function ContentSection({
 
                     <button
                       type="button"
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
                         playClickSound();
                         toggleFavorite(item.id);
                       }}
-                      className="p-2 rounded-full bg-[#F0F2F5] hover:bg-red-50 text-slate-400 hover:text-red-500 transition-all cursor-pointer group/fav"
+                      className="p-2.5 min-w-[38px] min-h-[38px] rounded-full bg-[#F0F2F5] hover:bg-red-50 text-slate-400 hover:text-red-500 transition-all cursor-pointer group/fav flex items-center justify-center touch-manipulation"
                       aria-label={isFav ? "Remove from favorites" : "Add to favorites"}
                     >
                       <Heart
@@ -700,7 +716,8 @@ export default function ContentSection({
                       href={item.website || item.github}
                       target="_blank"
                       rel="noreferrer"
-                      className="p-2 rounded-full bg-[#F0F2F5] hover:bg-[#007BE5] text-slate-500 hover:text-white transition-all cursor-pointer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="p-2.5 min-w-[38px] min-h-[38px] rounded-full bg-[#F0F2F5] hover:bg-[#007BE5] text-slate-500 hover:text-white transition-all cursor-pointer flex items-center justify-center touch-manipulation"
                       title={item.website ? "Visit Website" : "Open Tool"}
                     >
                       <ExternalLink className="w-4 h-4" />
@@ -739,7 +756,7 @@ export default function ContentSection({
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-lg bg-white rounded-[32px] p-6 sm:p-8 shadow-studio-card border border-white/90 overflow-hidden flex flex-col relative"
+              className="w-full max-w-lg bg-white rounded-[24px] sm:rounded-[32px] p-5 sm:p-8 shadow-studio-card border border-white/90 overflow-y-auto max-h-[90vh] flex flex-col relative"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">

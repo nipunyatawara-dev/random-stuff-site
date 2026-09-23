@@ -4,7 +4,6 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   Search,
   Sparkles,
-  ExternalLink,
   Scale,
   Download,
   X,
@@ -130,7 +129,10 @@ export default function CommandPalette({
     );
   }, [actions, query]);
 
-  const totalResults = [...filteredActions, ...filteredItems];
+  const totalResults = useMemo(
+    () => [...filteredActions, ...filteredItems],
+    [filteredActions, filteredItems]
+  );
 
   useEffect(() => {
     setSelectedIndex(0);
