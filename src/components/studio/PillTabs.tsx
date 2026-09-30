@@ -26,16 +26,28 @@ export const PillTabs: React.FC<PillTabsProps> = ({
   layoutIdPrefix = 'pillTab',
 }) => {
   const buttonRefs = React.useRef<Record<string, HTMLButtonElement | null>>({});
+  const isInitialMount = React.useRef(true);
 
-  // Auto-scroll active tab into view when it changes
+  // Auto-scroll active tab into view horizontally inside its container when category changes
   React.useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
     const activeEl = buttonRefs.current[activeTab];
     if (activeEl) {
-      activeEl.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-        inline: 'center',
-      });
+      const scrollContainer = activeEl.closest('.overflow-x-auto');
+      if (scrollContainer) {
+        const targetLeft =
+          activeEl.offsetLeft -
+          scrollContainer.clientWidth / 2 +
+          activeEl.clientWidth / 2;
+        scrollContainer.scrollTo({
+          left: targetLeft,
+          behavior: 'smooth',
+        });
+      }
     }
   }, [activeTab]);
 

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import type { Item } from "@/data/items";
-import { OtterLogo, MagneticButton } from "./studio";
+import { OtterLogo, MagneticButton, LoadingScreen } from "./studio";
 import HeroSection from "./HeroSection";
 import ContentSection from "./ContentSection";
 import Footer from "./Footer";
@@ -33,17 +33,52 @@ export default function ClientPageLayout({ items }: { items: Item[] }) {
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [showRoulette, setShowRoulette] = useState(false);
   const [showCompare, setShowCompare] = useState(false);
+  const [isLoadingScreenVisible, setIsLoadingScreenVisible] = useState(false);
 
-  // Lock body scroll when mobile drawer is open
+  // Ensure scroll is at the top on mount
   useEffect(() => {
-    if (mobileDrawerOpen) {
+    if ("scrollRestoration" in history) {
+      history.scrollRestoration = "manual";
+    }
+    window.scrollTo(0, 0);
+  }, []);
+
+  // Check if initial session loading screen should be shown
+  useEffect(() => {
+    try {
+      const hasSeenIntro = sessionStorage.getItem("rs_intro_seen");
+      const prefersReducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches;
+      if (!hasSeenIntro && !prefersReducedMotion) {
+        setIsLoadingScreenVisible(true);
+      }
+    } catch {
+      // In case sessionStorage is blocked in private browsing
+    }
+  }, []);
+
+  const handleLoadingComplete = () => {
+    setIsLoadingScreenVisible(false);
+    scrollToY(0, { immediate: true });
+    window.scrollTo(0, 0);
+    try {
+      sessionStorage.setItem("rs_intro_seen", "true");
+    } catch {
+      // Ignore
+    }
+  };
+
+  // Lock body scroll when mobile drawer or loading screen is open
+  useEffect(() => {
+    if (mobileDrawerOpen || isLoadingScreenVisible) {
       const prev = document.body.style.overflow;
       document.body.style.overflow = "hidden";
       return () => {
         document.body.style.overflow = prev;
       };
     }
-  }, [mobileDrawerOpen]);
+  }, [mobileDrawerOpen, isLoadingScreenVisible]);
 
   // Close drawer on Escape key
   useEffect(() => {
@@ -106,15 +141,30 @@ export default function ClientPageLayout({ items }: { items: Item[] }) {
 
   return (
     <div className="min-h-screen bg-[#F0F2F5] text-[#14334D] font-sans antialiased flex flex-col selection:bg-[#9DF71F] selection:text-[#14334D]">
+      {/* Charming Otter Animated Loading Screen */}
+      <AnimatePresence>
+        {isLoadingScreenVisible && (
+          <LoadingScreen onComplete={handleLoadingComplete} />
+        )}
+      </AnimatePresence>
+
       {/* Top Global Studio Navigation Bar */}
       <header className="sticky top-0 z-40 bg-[#F0F2F5]/85 backdrop-blur-md border-b border-[#D6DCE1] px-4 md:px-8 py-3 select-none">
         <div className="max-w-[1400px] mx-auto flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <OtterLogo size={32} />
+          <button
+            type="button"
+            onClick={() => setIsLoadingScreenVisible(true)}
+            className="flex items-center gap-3 cursor-pointer group text-left"
+            title="Replay Otter Intro"
+            aria-label="Replay intro animation"
+          >
+            <div className="group-hover:scale-105 transition-transform duration-200">
+              <OtterLogo size={32} />
+            </div>
             <span className="font-phudu font-bold text-lg md:text-xl text-[#14334D] tracking-tight">
               RANDOM STUFF
             </span>
-          </div>
+          </button>
 
           {/* Desktop Right Quick Actions */}
           <div className="hidden sm:flex items-center gap-2.5">
@@ -179,12 +229,23 @@ export default function ClientPageLayout({ items }: { items: Item[] }) {
               <div>
                 {/* Drawer Header */}
                 <div className="flex items-center justify-between pb-5 border-b border-slate-100 mb-6">
-                  <div className="flex items-center gap-2.5">
-                    <OtterLogo size={28} />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileDrawerOpen(false);
+                      setIsLoadingScreenVisible(true);
+                    }}
+                    className="flex items-center gap-2.5 cursor-pointer text-left group"
+                    title="Replay Otter Intro"
+                    aria-label="Replay intro animation"
+                  >
+                    <div className="group-hover:scale-105 transition-transform duration-200">
+                      <OtterLogo size={28} />
+                    </div>
                     <span className="font-phudu font-bold text-base text-[#14334D]">
                       RANDOM STUFF
                     </span>
-                  </div>
+                  </button>
                   <button
                     type="button"
                     onClick={() => setMobileDrawerOpen(false)}
