@@ -21,9 +21,12 @@ import {
   Heart,
   Scale,
   ArrowRight,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { scrollToY } from "@/lib/lenis";
+import { isSoundEnabled, toggleSound } from "@/lib/sound-fx";
 import RandomRouletteModal from "./RandomRouletteModal";
 import CompareModal from "./CompareModal";
 
@@ -34,6 +37,25 @@ export default function ClientPageLayout({ items }: { items: Item[] }) {
   const [showRoulette, setShowRoulette] = useState(false);
   const [showCompare, setShowCompare] = useState(false);
   const [isLoadingScreenVisible, setIsLoadingScreenVisible] = useState(false);
+  const [soundOn, setSoundOn] = useState(false);
+
+  // Sync sound effect preference
+  useEffect(() => {
+    setSoundOn(isSoundEnabled());
+    const onSoundToggle = (e: Event) => {
+      const detail = (e as CustomEvent<{ enabled: boolean }>).detail;
+      if (detail && typeof detail.enabled === "boolean") {
+        setSoundOn(detail.enabled);
+      }
+    };
+    window.addEventListener("sound-toggle", onSoundToggle);
+    return () => window.removeEventListener("sound-toggle", onSoundToggle);
+  }, []);
+
+  const handleToggleSound = () => {
+    const next = toggleSound();
+    setSoundOn(next);
+  };
 
   // Ensure scroll is at the top on mount
   useEffect(() => {
@@ -168,6 +190,20 @@ export default function ClientPageLayout({ items }: { items: Item[] }) {
 
           {/* Desktop Right Quick Actions */}
           <div className="hidden sm:flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={handleToggleSound}
+              className="p-2 min-w-[36px] min-h-[36px] rounded-full bg-white shadow-studio-button border border-white/80 text-[#14334D] hover:bg-slate-50 active:scale-95 transition-all flex items-center justify-center cursor-pointer"
+              title={soundOn ? "Disable Sound Effects" : "Enable Sound Effects"}
+              aria-label={soundOn ? "Disable Sound Effects" : "Enable Sound Effects"}
+            >
+              {soundOn ? (
+                <Volume2 className="w-4 h-4 text-[#007BE5]" />
+              ) : (
+                <VolumeX className="w-4 h-4 text-slate-400" />
+              )}
+            </button>
+
             <MagneticButton
               variant="primary-light"
               size="sm"
@@ -183,14 +219,28 @@ export default function ClientPageLayout({ items }: { items: Item[] }) {
               icon={<Github className="w-3.5 h-3.5 text-[#14334D]" />}
               href="https://github.com/nipunyatawara-dev/random-stuff-site"
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
             >
               GitHub
             </MagneticButton>
           </div>
 
-          {/* Mobile Menu Trigger */}
-          <div className="flex sm:hidden items-center">
+          {/* Mobile Actions: Sound Toggle + Menu Trigger */}
+          <div className="flex sm:hidden items-center gap-2">
+            <button
+              type="button"
+              onClick={handleToggleSound}
+              className="p-2 min-w-[40px] min-h-[40px] rounded-full bg-white shadow-xs text-[#14334D] flex items-center justify-center hover:bg-slate-50 active:scale-95 transition-all cursor-pointer"
+              title={soundOn ? "Disable Sound Effects" : "Enable Sound Effects"}
+              aria-label={soundOn ? "Disable Sound Effects" : "Enable Sound Effects"}
+            >
+              {soundOn ? (
+                <Volume2 className="w-4 h-4 text-[#007BE5]" />
+              ) : (
+                <VolumeX className="w-4 h-4 text-slate-400" />
+              )}
+            </button>
+
             <button
               type="button"
               onClick={() => setMobileDrawerOpen(true)}
@@ -355,7 +405,7 @@ export default function ClientPageLayout({ items }: { items: Item[] }) {
                   <a
                     href="https://github.com/nipunyatawara-dev/random-stuff-site"
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-[#456176] hover:bg-[#F0F2F5] transition-colors"
                   >
                     <div className="flex items-center gap-2.5">
@@ -393,6 +443,8 @@ export default function ClientPageLayout({ items }: { items: Item[] }) {
             initialItems={items}
             activeCategory={activeCategory}
             onCategoryChange={setActiveCategory}
+            onOpenRoulette={() => setShowRoulette(true)}
+            onOpenCompare={() => setShowCompare(true)}
           />
         </div>
       </main>

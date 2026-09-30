@@ -27,12 +27,12 @@ const recentSubmittedUrls = new Map<string, number>();
 const recentSubmittedNames = new Map<string, number>();
 
 function getClientIp(request: Request) {
-    const forwardedFor = request.headers.get("x-forwarded-for");
-    if (forwardedFor) {
-        return forwardedFor.split(",")[0]?.trim() || "unknown";
-    }
-
-    return request.headers.get("x-real-ip") ?? "unknown";
+    return (
+        request.headers.get("x-vercel-ip") ||
+        request.headers.get("x-real-ip") ||
+        request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+        "unknown"
+    );
 }
 
 function checkRateLimit(identifier: string) {
@@ -165,7 +165,10 @@ async function sendToDiscord(submission: {
         const response = await fetch(webhookUrl, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ embeds: [embed] }),
+            body: JSON.stringify({
+                embeds: [embed],
+                allowed_mentions: { parse: [] },
+            }),
         });
 
         return response.ok;
@@ -216,7 +219,15 @@ export async function POST(request: Request) {
         }
 
         const payload = body as Record<string, unknown>;
-        const { toolName, link, category, description } = payload;
+        const { toolName, link, category, description, honeypot } = payload;
+
+        // Reject if honeypot is populated
+        if (typeof honeypot === "string" && honeypot.trim().length > 0) {
+            return NextResponse.json(
+                { error: "Submission rejected." },
+                { status: 400 }
+            );
+        }
 
         const trimmedName = typeof toolName === "string" ? toolName.trim() : "";
         const trimmedLink = typeof link === "string" ? link.trim() : "";

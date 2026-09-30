@@ -3,7 +3,7 @@ import { getItems } from "@/lib/items-server";
 
 export async function GET() {
   const items = await getItems();
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://random-stuff-site.vercel.app";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://randomstuff.shocka.site";
 
   // Take the most recent items (first 50)
   const feedItems = items.slice(0, 50);

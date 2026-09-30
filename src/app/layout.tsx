@@ -31,17 +31,36 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Random Stuff",
-  description: "Directory of 350+ useful websites, desktop apps, and scripts for builders and creators.",
+  metadataBase: new URL("https://randomstuff.shocka.site"),
+  title: {
+    default: "Random Stuff - Curated Tools & Scripts Directory",
+    template: "%s | Random Stuff",
+  },
+  description: "Directory of 350+ handpicked websites, desktop apps, and CLI scripts for builders and creators.",
   manifest: "/manifest.webmanifest",
   icons: {
     icon: "/icon.png",
     apple: "/icon.png",
   },
   alternates: {
+    canonical: "/",
     types: {
       "application/rss+xml": "/feed.xml",
     },
+  },
+  openGraph: {
+    title: "Random Stuff - Curated Directory for Builders",
+    description: "Directory of 350+ handpicked websites, desktop apps, and CLI scripts for builders and creators.",
+    url: "https://randomstuff.shocka.site",
+    siteName: "Random Stuff",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Random Stuff - Curated Directory for Builders",
+    description: "Directory of 350+ handpicked websites, desktop apps, and CLI scripts for builders and creators.",
+    creator: "@nipunyatawara",
   },
 };
 

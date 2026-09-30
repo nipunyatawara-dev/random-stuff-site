@@ -22,6 +22,7 @@ export default function SubmitPage() {
   const [link, setLink] = useState("");
   const [category, setCategory] = useState("Websites");
   const [description, setDescription] = useState("");
+  const [honeypot, setHoneypot] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,6 +34,7 @@ export default function SubmitPage() {
       link: link.trim(),
       category: category.trim(),
       description: description.trim(),
+      honeypot: honeypot.trim(),
     };
 
     try {
@@ -136,6 +138,18 @@ export default function SubmitPage() {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-5">
+                  {/* Invisible Honeypot to Catch Spam Bots */}
+                  <input
+                    type="text"
+                    name="company_website"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    value={honeypot}
+                    onChange={(e) => setHoneypot(e.target.value)}
+                    style={{ display: "none" }}
+                    aria-hidden="true"
+                  />
+
                   {status === "error" && (
                     <div className="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center gap-2">
                       <AlertCircle className="w-4 h-4 shrink-0" />

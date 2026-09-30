@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 
 export interface PolaroidCardProps {
   imageSrc?: string;
@@ -55,7 +56,14 @@ export const PolaroidCard: React.FC<PolaroidCardProps> = ({
       {/* Image or Visual Canvas */}
       <div className="w-full aspect-[4/3] rounded-xl overflow-hidden bg-[#F0F4F8] flex items-center justify-center relative">
         {imageSrc ? (
-          <img src={imageSrc} alt={caption} className="w-full h-full object-cover" />
+          <Image
+            src={imageSrc}
+            alt={caption}
+            fill
+            sizes="(max-width: 768px) 100vw, 320px"
+            className="object-cover"
+            unoptimized
+          />
         ) : (
           children || (
             <div className="w-full h-full bg-gradient-to-br from-emerald-100 via-teal-100 to-sky-100 flex items-center justify-center text-slate-400 text-xs font-mono">

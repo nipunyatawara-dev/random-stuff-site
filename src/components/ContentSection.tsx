@@ -19,6 +19,7 @@ import {
   Share2,
   Trash2,
   Github,
+  Link2,
 } from "lucide-react";
 import { useFavorites } from "@/hooks/useFavorites";
 import { getVisiblePlatformTags, itemMatchesPlatformTag } from "@/lib/platform-tags";
@@ -47,12 +48,16 @@ export interface ContentSectionProps {
   initialItems: Item[];
   activeCategory?: string;
   onCategoryChange?: (category: string) => void;
+  onOpenRoulette?: () => void;
+  onOpenCompare?: () => void;
 }
 
 export default function ContentSection({
   initialItems,
   activeCategory: externalCategory,
   onCategoryChange: externalCategoryChange,
+  onOpenRoulette,
+  onOpenCompare,
 }: ContentSectionProps) {
   const [items] = useState<Item[]>(initialItems);
   const [internalCategory, setInternalCategory] = useState("all");
@@ -73,6 +78,7 @@ export default function ContentSection({
   const [searchQuery, setSearchQuery] = useState("");
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_ITEMS);
   const [previewItem, setPreviewItem] = useState<Item | null>(null);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   // Favorites state
   const { favorites, isFavorite, toggleFavorite, clearFavorites, removeFavorites, addFavorite } = useFavorites();
@@ -85,6 +91,85 @@ export default function ContentSection({
   const [showRoulette, setShowRoulette] = useState(false);
   const [showCompare, setShowCompare] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
+
+  const handleOpenRoulette = useCallback(() => {
+    if (onOpenRoulette) onOpenRoulette();
+    else setShowRoulette(true);
+  }, [onOpenRoulette]);
+
+  const handleOpenCompare = useCallback(() => {
+    if (onOpenCompare) onOpenCompare();
+    else setShowCompare(true);
+  }, [onOpenCompare]);
+
+  // Sync initial state from URL search parameters or hash
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    try {
+      const url = new URL(window.location.href);
+      const q = url.searchParams.get("q");
+      const cat = url.searchParams.get("category");
+      const tag = url.searchParams.get("tag");
+      const toolId =
+        url.searchParams.get("tool") ||
+        (window.location.hash ? window.location.hash.replace(/^#/, "") : null);
+
+      if (q) setSearchQuery(q);
+      if (
+        cat &&
+        ["Websites", "Softwares", "Scripts", "stacks", "favorites", "all"].includes(cat)
+      ) {
+        setActiveCategory(cat);
+      }
+      if (tag) setActiveTag(tag);
+      if (toolId) {
+        const found = items.find((item) => item.id === toolId);
+        if (found) setPreviewItem(found);
+      }
+    } catch {
+      // Ignore URL parsing errors
+    }
+  }, [items, setActiveCategory]);
+
+  // Sync state changes back to URL without reloading
+  const isFirstSyncRef = useRef(true);
+  useEffect(() => {
+    if (isFirstSyncRef.current) {
+      isFirstSyncRef.current = false;
+      return;
+    }
+    if (typeof window === "undefined") return;
+
+    const url = new URL(window.location.href);
+    if (searchQuery.trim()) {
+      url.searchParams.set("q", searchQuery.trim());
+    } else {
+      url.searchParams.delete("q");
+    }
+
+    if (activeCategory && activeCategory !== "all") {
+      url.searchParams.set("category", activeCategory);
+    } else {
+      url.searchParams.delete("category");
+    }
+
+    if (activeTag && activeTag !== "all") {
+      url.searchParams.set("tag", activeTag);
+    } else {
+      url.searchParams.delete("tag");
+    }
+
+    if (previewItem) {
+      url.searchParams.set("tool", previewItem.id);
+    } else {
+      url.searchParams.delete("tool");
+    }
+
+    const nextSearch = url.searchParams.toString();
+    const nextUrl = nextSearch ? `${url.pathname}?${nextSearch}` : url.pathname;
+    window.history.replaceState({}, "", nextUrl);
+  }, [searchQuery, activeCategory, activeTag, previewItem]);
 
   // Stacks state
   const [activeStack, setActiveStack] = useState<CuratedStack | null>(null);
@@ -303,7 +388,7 @@ export default function ContentSection({
               variant="primary-light"
               size="sm"
               icon={<Scale className="w-3.5 h-3.5 text-[#007BE5]" />}
-              onClick={() => setShowCompare(true)}
+              onClick={handleOpenCompare}
             >
               Compare
             </MagneticButton>
@@ -312,7 +397,7 @@ export default function ContentSection({
               variant="accent-lime"
               size="sm"
               icon={<Sparkles className="w-3.5 h-3.5 text-[#14334D]" />}
-              onClick={() => setShowRoulette(true)}
+              onClick={handleOpenRoulette}
             >
               Roulette
             </MagneticButton>
@@ -598,6 +683,7 @@ export default function ContentSection({
                           alt={item.title}
                           width={44}
                           height={44}
+                          unoptimized
                           className="w-full h-full object-cover"
                         />
                       ) : (
@@ -624,7 +710,7 @@ export default function ContentSection({
                     <a
                       href={item.website || item.github}
                       target="_blank"
-                      rel="noreferrer"
+                      rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
                       className="font-phudu text-lg font-bold text-[#14334D] group-hover:text-[#007BE5] active:text-[#007BE5] transition-colors inline-flex items-center gap-1.5 tracking-tight"
                     >
@@ -666,7 +752,7 @@ export default function ContentSection({
                       <a
                         href={item.github}
                         target="_blank"
-                        rel="noreferrer"
+                        rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#F0F2F5] hover:bg-[#14334D] text-[#14334D] hover:text-white text-xs font-semibold transition-colors cursor-pointer min-h-[36px] touch-manipulation"
                         title="Go to Source Code on GitHub"
@@ -715,7 +801,7 @@ export default function ContentSection({
                     <a
                       href={item.website || item.github}
                       target="_blank"
-                      rel="noreferrer"
+                      rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
                       className="p-2.5 min-w-[38px] min-h-[38px] rounded-full bg-[#F0F2F5] hover:bg-[#007BE5] text-slate-500 hover:text-white transition-all cursor-pointer flex items-center justify-center touch-manipulation"
                       title={item.website ? "Visit Website" : "Open Tool"}
@@ -802,21 +888,39 @@ export default function ContentSection({
               )}
 
               <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => {
-                    playClickSound();
-                    toggleFavorite(previewItem.id);
-                  }}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#F0F2F5] text-xs font-semibold text-[#14334D] hover:bg-slate-200 transition-colors"
-                >
-                  <Heart
-                    className={`w-4 h-4 ${
-                      isFavorite(previewItem.id) ? "fill-red-500 text-red-500" : "text-slate-400"
-                    }`}
-                  />
-                  <span>{isFavorite(previewItem.id) ? "In Favorites" : "Save Tool"}</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      playClickSound();
+                      toggleFavorite(previewItem.id);
+                    }}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#F0F2F5] text-xs font-semibold text-[#14334D] hover:bg-slate-200 transition-colors"
+                  >
+                    <Heart
+                      className={`w-4 h-4 ${
+                        isFavorite(previewItem.id) ? "fill-red-500 text-red-500" : "text-slate-400"
+                      }`}
+                    />
+                    <span>{isFavorite(previewItem.id) ? "In Favorites" : "Save Tool"}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const toolUrl = `${window.location.origin}/?tool=${previewItem.id}`;
+                      navigator.clipboard.writeText(toolUrl);
+                      setLinkCopied(true);
+                      playSuccessSound();
+                      setTimeout(() => setLinkCopied(false), 2000);
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[#F0F2F5] text-xs font-semibold text-[#14334D] hover:bg-slate-200 transition-colors cursor-pointer"
+                    title="Copy direct shareable link to this tool"
+                  >
+                    <Link2 className="w-3.5 h-3.5 text-[#007BE5]" />
+                    <span>{linkCopied ? "Link Copied!" : "Copy Link"}</span>
+                  </button>
+                </div>
 
                 <div className="flex items-center gap-2">
                   {previewItem.github && (
@@ -826,7 +930,7 @@ export default function ContentSection({
                       icon={<Github className="w-4 h-4 text-[#14334D]" />}
                       href={previewItem.github}
                       target="_blank"
-                      rel="noreferrer"
+                      rel="noopener noreferrer"
                     >
                       Go to Source
                     </MagneticButton>
@@ -838,7 +942,7 @@ export default function ContentSection({
                     icon={<ExternalLink className="w-4 h-4 text-[#14334D]" />}
                     href={previewItem.website || previewItem.github}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                   >
                     {previewItem.website ? "Visit Website →" : "Launch Tool →"}
                   </MagneticButton>
@@ -857,30 +961,33 @@ export default function ContentSection({
         onSelectItem={(item) => {
           setPreviewItem(item);
         }}
-        onOpenRandom={() => setShowRoulette(true)}
+        onOpenRandom={handleOpenRoulette}
         onOpenFavorites={() => setActiveCategory("favorites")}
         onOpenSandbox={() => {}}
-        onOpenCompare={() => setShowCompare(true)}
+        onOpenCompare={handleOpenCompare}
         onExportFavorites={() => handleExport("md")}
       />
 
-      {/* COMPARE MODAL */}
-      <CompareModal
-        isOpen={showCompare}
-        onClose={() => setShowCompare(false)}
-        allItems={items}
-        favorites={favorites}
-        onToggleFavorite={toggleFavorite}
-      />
+      {/* Fallback Modals (Only active if not controlled globally by parent layout) */}
+      {!onOpenCompare && (
+        <CompareModal
+          isOpen={showCompare}
+          onClose={() => setShowCompare(false)}
+          allItems={items}
+          favorites={favorites}
+          onToggleFavorite={toggleFavorite}
+        />
+      )}
 
-      {/* RANDOM ROULETTE MODAL */}
-      <RandomRouletteModal
-        isOpen={showRoulette}
-        onClose={() => setShowRoulette(false)}
-        items={items}
-        favorites={favorites}
-        onToggleFavorite={toggleFavorite}
-      />
+      {!onOpenRoulette && (
+        <RandomRouletteModal
+          isOpen={showRoulette}
+          onClose={() => setShowRoulette(false)}
+          items={items}
+          favorites={favorites}
+          onToggleFavorite={toggleFavorite}
+        />
+      )}
     </section>
   );
 }

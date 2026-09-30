@@ -156,7 +156,7 @@ export default function CompareModal({
                     <a
                       href={item.website || item.github}
                       target="_blank"
-                      rel="noreferrer"
+                      rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#14334D] text-white text-xs font-semibold hover:bg-[#304F67] transition-colors"
                     >
                       <span>Visit Tool</span>

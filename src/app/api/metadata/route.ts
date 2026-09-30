@@ -8,6 +8,49 @@ export const runtime = "nodejs";
 
 const REQUEST_TIMEOUT_MS = 5000;
 const MAX_CONTENT_LENGTH_BYTES = 2_000_000;
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const RATE_LIMIT_MAX_REQUESTS = 20;
+
+type RateLimitEntry = {
+  count: number;
+  resetAt: number;
+};
+
+const metadataRateLimitStore = new Map<string, RateLimitEntry>();
+
+function getClientIp(request: Request) {
+  return (
+    request.headers.get("x-vercel-ip") ||
+    request.headers.get("x-real-ip") ||
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    "unknown"
+  );
+}
+
+function checkMetadataRateLimit(clientIp: string) {
+  const now = Date.now();
+  if (metadataRateLimitStore.size > 1000) {
+    for (const [key, entry] of metadataRateLimitStore) {
+      if (entry.resetAt <= now) metadataRateLimitStore.delete(key);
+    }
+  }
+
+  const current = metadataRateLimitStore.get(clientIp);
+  if (!current || current.resetAt <= now) {
+    metadataRateLimitStore.set(clientIp, {
+      count: 1,
+      resetAt: now + RATE_LIMIT_WINDOW_MS,
+    });
+    return true;
+  }
+
+  if (current.count >= RATE_LIMIT_MAX_REQUESTS) {
+    return false;
+  }
+
+  current.count += 1;
+  return true;
+}
 
 function isPrivateIpAddress(value: string) {
   if (value.startsWith("::ffff:")) {
@@ -21,16 +64,20 @@ function isPrivateIpAddress(value: string) {
       first === 0 ||
       first === 10 ||
       first === 127 ||
+      (first === 100 && second >= 64 && second <= 127) ||
       (first === 169 && second === 254) ||
       (first === 172 && second >= 16 && second <= 31) ||
-      (first === 192 && second === 168)
+      (first === 192 && second === 168) ||
+      (first === 198 && (second === 18 || second === 19))
     );
   }
 
   if (version === 6) {
     const normalized = value.toLowerCase();
     return (
+      normalized === "::" ||
       normalized === "::1" ||
+      normalized === "0:0:0:0:0:0:0:0" ||
       normalized.startsWith("fc") ||
       normalized.startsWith("fd") ||
       normalized.startsWith("fe8") ||
@@ -131,13 +178,17 @@ function fetchWithSafeLookup(url: string | URL, redirectCount = 0): Promise<{ ht
         return reject(new Error("Only HTML pages can be previewed."));
       }
       
+      let receivedBytes = 0;
       let data = "";
-      res.on("data", (chunk) => {
-        data += chunk;
-        if (data.length > MAX_CONTENT_LENGTH_BYTES) {
+      res.on("data", (chunk: Buffer | string) => {
+        const chunkSize = Buffer.isBuffer(chunk) ? chunk.length : Buffer.byteLength(chunk);
+        receivedBytes += chunkSize;
+        if (receivedBytes > MAX_CONTENT_LENGTH_BYTES) {
           res.destroy();
           reject(new Error("The requested page is too large to preview."));
+          return;
         }
+        data += chunk;
       });
       
       res.on("end", () => resolve({ html: data, finalUrl: parsedUrl.toString() }));
@@ -162,6 +213,14 @@ function toAbsoluteUrl(value: string | undefined, baseUrl: URL) {
 }
 
 export async function GET(request: Request) {
+  const clientIp = getClientIp(request);
+  if (!checkMetadataRateLimit(clientIp)) {
+    return NextResponse.json(
+      { error: "Too many metadata requests. Please try again later." },
+      { status: 429 }
+    );
+  }
+
   const { searchParams } = new URL(request.url);
   const rawUrl = searchParams.get("url");
 

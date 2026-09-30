@@ -189,7 +189,7 @@ export default function RandomRouletteModal({
                   icon={<ExternalLink className="w-4 h-4 text-[#14334D]" />}
                   href={current.website || current.github}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                 >
                   Open Tool →
                 </MagneticButton>

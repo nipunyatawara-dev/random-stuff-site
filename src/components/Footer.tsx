@@ -44,7 +44,7 @@ export default function Footer() {
             icon={<Github className="w-4 h-4 text-[#14334D]" />}
             href="https://github.com/nipunyatawara-dev/random-stuff-site"
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
           >
             Star on GitHub
           </MagneticButton>

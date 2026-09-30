@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 const STORAGE_KEY = "random-stuff-favorites";
 const SYNC_EVENT = "random-stuff-favorites-sync";
@@ -8,6 +8,11 @@ const SYNC_EVENT = "random-stuff-favorites-sync";
 export function useFavorites() {
     const [favorites, setFavorites] = useState<string[]>([]);
     const [isLoaded, setIsLoaded] = useState(false);
+    const favoritesRef = useRef<string[]>(favorites);
+
+    useEffect(() => {
+        favoritesRef.current = favorites;
+    }, [favorites]);
 
     // Load favorites from localStorage on mount and listen for sync events
     useEffect(() => {
@@ -63,11 +68,9 @@ export function useFavorites() {
 
     const updateAndPersist = useCallback(
         (updater: (current: string[]) => string[]) => {
-            let next: string[] = [];
-            setFavorites((prev) => {
-                next = updater(prev);
-                return next;
-            });
+            const next = updater(favoritesRef.current);
+            favoritesRef.current = next;
+            setFavorites(next);
 
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(next));

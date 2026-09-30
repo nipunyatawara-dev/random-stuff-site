@@ -11,6 +11,7 @@ import {
   CornerDownLeft,
 } from "lucide-react";
 import type { Item } from "@/data/items";
+import { searchItems } from "@/lib/item-search";
 import { playClickSound } from "@/lib/sound-fx";
 
 interface CommandPaletteProps {
@@ -106,17 +107,7 @@ export default function CommandPalette({
 
   const filteredItems = useMemo(() => {
     if (!query.trim()) return [];
-    const q = query.toLowerCase().trim();
-    return items
-      .filter((item) => {
-        return (
-          item.title.toLowerCase().includes(q) ||
-          item.description.toLowerCase().includes(q) ||
-          item.category.toLowerCase().includes(q) ||
-          item.tags?.some((t) => t.toLowerCase().includes(q))
-        );
-      })
-      .slice(0, 8);
+    return searchItems(items, query).slice(0, 8);
   }, [items, query]);
 
   const filteredActions = useMemo(() => {

@@ -17,7 +17,6 @@ export interface UseMagneticOptions {
 }
 
 export function useMagnetic({
-  proximity = 40,
   outerLimit = 3,
   innerLimit = 5,
   outerDuration = 1.0,
@@ -64,39 +63,29 @@ export function useMagnetic({
       const deltaX = e.clientX - centerX;
       const deltaY = e.clientY - centerY;
 
-      // Check if mouse is within proximity bounding box
-      const isInside =
-        e.clientX >= rect.left - proximity &&
-        e.clientX <= rect.right + proximity &&
-        e.clientY >= rect.top - proximity &&
-        e.clientY <= rect.bottom + proximity;
-
-      if (isInside) {
-        // Outer button shifts subtly (0.1 * delta, clamped to outerLimit)
-        quickOuterX(Math.max(-outerLimit, Math.min(outerLimit, 0.1 * deltaX)));
-        quickOuterY(Math.max(-outerLimit, Math.min(outerLimit, 0.1 * deltaY)));
-
-        // Inner content (icon & text) shifts further (0.2 * delta, clamped to innerLimit)
-        // Creating the signature parallax float inside the button
-        quickInnerX(Math.max(-innerLimit, Math.min(innerLimit, 0.2 * deltaX)));
-        quickInnerY(Math.max(-innerLimit, Math.min(innerLimit, 0.2 * deltaY)));
-      } else {
-        // Smoothly snap back to origin
-        quickOuterX(0);
-        quickOuterY(0);
-        quickInnerX(0);
-        quickInnerY(0);
-      }
+      quickOuterX(Math.max(-outerLimit, Math.min(outerLimit, 0.15 * deltaX)));
+      quickOuterY(Math.max(-outerLimit, Math.min(outerLimit, 0.15 * deltaY)));
+      quickInnerX(Math.max(-innerLimit, Math.min(innerLimit, 0.25 * deltaX)));
+      quickInnerY(Math.max(-innerLimit, Math.min(innerLimit, 0.25 * deltaY)));
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
+    const handleMouseLeave = () => {
+      quickOuterX(0);
+      quickOuterY(0);
+      quickInnerX(0);
+      quickInnerY(0);
+    };
+
+    container.addEventListener('mousemove', handleMouseMove);
+    container.addEventListener('mouseleave', handleMouseLeave);
 
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
+      container.removeEventListener('mousemove', handleMouseMove);
+      container.removeEventListener('mouseleave', handleMouseLeave);
       // Clean up inline transforms on unmount
       gsap.set([container, inner], { x: 0, y: 0 });
     };
-  }, [proximity, outerLimit, innerLimit, outerDuration, innerDuration, enabled]);
+  }, [outerLimit, innerLimit, outerDuration, innerDuration, enabled]);
 
   return { containerRef, innerRef };
 }
