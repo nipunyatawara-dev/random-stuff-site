@@ -9,7 +9,7 @@ function titlesFor(query: string, platformTag = "all") {
 
 describe("topic-aware item search", () => {
   it("assigns at least one known topic to every item", () => {
-    expect(items).toHaveLength(226);
+    expect(items).toHaveLength(228);
     for (const item of items) {
       expect(item.topics.length, item.title).toBeGreaterThan(0);
       expect(item.topics.every(isSearchTopic), item.title).toBe(true);

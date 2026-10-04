@@ -2149,6 +2149,21 @@ const rawItems: RawItem[] = [
     "category": "Softwares",
     "tags": ["macos"],
     "image": "https://github.com/fayazara.png"
+  },
+  {
+    "title": "Quick Image Converter",
+    "description": "Free online image converter — convert JPG, PNG, WebP, AVIF and HEIC right in your browser. Fast, private, no sign-up needed.",
+    "website": "https://quickimgconvert.com/",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "Steam Market Fee Calculator",
+    "description": "An open-source calculator to estimate Steam Community Market fees, buyer costs, and seller proceeds in integer precision.",
+    "website": "https://steamvaults.org/tools/steam-market-fee-calculator",
+    "github": "https://github.com/hyunjun12312/steam-market-fee-calculator",
+    "category": "Websites",
+    "tags": ["all"]
   }
 ];
 

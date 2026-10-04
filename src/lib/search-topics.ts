@@ -37,7 +37,7 @@ const TOPIC_ITEMS: Record<SearchTopic, readonly string[]> = {
     "Isocons", "Gemini Watermark Remover", "FaceFusion", "Shader Gradient", "Excalidraw",
     "WinShot", "Dither", "CompressO", "Clop", "ASCII Magic", "GIMP", "Krita", "Inkscape",
     "Pinta", "Lap Photo Manager", "digiKam", "darktable", "RawTherapee", "Flameshot", "Ksnip",
-    "Screendrop",
+    "Screendrop", "Quick Image Converter",
   ],
   development: [
     "Tabby", "React Bits", "Awesome Swift Apps", "Spicetify CLI", "Mate Engine", "Cline",
@@ -77,7 +77,7 @@ const TOPIC_ITEMS: Record<SearchTopic, readonly string[]> = {
     "Joplin", "Trilium Notes", "AppFlowy", "AFFiNE", "Super Productivity", "BreakTimer", "Blanket",
     "CopyQ", "Qalculate!", "SpeedCrunch", "TagSpaces", "Actiona", "Espanso", "Asyar", "Ueli",
     "Nextcloud", "Textream", "Keyty", "Itsycal", "KeyCastr", "Handy", "ZenNotes", "Screendrop",
-    "DigiBouquet",
+    "DigiBouquet", "Steam Market Fee Calculator",
   ],
   system: [
     "Tabby", "WizTree", "Raycast", "Chris Titus WinUtil", "Mole", "Mounty", "Boring Notch", "UTM",
@@ -106,9 +106,9 @@ const TOPIC_ITEMS: Record<SearchTopic, readonly string[]> = {
     "Atomic Chat", "LocalSend", "Syncthing", "KDE Connect", "RustDesk", "KeePass", "KeePassXC",
     "Cryptomator", "FreeFileSync", "Jitsi Meet", "Element", "Firefox", "LibreWolf", "Waterfox",
     "Zen Browser", "Mozilla Thunderbird", "OnlyOffice", "Logseq", "Joplin", "AppFlowy", "Duplicati",
-    "Seafile", "Nextcloud",
+    "Seafile", "Nextcloud", "Quick Image Converter",
   ],
-  gaming: ["PlayCover", "shadPS4", "Mate Engine", "PS4 Game Scraper"],
+  gaming: ["PlayCover", "shadPS4", "Mate Engine", "PS4 Game Scraper", "Steam Market Fee Calculator"],
   networking: [
     "Droppy", "OpenScreen", "Net-Bar", "Scrcpy GUI", "Transmission", "Awesome Self-Hosted", "Reclip",
     "RuView", "LocalSend", "Syncthing", "KDE Connect", "RustDesk", "Jitsi Meet", "Element", "Navidrome",
@@ -119,7 +119,7 @@ const TOPIC_ITEMS: Record<SearchTopic, readonly string[]> = {
     "CopyCat Clipboard", "Bulk Crap Uninstaller", "CompressO", "VidBee", "Clop", "LocalSend", "Syncthing",
     "FreeFileSync", "Okular", "PDFsam", "CopyQ", "Lap Photo Manager", "digiKam", "PeaZip", "Filelight",
     "Crossdirstat", "Double Commander", "muCommander", "TagSpaces", "SpaceDrive", "Duplicati", "Seafile",
-    "Nextcloud", "Paperless-ngx", "LiteParse", "Keka",
+    "Nextcloud", "Paperless-ngx", "LiteParse", "Keka", "Quick Image Converter",
   ],
   downloads: [
     "Github Store", "Popcorn Time", "Brisk", "Cobalt", "Transmission", "IPSW Downloads", "NouTube Desktop",
@@ -138,7 +138,8 @@ const TOPIC_ITEMS: Record<SearchTopic, readonly string[]> = {
   web: [
     "FMHY", "Vert", "Cloudflare Error Page", "Ear (web)", "Poke", "Scrapy", "Awesome Self-Hosted",
     "API Mega List", "Delphi Tools", "Webcam & Mic Test", "mapcn", "Firefox", "LibreWolf", "Waterfox",
-    "Zen Browser", "Chromium", "Motion", "Transitions.dev", "DigiBouquet",
+    "Zen Browser", "Chromium", "Motion", "Transitions.dev", "DigiBouquet", "Quick Image Converter",
+    "Steam Market Fee Calculator",
   ],
   media: [
     "Popcorn Time", "Cobalt", "Spicetify CLI", "FaceFusion", "FineTune", "Quick Subtitles", "BetterCapture",
