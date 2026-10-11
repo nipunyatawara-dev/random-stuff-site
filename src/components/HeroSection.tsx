@@ -163,7 +163,7 @@ export default function HeroSection({
                 </span>
                 <div className="my-auto space-y-1">
                   <span className="font-sans font-black text-sm block tracking-tight">
-                    ZERO SPONSORED ADS
+                    100% UNBIASED & FREE
                   </span>
                   <span className="font-caveat text-xl text-[#82CCFF] block">
                     Only tools that matter

@@ -10,17 +10,19 @@ export interface LoadingScreenProps {
 
 export const LoadingScreen: React.FC<LoadingScreenProps> = ({
   onComplete,
-  minDurationMs = 1500,
+  minDurationMs = 1400,
 }) => {
   const [progress, setProgress] = useState(0);
   const [isFinishing, setIsFinishing] = useState(false);
+  const onCompleteRef = React.useRef(onComplete);
+  onCompleteRef.current = onComplete;
 
   const handleFinish = useCallback(() => {
     setIsFinishing(true);
     setTimeout(() => {
-      onComplete();
+      onCompleteRef.current();
     }, 450);
-  }, [onComplete]);
+  }, []);
 
   // Handle escape key to skip
   useEffect(() => {
@@ -33,24 +35,18 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleFinish]);
 
-  // Check reduced motion
-  useEffect(() => {
-    const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
-    if (prefersReducedMotion) {
-      handleFinish();
-    }
-  }, [handleFinish]);
-
   // Progress simulation
   useEffect(() => {
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const duration = prefersReducedMotion ? Math.min(minDurationMs, 650) : minDurationMs;
     const startTime = performance.now();
     const interval = 20; // 50fps tick
 
     const timer = setInterval(() => {
       const elapsed = performance.now() - startTime;
-      const rawProgress = Math.min(100, (elapsed / minDurationMs) * 100);
+      const rawProgress = Math.min(100, (elapsed / duration) * 100);
 
       // Smooth progress curve with gentle plateau near the end
       const easedProgress = Math.round(
@@ -61,10 +57,10 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
 
       setProgress(Math.min(100, Math.max(0, easedProgress)));
 
-      if (elapsed >= minDurationMs) {
+      if (elapsed >= duration) {
         clearInterval(timer);
         setProgress(100);
-        setTimeout(handleFinish, 180);
+        setTimeout(handleFinish, 160);
       }
     }, interval);
 

@@ -181,7 +181,7 @@ export default function CommandPalette({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-xl bg-white rounded-[28px] shadow-studio-card border border-white/90 overflow-hidden flex flex-col"
+        className="w-full max-w-xl bg-white rounded-[28px] shadow-studio-card border border-slate-200 overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search Input Bar */}

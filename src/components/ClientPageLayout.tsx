@@ -65,30 +65,15 @@ export default function ClientPageLayout({ items }: { items: Item[] }) {
     window.scrollTo(0, 0);
   }, []);
 
-  // Check if initial session loading screen should be shown
+  // Show initial loading screen on mount
   useEffect(() => {
-    try {
-      const hasSeenIntro = sessionStorage.getItem("rs_intro_seen");
-      const prefersReducedMotion = window.matchMedia(
-        "(prefers-reduced-motion: reduce)"
-      ).matches;
-      if (!hasSeenIntro && !prefersReducedMotion) {
-        setIsLoadingScreenVisible(true);
-      }
-    } catch {
-      // In case sessionStorage is blocked in private browsing
-    }
+    setIsLoadingScreenVisible(true);
   }, []);
 
   const handleLoadingComplete = () => {
     setIsLoadingScreenVisible(false);
     scrollToY(0, { immediate: true });
     window.scrollTo(0, 0);
-    try {
-      sessionStorage.setItem("rs_intro_seen", "true");
-    } catch {
-      // Ignore
-    }
   };
 
   // Lock body scroll when mobile drawer or loading screen is open
@@ -193,7 +178,7 @@ export default function ClientPageLayout({ items }: { items: Item[] }) {
             <button
               type="button"
               onClick={handleToggleSound}
-              className="p-2 min-w-[36px] min-h-[36px] rounded-full bg-white shadow-studio-button border border-white/80 text-[#14334D] hover:bg-slate-50 active:scale-95 transition-all flex items-center justify-center cursor-pointer"
+              className="p-2 min-w-[36px] min-h-[36px] rounded-full bg-white shadow-studio-button border border-[#D6DCE1] text-[#14334D] hover:bg-slate-50 active:scale-95 transition-all flex items-center justify-center cursor-pointer"
               title={soundOn ? "Disable Sound Effects" : "Enable Sound Effects"}
               aria-label={soundOn ? "Disable Sound Effects" : "Enable Sound Effects"}
             >
@@ -230,7 +215,7 @@ export default function ClientPageLayout({ items }: { items: Item[] }) {
             <button
               type="button"
               onClick={handleToggleSound}
-              className="p-2 min-w-[40px] min-h-[40px] rounded-full bg-white shadow-xs text-[#14334D] flex items-center justify-center hover:bg-slate-50 active:scale-95 transition-all cursor-pointer"
+              className="p-2 min-w-[40px] min-h-[40px] rounded-full bg-white shadow-xs border border-[#D6DCE1] text-[#14334D] flex items-center justify-center hover:bg-slate-50 active:scale-95 transition-all cursor-pointer"
               title={soundOn ? "Disable Sound Effects" : "Enable Sound Effects"}
               aria-label={soundOn ? "Disable Sound Effects" : "Enable Sound Effects"}
             >
@@ -244,7 +229,7 @@ export default function ClientPageLayout({ items }: { items: Item[] }) {
             <button
               type="button"
               onClick={() => setMobileDrawerOpen(true)}
-              className="p-2 min-w-[40px] min-h-[40px] rounded-full bg-white shadow-xs text-[#14334D] flex items-center justify-center hover:bg-slate-50 active:scale-95 transition-all cursor-pointer"
+              className="p-2 min-w-[40px] min-h-[40px] rounded-full bg-white shadow-xs border border-[#D6DCE1] text-[#14334D] flex items-center justify-center hover:bg-slate-50 active:scale-95 transition-all cursor-pointer"
               aria-label="Open mobile menu"
               aria-expanded={mobileDrawerOpen}
             >
@@ -429,7 +414,7 @@ export default function ClientPageLayout({ items }: { items: Item[] }) {
       {/* Main Studio Viewport Container */}
       <main className="flex-1 w-full max-w-[1400px] mx-auto p-2 sm:p-6 flex flex-col items-center">
         {/* Main Rounded Studio Card Canvas */}
-        <div className="w-full bg-white rounded-[22px] sm:rounded-[36px] md:rounded-[40px] p-4 sm:p-8 md:p-12 shadow-studio-card border border-white/80 overflow-hidden">
+        <div className="w-full bg-white rounded-[22px] sm:rounded-[36px] md:rounded-[40px] p-4 sm:p-8 md:p-12 shadow-studio-card border border-slate-200/80 overflow-hidden">
           <HeroSection
             totalItemsCount={items.length}
             onExploreClick={scrollToCatalog}

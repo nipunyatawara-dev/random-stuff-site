@@ -29,31 +29,38 @@ export function useMagnetic({
   useEffect(() => {
     if (!enabled) return;
 
-    // Check for reduced motion preference
-    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      return;
-    }
+    // Check for reduced motion preference (or privacy-shield spoofing)
+    const isReduced =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     const container = containerRef.current;
     const inner = innerRef.current;
     if (!container || !inner) return;
 
-    // Initialize optimized GSAP quickTo setters with elastic spring curves
+    const effectiveOuterLimit = isReduced ? Math.min(outerLimit, 1.5) : outerLimit;
+    const effectiveInnerLimit = isReduced ? Math.min(innerLimit, 2) : innerLimit;
+    const effectiveOuterDuration = isReduced ? 0.3 : outerDuration;
+    const effectiveInnerDuration = isReduced ? 0.25 : innerDuration;
+    const effectiveEase = isReduced ? 'power2.out' : 'elastic.out(1, 0.5)';
+    const effectiveInnerEase = isReduced ? 'power2.out' : 'elastic.out(1, 0.55)';
+
+    // Initialize optimized GSAP quickTo setters
     const quickOuterX = gsap.quickTo(container, 'x', {
-      duration: outerDuration,
-      ease: 'elastic.out(1, 0.5)',
+      duration: effectiveOuterDuration,
+      ease: effectiveEase,
     });
     const quickOuterY = gsap.quickTo(container, 'y', {
-      duration: outerDuration,
-      ease: 'elastic.out(1, 0.5)',
+      duration: effectiveOuterDuration,
+      ease: effectiveEase,
     });
     const quickInnerX = gsap.quickTo(inner, 'x', {
-      duration: innerDuration,
-      ease: 'elastic.out(1, 0.55)',
+      duration: effectiveInnerDuration,
+      ease: effectiveInnerEase,
     });
     const quickInnerY = gsap.quickTo(inner, 'y', {
-      duration: innerDuration,
-      ease: 'elastic.out(1, 0.55)',
+      duration: effectiveInnerDuration,
+      ease: effectiveInnerEase,
     });
 
     const handleMouseMove = (e: MouseEvent) => {
@@ -63,10 +70,10 @@ export function useMagnetic({
       const deltaX = e.clientX - centerX;
       const deltaY = e.clientY - centerY;
 
-      quickOuterX(Math.max(-outerLimit, Math.min(outerLimit, 0.15 * deltaX)));
-      quickOuterY(Math.max(-outerLimit, Math.min(outerLimit, 0.15 * deltaY)));
-      quickInnerX(Math.max(-innerLimit, Math.min(innerLimit, 0.25 * deltaX)));
-      quickInnerY(Math.max(-innerLimit, Math.min(innerLimit, 0.25 * deltaY)));
+      quickOuterX(Math.max(-effectiveOuterLimit, Math.min(effectiveOuterLimit, 0.15 * deltaX)));
+      quickOuterY(Math.max(-effectiveOuterLimit, Math.min(effectiveOuterLimit, 0.15 * deltaY)));
+      quickInnerX(Math.max(-effectiveInnerLimit, Math.min(effectiveInnerLimit, 0.25 * deltaX)));
+      quickInnerY(Math.max(-effectiveInnerLimit, Math.min(effectiveInnerLimit, 0.25 * deltaY)));
     };
 
     const handleMouseLeave = () => {

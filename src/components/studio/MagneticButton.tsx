@@ -49,13 +49,13 @@ export const MagneticButton: React.FC<MagneticButtonProps> = ({
 
   const variantClasses = {
     'primary-light':
-      'bg-[#F0F2F5] text-[#304F67] border border-white/60 shadow-studio-button hover:bg-white transition-colors duration-200',
+      'bg-[#F0F2F5] text-[#304F67] border border-[#D6DCE1] shadow-studio-button hover:bg-white hover:border-[#CCD5DC] active:translate-y-0.5 transition-all duration-200',
     'primary-dark':
-      'bg-[#304F67] text-white border border-[#456176]/40 shadow-studio-button-dark hover:bg-[#253f54] transition-colors duration-200',
+      'bg-[#304F67] text-white border border-[#14334D] shadow-studio-button-dark hover:bg-[#253f54] active:translate-y-0.5 transition-all duration-200',
     'accent-lime':
-      'bg-gradient-to-r from-[#9DF71F] to-[#89E00F] text-[#14334D] font-bold border border-white/50 shadow-studio-button hover:brightness-105 transition-all duration-200',
+      'bg-gradient-to-r from-[#9DF71F] to-[#89E00F] text-[#14334D] font-bold border border-[#7ECC0C] shadow-studio-button-lime hover:brightness-105 active:translate-y-0.5 transition-all duration-200',
     'ghost':
-      'bg-transparent text-[#456176] border border-transparent hover:bg-black/5 transition-colors duration-200',
+      'bg-transparent text-[#456176] border border-transparent hover:bg-black/5 active:translate-y-0.5 transition-all duration-200',
   }[variant];
 
   const content = (

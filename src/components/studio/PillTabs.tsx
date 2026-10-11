@@ -54,7 +54,7 @@ export const PillTabs: React.FC<PillTabsProps> = ({
   return (
     <div
       data-lenis-prevent
-      className={`inline-flex items-center gap-1 sm:gap-1.5 p-1 sm:p-1.5 rounded-full bg-[#E8ECEF]/80 backdrop-blur-xs border border-white/60 shadow-inner min-w-max shrink-0 ${className}`}
+      className={`inline-flex items-center gap-1 sm:gap-1.5 p-1 sm:p-1.5 rounded-full bg-[#E8ECEF]/80 backdrop-blur-xs border border-[#D6DCE1] shadow-inner min-w-max shrink-0 ${className}`}
     >
       {tabs.map((tab) => {
         const isActive = tab.id === activeTab;
@@ -74,7 +74,7 @@ export const PillTabs: React.FC<PillTabsProps> = ({
               <motion.div
                 layoutId={`${layoutIdPrefix}Indicator`}
                 transition={{ type: 'spring', stiffness: 450, damping: 32 }}
-                className="absolute inset-0 rounded-full bg-white shadow-studio-button border border-white/80"
+                className="absolute inset-0 rounded-full bg-white shadow-studio-button border border-[#D6DCE1]"
               />
             )}
             <span className="relative z-10 flex items-center gap-1.5 sm:gap-2">

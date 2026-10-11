@@ -92,7 +92,7 @@ export default function RandomRouletteModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg bg-white rounded-[22px] sm:rounded-[32px] p-4 sm:p-8 shadow-studio-card border border-white/90 overflow-y-auto max-h-[90vh] flex flex-col relative select-none"
+        className="w-full max-w-lg bg-white rounded-[22px] sm:rounded-[32px] p-4 sm:p-8 shadow-studio-card border border-slate-200 overflow-y-auto max-h-[90vh] flex flex-col relative select-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

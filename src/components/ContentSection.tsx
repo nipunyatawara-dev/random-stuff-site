@@ -361,7 +361,7 @@ export default function ContentSection({
               placeholder="Search 350+ tools, tags (#cli, #macos)..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-11 pr-20 py-2.5 rounded-full bg-white shadow-studio-button border border-white/80 text-sm text-[#14334D] placeholder-[#A0AFBB] focus:outline-hidden focus:ring-2 focus:ring-[#007BE5]/25 transition-all font-sans"
+              className="w-full pl-11 pr-20 py-2.5 rounded-full bg-white shadow-studio-button border border-[#D6DCE1] text-sm text-[#14334D] placeholder-[#A0AFBB] focus:outline-hidden focus:ring-2 focus:ring-[#007BE5]/25 focus:border-[#007BE5] transition-all font-sans"
             />
             {searchQuery ? (
               <button
@@ -414,7 +414,7 @@ export default function ContentSection({
                 </MagneticButton>
 
                 {isExportMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-studio-popover border border-white/80 p-2 z-30 space-y-1">
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-studio-popover border border-[#D6DCE1] p-2 z-30 space-y-1">
                     <button
                       type="button"
                       onClick={() => handleExport("md")}
@@ -480,7 +480,7 @@ export default function ContentSection({
                   }}
                   className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shrink-0 transition-all duration-200 cursor-pointer ${
                     isActive
-                      ? "bg-white text-[#14334D] shadow-studio-button font-bold border border-white/80"
+                      ? "bg-white text-[#14334D] shadow-studio-button font-bold border border-[#D6DCE1]"
                       : "bg-[#F0F2F5] text-[#456176] hover:text-[#14334D] hover:bg-slate-200/80"
                   }`}
                 >
@@ -842,7 +842,7 @@ export default function ContentSection({
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-lg bg-white rounded-[24px] sm:rounded-[32px] p-5 sm:p-8 shadow-studio-card border border-white/90 overflow-y-auto max-h-[90vh] flex flex-col relative"
+              className="w-full max-w-lg bg-white rounded-[24px] sm:rounded-[32px] p-5 sm:p-8 shadow-studio-card border border-slate-200 overflow-y-auto max-h-[90vh] flex flex-col relative"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">

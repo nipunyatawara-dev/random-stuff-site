@@ -2164,6 +2164,611 @@ const rawItems: RawItem[] = [
     "github": "https://github.com/hyunjun12312/steam-market-fee-calculator",
     "category": "Websites",
     "tags": ["all"]
+  },
+  {
+    "title": "Flow Launcher",
+    "description": "Quick file search and keyboard application launcher for Windows with community plugins.",
+    "website": "https://www.flowlauncher.com",
+    "github": "https://github.com/Flow-Launcher/Flow.Launcher",
+    "category": "Softwares",
+    "tags": ["windows"]
+  },
+  {
+    "title": "Shottr",
+    "description": "Lightweight, pixel-perfect screenshot annotation and measurement app for macOS.",
+    "website": "https://shottr.cc",
+    "category": "Softwares",
+    "tags": ["macos"]
+  },
+  {
+    "title": "BetterDisplay",
+    "description": "Unlock HiDPI scaling, XDR/HDR brightness, virtual screens, and DDC controls on Mac displays.",
+    "website": "https://betterdisplay.pro",
+    "github": "https://github.com/waydabber/BetterDisplay",
+    "category": "Softwares",
+    "tags": ["macos"]
+  },
+  {
+    "title": "AltTab",
+    "description": "Brings Windows-style Alt+Tab application window switching with live previews to macOS.",
+    "website": "https://alt-tab-macos.netlify.app",
+    "github": "https://github.com/lwouis/alt-tab-macos",
+    "category": "Softwares",
+    "tags": ["macos"]
+  },
+  {
+    "title": "Thaw",
+    "description": "Clean menu bar manager to hide, show, and organize cluttered menu bar icons on macOS.",
+    "github": "https://github.com/stonerl/Thaw",
+    "category": "Softwares",
+    "tags": ["macos"]
+  },
+  {
+    "title": "Pika",
+    "description": "Open-source native color picker for macOS with real-time WCAG contrast ratio compliance checks.",
+    "website": "https://superhighfives.com/pika",
+    "github": "https://github.com/superhighfives/pika",
+    "category": "Softwares",
+    "tags": ["macos"]
+  },
+  {
+    "title": "AlDente",
+    "description": "macOS menu bar utility to set charging limits and prolong MacBook battery health.",
+    "website": "https://apphousekitchen.com",
+    "github": "https://github.com/AppHouseKitchen/AlDente-Battery_Care_and_Monitoring",
+    "category": "Softwares",
+    "tags": ["macos"]
+  },
+  {
+    "title": "WinDiskWriter",
+    "description": "Native macOS utility to create bootable Windows installer USB drives, bypassing TPM requirements.",
+    "github": "https://github.com/TechUnRestricted/WinDiskWriter",
+    "category": "Softwares",
+    "tags": ["macos"]
+  },
+  {
+    "title": "AudioRelay",
+    "description": "Stream PC audio to an Android device or other computers over local Wi-Fi or USB with low latency.",
+    "website": "https://audiorelay.net",
+    "category": "Softwares",
+    "tags": ["windows", "macos", "linux", "android"]
+  },
+  {
+    "title": "SonoBus",
+    "description": "Open-source, high-quality peer-to-peer audio streaming over network or internet.",
+    "website": "https://www.sonobus.net",
+    "category": "Softwares",
+    "tags": ["windows", "macos", "linux", "ios", "android"]
+  },
+  {
+    "title": "Thock",
+    "description": "Native macOS sound simulator that plays mechanical keyboard switch sounds while you type.",
+    "github": "https://github.com/kamillobinski/thock",
+    "category": "Softwares",
+    "tags": ["macos"]
+  },
+  {
+    "title": "Moody",
+    "description": "Floating teleprompter application designed to sit inside the MacBook camera notch.",
+    "website": "https://moody.mjarosz.com",
+    "category": "Softwares",
+    "tags": ["macos"]
+  },
+  {
+    "title": "Porting Kit",
+    "description": "One-click Wine wrapper installer for classic Windows games and applications on macOS.",
+    "website": "https://www.portingkit.com",
+    "category": "Softwares",
+    "tags": ["macos"]
+  },
+  {
+    "title": "Sikarugir",
+    "description": "Tool used to package Windows software into standalone Wine-wrapped native macOS apps.",
+    "github": "https://github.com/Sikarugir-App/Sikarugir",
+    "category": "Softwares",
+    "tags": ["macos"]
+  },
+  {
+    "title": "OneMenu",
+    "description": "Menu bar system monitor and utility to track CPU, memory, network, and battery usage on macOS.",
+    "website": "https://www.withmarko.com/one-menu",
+    "category": "Softwares",
+    "tags": ["macos"]
+  },
+  {
+    "title": "Dissent",
+    "description": "Lightweight native Discord desktop client written in Go and GTK4 with low memory consumption.",
+    "github": "https://github.com/diamondburned/dissent",
+    "category": "Softwares",
+    "tags": ["linux", "windows", "macos"]
+  },
+  {
+    "title": "Nuclear",
+    "description": "Desktop music streaming player that pulls tracks from free online sources without ads.",
+    "website": "https://nuclearplayer.com",
+    "github": "https://github.com/nukeop/nuclear",
+    "category": "Softwares",
+    "tags": ["windows", "macos", "linux"]
+  },
+  {
+    "title": "Media Downloader",
+    "description": "Native macOS GUI app to download videos from YouTube, X, and Instagram and trim them in one pass.",
+    "github": "https://github.com/pixel-point/media-downloader",
+    "category": "Softwares",
+    "tags": ["macos"]
+  },
+  {
+    "title": "Chops",
+    "description": "macOS desktop app to browse, edit, and organize AI agent skills across Claude Code, Cursor, and Codex.",
+    "github": "https://github.com/Shpigford/chops",
+    "category": "Softwares",
+    "tags": ["macos"]
+  },
+  {
+    "title": "Deckcraft",
+    "description": "Clean-room open-source slide presentation software reimplemented in pure Rust.",
+    "website": "https://getartcraft.com/apps",
+    "github": "https://github.com/storytold/deckcraft",
+    "category": "Softwares",
+    "tags": ["windows", "macos", "linux"]
+  },
+  {
+    "title": "Anki",
+    "description": "Intelligent spaced repetition flashcard program for memorizing facts, vocabulary, and concepts.",
+    "website": "https://apps.ankiweb.net",
+    "github": "https://github.com/ankitects/anki",
+    "category": "Softwares",
+    "tags": ["windows", "macos", "linux"]
+  },
+  {
+    "title": "3uTools",
+    "description": "All-in-one iOS file manager, jailbreak, flashing, and backup utility for Windows.",
+    "website": "http://www.3u.com",
+    "category": "Softwares",
+    "tags": ["windows"]
+  },
+  {
+    "title": "Cowabunga",
+    "description": "Customization tool utilizing MacDirtyCow to tweak iOS system settings without a full jailbreak.",
+    "website": "https://cowabun.ga",
+    "category": "Softwares",
+    "tags": ["macos", "windows", "ios"]
+  },
+  {
+    "title": "DevToys",
+    "description": "Offline Swiss Army knife for developers with JSON formatters, regex testers, JWT inspectors, and decoders.",
+    "website": "https://devtoys.app",
+    "github": "https://github.com/DevToys-app/DevToys",
+    "category": "Softwares",
+    "tags": ["windows", "macos", "linux"]
+  },
+  {
+    "title": "Universal Android Debloater",
+    "description": "Cross-platform GUI written in Rust using ADB to safely uninstall system bloatware from Android devices.",
+    "github": "https://github.com/0x192/universal-android-debloater",
+    "category": "Softwares",
+    "tags": ["windows", "macos", "linux", "android"]
+  },
+  {
+    "title": "YouTube Music Desktop",
+    "description": "Open-source desktop player for YouTube Music with built-in ad blocker, Discord Rich Presence, and plugins.",
+    "github": "https://github.com/th-ch/youtube-music",
+    "category": "Softwares",
+    "tags": ["windows", "macos", "linux"]
+  },
+  {
+    "title": "LiveContainer",
+    "description": "Run iOS applications without actually installing them, bypassing Apple's 3-app sideloading certificate limit.",
+    "github": "https://github.com/LiveContainer/LiveContainer",
+    "category": "Softwares",
+    "tags": ["ios"]
+  },
+  {
+    "title": "OpenLogi",
+    "description": "Native, local-first Rust alternative to Logitech Options+ to configure DPI, gestures, and button mapping with no telemetry.",
+    "website": "https://openlogi.org/en",
+    "github": "https://github.com/AprilNEA/OpenLogi",
+    "category": "Softwares",
+    "tags": ["macos", "windows"]
+  },
+  {
+    "title": "Local",
+    "description": "Fast, one-click local WordPress development environment for macOS, Windows, and Linux.",
+    "website": "https://localwp.com",
+    "category": "Softwares",
+    "tags": ["macos", "windows", "linux"]
+  },
+  {
+    "title": "Trae",
+    "description": "Adaptive AI coding IDE featuring Claude 3.5 Sonnet, workspace indexing, and intelligent builder mode.",
+    "website": "https://www.trae.ai",
+    "category": "Softwares",
+    "tags": ["macos", "windows"]
+  },
+  {
+    "title": "InvokeAI",
+    "description": "Creative engine and WebUI for Stable Diffusion models, empowering artists to generate visual media locally.",
+    "github": "https://github.com/invoke-ai/InvokeAI",
+    "category": "Softwares",
+    "tags": ["windows", "macos", "linux"]
+  },
+  {
+    "title": "ClipGrab",
+    "description": "Simple, open-source video downloader and converter for YouTube, Vimeo, and other streaming websites.",
+    "website": "https://clipgrab.org",
+    "category": "Softwares",
+    "tags": ["windows", "macos", "linux"]
+  },
+  {
+    "title": "Koboldcpp",
+    "description": "Single-file zero-install executable to run quantized GGUF models locally with an integrated web UI.",
+    "github": "https://github.com/LostRuins/koboldcpp",
+    "category": "Softwares",
+    "tags": ["windows", "macos", "linux"]
+  },
+  {
+    "title": "PairDrop",
+    "description": "Local cross-platform file transfer directly in your browser without signup or setup.",
+    "website": "https://pairdrop.net",
+    "github": "https://github.com/schlagmichdoch/pairdrop",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "RevPDF",
+    "description": "Offline, in-browser PDF editor to sign, fill, split, and merge documents without uploading files to servers.",
+    "website": "https://revpdf.com",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "Unicorn Studio",
+    "description": "Interactive no-code WebGL shader, fluid simulation, and animation builder with embeddable code.",
+    "website": "https://www.unicorn.studio",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "SigGif",
+    "description": "Converts mouse or stylus signatures into smooth animated stroke GIFs and SVGs.",
+    "website": "https://sig-gif.vercel.app",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "Font Stealer",
+    "description": "Inspects any public website URL and extracts active font files and CSS font faces.",
+    "website": "https://font-stealer.vercel.app",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "Fish Audio",
+    "description": "Lightning-fast AI voice generator, text-to-speech engine, and zero-shot voice cloning platform.",
+    "website": "https://fish.audio",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "Gamepad Tester",
+    "description": "Online controller diagnostic tool to test joystick drift, trigger axis, and button response.",
+    "website": "https://hardwaretester.com/gamepad",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "ResizePixel",
+    "description": "Free web utility to crop, resize, convert, and compress images with clean controls.",
+    "website": "https://www.resizepixel.com",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "YourASCII",
+    "description": "Convert images and videos into customizable ASCII art with export controls.",
+    "website": "https://yourascii.vercel.app",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "WebHaptics",
+    "description": "JavaScript library and testing sandbox providing tactile haptic vibration feedback for mobile web apps.",
+    "website": "https://haptics.lochie.me",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "OpenUI",
+    "description": "Open standard and real-time generation environment for AI-generated user interfaces.",
+    "website": "https://www.openui.com",
+    "github": "https://github.com/thesysdev/openui",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "prompts.chat",
+    "description": "Searchable open-source repository of role-based system prompts and personas for ChatGPT and LLMs.",
+    "website": "https://prompts.chat",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "drawDB",
+    "description": "Free, intuitive online relational database diagram editor and SQL schema generator in browser.",
+    "website": "https://www.drawdb.app",
+    "github": "https://github.com/drawdb-io/drawdb",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "tldraw",
+    "description": "Ultra-fast, minimal infinite canvas whiteboard with real-time collaboration and SVG export.",
+    "website": "https://www.tldraw.com",
+    "github": "https://github.com/tldraw/tldraw",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "Star History",
+    "description": "Visualizes and compares historical GitHub repository star growth charts over time.",
+    "website": "https://star-history.com",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "Simple Icons",
+    "description": "Over 3,000 clean, official SVG icons and brand guidelines for popular technology services.",
+    "website": "https://simple-icons.org",
+    "github": "https://github.com/simple-icons/simple-icons",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "Paper Shaders",
+    "description": "Ultra-fast, zero-dependency WebGL canvas background shaders designed for modern web apps.",
+    "website": "https://shaders.paper.design",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "PhotoGradient",
+    "description": "Generates vibrant multi-point CSS mesh gradients directly from uploaded photographs.",
+    "website": "https://photogradient.com",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "Design Systems Surf",
+    "description": "Curated database and gallery of production design systems from tech organizations worldwide.",
+    "website": "https://designsystems.surf",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "Screenshot Studio",
+    "description": "Browser-based mockup maker to render screenshots inside customizable 3D angles, backgrounds, and shadows.",
+    "website": "https://www.screenshot-studio.com",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "SVG Repo",
+    "description": "Collection of over 500,000 free, open-licensed SVG vectors, icons, and graphics.",
+    "website": "https://www.svgrepo.com",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "Public APIs",
+    "description": "Massive collective list of free REST, GraphQL, and webhook APIs for software development.",
+    "website": "https://publicapis.io",
+    "github": "https://github.com/public-apis/public-apis",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "Free for Dev",
+    "description": "Exhaustive directory of SaaS, PaaS, and IaaS offerings with generous free tiers for developers.",
+    "github": "https://github.com/ripienaar/free-for-dev",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "Checklist Design",
+    "description": "Collection of best-practice UI and UX checklists covering essential elements for standard pages.",
+    "website": "https://www.checklist.design",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "emailcn",
+    "description": "Clean, responsive email component templates and layouts built for modern transactional email.",
+    "website": "https://www.emailcn.run",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "Square UI",
+    "description": "Open-source layouts and production dashboards built on top of Tailwind CSS and shadcn/ui.",
+    "github": "https://github.com/ln-dev7/square-ui",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "Velvet UI",
+    "description": "Interactive sound design library demonstrating tactile audio feedback for web interfaces.",
+    "website": "https://velvet-ui-eight.vercel.app",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "Its Hover",
+    "description": "Curated collection of micro-interactions, CSS hover states, and button transition effects.",
+    "website": "https://www.itshover.com",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "NotebookLM",
+    "description": "Google's AI research notebook that grounds answers in your documents and generates Audio Overviews.",
+    "website": "https://notebook.google.com",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "Google AI Studio",
+    "description": "Fast web-based playground for prompt engineering and experimenting with Google Gemini models.",
+    "website": "https://aistudio.google.com",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "QuillBot",
+    "description": "AI writing assistant offering sentence paraphrasing, grammar checking, and text summarization.",
+    "website": "https://quillbot.com",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "Vocal Remover",
+    "description": "AI-powered audio splitter to isolate vocals and instrumental accompaniment tracks from audio files.",
+    "website": "https://vocalremover.org",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "Diffchecker",
+    "description": "Online comparison tool to diff text, code, images, spreadsheets, and PDFs side-by-side.",
+    "website": "https://www.diffchecker.com",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "WhatTheFont",
+    "description": "Instant font identifier that finds matching typography styles from uploaded raster screenshots.",
+    "website": "https://www.myfonts.com/pages/whatthefont",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "Ezgif",
+    "description": "Quick web editor for animated GIFs: convert videos, crop, reverse, resize, and optimize file size.",
+    "website": "https://ezgif.com",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "Remove.bg",
+    "description": "Automatic image background removal tool producing transparent PNGs in seconds.",
+    "website": "https://www.remove.bg",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "Text Behind Image",
+    "description": "Web tool that isolates foreground subjects to place bold typography layered behind them.",
+    "website": "https://textbehindimage.rexanwong.xyz",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "Lottielab",
+    "description": "Vector animation platform in the browser to create, edit, and export interactive Lottie animations.",
+    "website": "https://www.lottielab.com",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "Public Work",
+    "description": "Search engine for public domain art, historical engravings, and vintage photography for creative projects.",
+    "website": "https://public.work",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "Roadmap.sh",
+    "description": "Community-curated interactive roadmaps and structured study guides for developer career paths.",
+    "website": "https://roadmap.sh",
+    "github": "https://github.com/kamranahmedse/developer-roadmap",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "Keybr",
+    "description": "Touch typing tutor that teaches keyboard layout muscle memory using phonetic accuracy rules.",
+    "website": "https://www.keybr.com",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "Omni Calculator",
+    "description": "Over 3,000 free specialized calculators covering everyday finance, physics, math, and construction equations.",
+    "website": "https://www.omnicalculator.com",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "Savee",
+    "description": "Visual bookmarking and inspiration board designed for designers, photographers, and creatives.",
+    "website": "https://savee.com",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "Fonts In Use",
+    "description": "Public archive and index of typography categorized by typeface, publishing format, and aesthetic style.",
+    "website": "https://fontsinuse.com",
+    "category": "Websites",
+    "tags": ["all"]
+  },
+  {
+    "title": "RemoveWindowsAI",
+    "description": "PowerShell script to remove Copilot, Recall, and AI telemetry bloatware from Windows 11.",
+    "github": "https://github.com/zoicware/RemoveWindowsAI",
+    "category": "Scripts",
+    "tags": ["windows", "cli"]
+  },
+  {
+    "title": "Winhance",
+    "description": "Windows enhancement toolkit to optimize privacy, speed up performance, and strip pre-installed bloat.",
+    "website": "https://winhance.net",
+    "category": "Scripts",
+    "tags": ["windows"]
+  },
+  {
+    "title": "Pake",
+    "description": "Turn any webpage into a tiny desktop application with a single CLI command using Rust and Tauri.",
+    "github": "https://github.com/tw93/Pake",
+    "category": "Scripts",
+    "tags": ["macos", "windows", "linux", "cli"]
+  },
+  {
+    "title": "AirLLM",
+    "description": "Run 70B parameter LLM inference on a single 4GB GPU using layered memory paging.",
+    "github": "https://github.com/lyogavin/airllm",
+    "category": "Scripts",
+    "tags": ["all", "cli"]
+  },
+  {
+    "title": "Tiny11",
+    "description": "Scripts and lightweight installation images of Windows 11 stripped of telemetry and bloatware.",
+    "website": "https://ntdotdev.wordpress.com",
+    "category": "Scripts",
+    "tags": ["windows"]
+  },
+  {
+    "title": "Morphicons",
+    "description": "Zero-dependency spring-physics animation library that smoothly morphs any stroke-based SVG icon into another.",
+    "github": "https://github.com/guillermolg00/morphicons",
+    "category": "Scripts",
+    "tags": ["all"]
+  },
+  {
+    "title": "Stable Diffusion WebUI",
+    "description": "The quintessential open-source browser interface for Stable Diffusion image generation and fine-tuning.",
+    "github": "https://github.com/AUTOMATIC1111/stable-diffusion-webui",
+    "category": "Scripts",
+    "tags": ["windows", "linux"]
   }
 ];
 

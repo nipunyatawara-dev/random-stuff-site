@@ -61,21 +61,76 @@ html::-webkit-scrollbar-thumb:hover {
   background: #94A3B8;
 }
 
-/* Custom studio layered elevation & clay shadows */
+/* Custom studio layered elevation & tactile 3D shadows */
 .shadow-studio-button {
   box-shadow: 
-    rgba(181, 186, 203, 0.31) 0px 1.67px 4.18px 0px,
-    rgba(181, 187, 203, 0.16) 0px 17.57px 10.87px 0px,
-    rgba(181, 187, 203, 0.05) 0px 31.79px 12.55px 0px,
-    rgba(181, 193, 203, 0.01) 0px 50.20px 14.22px 0px,
-    rgb(255, 255, 255) 0px 7px 32px 0px inset;
+    0px 0px 0px 1px rgba(20, 51, 77, 0.06),
+    0px 1.5px 3px 0px rgba(20, 51, 77, 0.08),
+    0px 4px 10px -2px rgba(20, 51, 77, 0.10),
+    0px 12px 20px -6px rgba(20, 51, 77, 0.06),
+    inset 0px 1px 0px 0px rgba(255, 255, 255, 0.95),
+    inset 0px -1px 2px 0px rgba(20, 51, 77, 0.04);
+}
+
+.shadow-studio-button:hover {
+  box-shadow: 
+    0px 0px 0px 1px rgba(20, 51, 77, 0.09),
+    0px 2px 5px 0px rgba(20, 51, 77, 0.10),
+    0px 8px 16px -3px rgba(20, 51, 77, 0.12),
+    inset 0px 1px 0px 0px rgba(255, 255, 255, 1.0);
+}
+
+.shadow-studio-button:active {
+  box-shadow: 
+    0px 0px 0px 1px rgba(20, 51, 77, 0.08),
+    0px 1px 2px 0px rgba(20, 51, 77, 0.10),
+    inset 0px 1px 3px 0px rgba(20, 51, 77, 0.08);
 }
 
 .shadow-studio-button-dark {
   box-shadow: 
-    rgba(20, 51, 77, 0.25) 0px 2px 5px 0px,
-    rgba(20, 51, 77, 0.15) 0px 12px 14px 0px,
-    rgba(255, 255, 255, 0.15) 0px 1px 0px 0px inset;
+    0px 0px 0px 1px rgba(14, 35, 54, 0.4),
+    0px 1.5px 3px 0px rgba(14, 35, 54, 0.25),
+    0px 6px 14px -2px rgba(14, 35, 54, 0.3),
+    inset 0px 1px 0px 0px rgba(255, 255, 255, 0.22);
+}
+
+.shadow-studio-button-dark:hover {
+  box-shadow: 
+    0px 0px 0px 1px rgba(14, 35, 54, 0.5),
+    0px 2px 5px 0px rgba(14, 35, 54, 0.3),
+    0px 10px 20px -3px rgba(14, 35, 54, 0.35),
+    inset 0px 1px 0px 0px rgba(255, 255, 255, 0.28);
+}
+
+.shadow-studio-button-dark:active {
+  box-shadow: 
+    0px 0px 0px 1px rgba(14, 35, 54, 0.4),
+    0px 1px 2px 0px rgba(14, 35, 54, 0.2),
+    inset 0px 1px 3px 0px rgba(0, 0, 0, 0.25);
+}
+
+.shadow-studio-button-lime {
+  box-shadow: 
+    0px 0px 0px 1px rgba(126, 204, 12, 0.5),
+    0px 1.5px 3px 0px rgba(35, 127, 0, 0.2),
+    0px 6px 14px -2px rgba(157, 247, 31, 0.35),
+    inset 0px 1px 0px 0px rgba(255, 255, 255, 0.75);
+}
+
+.shadow-studio-button-lime:hover {
+  box-shadow: 
+    0px 0px 0px 1px rgba(126, 204, 12, 0.6),
+    0px 2px 5px 0px rgba(35, 127, 0, 0.25),
+    0px 10px 20px -3px rgba(157, 247, 31, 0.45),
+    inset 0px 1px 0px 0px rgba(255, 255, 255, 0.9);
+}
+
+.shadow-studio-button-lime:active {
+  box-shadow: 
+    0px 0px 0px 1px rgba(126, 204, 12, 0.5),
+    0px 1px 2px 0px rgba(35, 127, 0, 0.2),
+    inset 0px 1px 3px 0px rgba(35, 127, 0, 0.2);
 }
 
 .shadow-studio-card {

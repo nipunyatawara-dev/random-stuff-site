@@ -7,7 +7,7 @@ import { Plus, Github, ExternalLink, Instagram } from "lucide-react";
 export default function Footer() {
   return (
     <footer className="w-full mt-12 mb-6 px-3 sm:px-6 select-none">
-      <div className="w-full max-w-[1600px] mx-auto bg-white/90 backdrop-blur-md rounded-[32px] md:rounded-[40px] p-8 md:p-12 shadow-studio-card border border-white/90 flex flex-col items-center text-center">
+      <div className="w-full max-w-[1600px] mx-auto bg-white/90 backdrop-blur-md rounded-[32px] md:rounded-[40px] p-8 md:p-12 shadow-studio-card border border-slate-200/80 flex flex-col items-center text-center">
         {/* Top Otter Brand Badge */}
         <div className="flex items-center gap-2.5 mb-4">
           <OtterLogo size={36} />
