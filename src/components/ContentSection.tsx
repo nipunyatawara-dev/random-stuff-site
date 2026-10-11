@@ -336,7 +336,6 @@ export default function ContentSection({
         {/* Category Pill Tabs */}
         <div className="w-full relative">
           <div
-            data-lenis-prevent
             className="w-full overflow-x-auto no-scrollbar flex items-center justify-start md:justify-center py-1.5 px-0.5"
           >
             <PillTabs
@@ -462,7 +461,6 @@ export default function ContentSection({
         {/* Platform Tags Filter Bar */}
         {activeCategory !== "stacks" && (
           <div
-            data-lenis-prevent
             className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 py-1"
           >
             <span className="text-[11px] font-mono uppercase tracking-wider text-[#304F68]/50 font-bold mr-1 shrink-0">

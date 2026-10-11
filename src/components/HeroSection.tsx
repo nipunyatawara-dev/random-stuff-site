@@ -90,11 +90,10 @@ export default function HeroSection({
       {/* Polaroid Scrapbook Stage */}
       <div className="w-full max-w-[860px] mx-auto mt-4 sm:mt-6 mb-6 sm:mb-8 px-1 sm:px-4">
         <div
-          data-lenis-prevent
-          className="flex sm:grid sm:grid-cols-3 gap-4 sm:gap-4 md:gap-6 overflow-x-auto sm:overflow-visible no-scrollbar pb-3 sm:pb-0 items-center justify-start sm:justify-items-center snap-x snap-mandatory px-3 sm:px-0"
+          className="flex sm:grid sm:grid-cols-3 gap-4 sm:gap-4 md:gap-6 overflow-x-auto sm:overflow-visible no-scrollbar pb-3 sm:pb-0 items-center justify-start sm:justify-items-center snap-x sm:snap-none snap-mandatory px-3 sm:px-0"
         >
           {/* Polaroid 1: Raycast */}
-          <div className="snap-center shrink-0 w-[240px] sm:w-full flex justify-center">
+          <div className="snap-center sm:snap-align-none shrink-0 w-[240px] sm:w-full flex justify-center">
             <PolaroidCard
               caption="Feels fresh....."
               pinType="red-pin"
@@ -121,7 +120,7 @@ export default function HeroSection({
           </div>
 
           {/* Polaroid 2: Builder Stacks */}
-          <div className="snap-center shrink-0 w-[240px] sm:w-full flex justify-center">
+          <div className="snap-center sm:snap-align-none shrink-0 w-[240px] sm:w-full flex justify-center">
             <PolaroidCard
               caption="Builder Stacks"
               pinType="paperclip"
@@ -149,7 +148,7 @@ export default function HeroSection({
           </div>
 
           {/* Polaroid 3: Studio Motto */}
-          <div className="snap-center shrink-0 w-[240px] sm:w-full flex justify-center">
+          <div className="snap-center sm:snap-align-none shrink-0 w-[240px] sm:w-full flex justify-center">
             <PolaroidCard
               caption="Our Motto"
               pinType="green-pin"

@@ -12,6 +12,14 @@ export function clearLenisInstance(instance?: Lenis) {
     }
 }
 
+export function stopLenis() {
+    lenisInstance?.stop();
+}
+
+export function startLenis() {
+    lenisInstance?.start();
+}
+
 export function scrollToY(top: number, options: { immediate?: boolean } = {}) {
     const { immediate = false } = options;
 

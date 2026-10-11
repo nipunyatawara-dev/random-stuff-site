@@ -5,20 +5,25 @@ import { motion } from "framer-motion";
 
 export interface LoadingScreenProps {
   onComplete: () => void;
+  onDismissStart?: () => void;
   minDurationMs?: number;
 }
 
 export const LoadingScreen: React.FC<LoadingScreenProps> = ({
   onComplete,
+  onDismissStart,
   minDurationMs = 1400,
 }) => {
   const [progress, setProgress] = useState(0);
   const [isFinishing, setIsFinishing] = useState(false);
   const onCompleteRef = React.useRef(onComplete);
   onCompleteRef.current = onComplete;
+  const onDismissStartRef = React.useRef(onDismissStart);
+  onDismissStartRef.current = onDismissStart;
 
   const handleFinish = useCallback(() => {
     setIsFinishing(true);
+    onDismissStartRef.current?.();
     setTimeout(() => {
       onCompleteRef.current();
     }, 450);
@@ -75,7 +80,9 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
         duration: 0.55,
         ease: [0.16, 1, 0.3, 1], // Deceleration cubic-bezier
       }}
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#F0F2F5] text-[#14334D] select-none overflow-hidden"
+      className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#F0F2F5] text-[#14334D] select-none overflow-hidden ${
+        isFinishing ? "pointer-events-none" : ""
+      }`}
       role="progressbar"
       aria-valuenow={progress}
       aria-valuemin={0}

@@ -25,7 +25,7 @@ import {
   VolumeX,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { scrollToY } from "@/lib/lenis";
+import { scrollToY, stopLenis, startLenis } from "@/lib/lenis";
 import { isSoundEnabled, toggleSound } from "@/lib/sound-fx";
 import RandomRouletteModal from "./RandomRouletteModal";
 import CompareModal from "./CompareModal";
@@ -37,6 +37,7 @@ export default function ClientPageLayout({ items }: { items: Item[] }) {
   const [showRoulette, setShowRoulette] = useState(false);
   const [showCompare, setShowCompare] = useState(false);
   const [isLoadingScreenVisible, setIsLoadingScreenVisible] = useState(false);
+  const [isIntroDismissing, setIsIntroDismissing] = useState(false);
   const [soundOn, setSoundOn] = useState(false);
 
   // Sync sound effect preference
@@ -72,20 +73,21 @@ export default function ClientPageLayout({ items }: { items: Item[] }) {
 
   const handleLoadingComplete = () => {
     setIsLoadingScreenVisible(false);
-    scrollToY(0, { immediate: true });
-    window.scrollTo(0, 0);
+    setIsIntroDismissing(false);
   };
 
-  // Lock body scroll when mobile drawer or loading screen is open
+  // Lock body scroll and halt virtual scroll when mobile drawer or active loading screen is open
   useEffect(() => {
-    if (mobileDrawerOpen || isLoadingScreenVisible) {
+    if (mobileDrawerOpen || (isLoadingScreenVisible && !isIntroDismissing)) {
       const prev = document.body.style.overflow;
       document.body.style.overflow = "hidden";
+      stopLenis();
       return () => {
         document.body.style.overflow = prev;
+        startLenis();
       };
     }
-  }, [mobileDrawerOpen, isLoadingScreenVisible]);
+  }, [mobileDrawerOpen, isLoadingScreenVisible, isIntroDismissing]);
 
   // Close drawer on Escape key
   useEffect(() => {
@@ -151,7 +153,10 @@ export default function ClientPageLayout({ items }: { items: Item[] }) {
       {/* Charming Otter Animated Loading Screen */}
       <AnimatePresence>
         {isLoadingScreenVisible && (
-          <LoadingScreen onComplete={handleLoadingComplete} />
+          <LoadingScreen
+            onComplete={handleLoadingComplete}
+            onDismissStart={() => setIsIntroDismissing(true)}
+          />
         )}
       </AnimatePresence>
 

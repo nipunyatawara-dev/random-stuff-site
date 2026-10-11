@@ -53,7 +53,6 @@ export const PillTabs: React.FC<PillTabsProps> = ({
 
   return (
     <div
-      data-lenis-prevent
       className={`inline-flex items-center gap-1 sm:gap-1.5 p-1 sm:p-1.5 rounded-full bg-[#E8ECEF]/80 backdrop-blur-xs border border-[#D6DCE1] shadow-inner min-w-max shrink-0 ${className}`}
     >
       {tabs.map((tab) => {
