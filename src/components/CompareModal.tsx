@@ -66,20 +66,20 @@ export default function CompareModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-5xl bg-white rounded-[22px] sm:rounded-[32px] p-4 sm:p-8 shadow-studio-card border border-slate-200 overflow-hidden flex flex-col max-h-[90vh] relative select-none"
+        className="w-full max-w-5xl bg-surface rounded-[22px] sm:rounded-[32px] p-4 sm:p-8 shadow-studio-card border border-studio-neutral-200 overflow-hidden flex flex-col max-h-[90vh] relative select-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div className="flex items-center justify-between pb-4 border-b border-studio-neutral-100">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#CCE8FF] flex items-center justify-center text-[#007BE5]">
+            <div className="w-9 h-9 rounded-xl bg-studio-blue-tint flex items-center justify-center text-studio-blue">
               <Scale className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-phudu text-xl font-bold text-[#14334D]">
+              <h3 className="font-phudu text-xl font-bold text-studio-navy">
                 Tool Comparator
               </h3>
-              <p className="text-xs text-[#456176]">
+              <p className="text-xs text-studio-muted">
                 Compare features, category & platform specs side-by-side
               </p>
             </div>
@@ -90,7 +90,7 @@ export default function CompareModal({
               playClickSound();
               onClose();
             }}
-            className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-200 transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-full bg-studio-neutral-100 flex items-center justify-center text-studio-neutral-500 hover:text-studio-neutral-800 hover:bg-studio-neutral-200 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -104,27 +104,27 @@ export default function CompareModal({
               return (
                 <div
                   key={item.id}
-                  className="bg-[#FAFCFD] rounded-2xl border border-slate-200 p-5 shadow-studio-button flex flex-col justify-between relative"
+                  className="bg-surface-soft rounded-2xl border border-studio-neutral-200 p-5 shadow-studio-button flex flex-col justify-between relative"
                 >
                   <div>
                     <div className="flex items-start justify-between gap-2 mb-3">
-                      <span className="text-[10px] font-mono uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-slate-200 text-[#14334D] font-bold">
+                      <span className="text-[10px] font-mono uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-studio-neutral-200 text-studio-navy font-bold">
                         {item.category}
                       </span>
                       <button
                         type="button"
                         onClick={() => handleRemove(item.id)}
-                        className="p-1 text-slate-400 hover:text-red-500 transition-colors"
+                        className="p-1 text-studio-neutral-400 hover:text-red-500 transition-colors"
                         title="Remove from comparison"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
 
-                    <h4 className="font-phudu text-xl font-bold text-[#14334D] mb-1">
+                    <h4 className="font-phudu text-xl font-bold text-studio-navy mb-1">
                       {item.title}
                     </h4>
-                    <p className="text-xs text-[#456176] font-sans line-clamp-4 leading-relaxed mb-4">
+                    <p className="text-xs text-studio-muted font-sans line-clamp-4 leading-relaxed mb-4">
                       {item.description}
                     </p>
 
@@ -134,7 +134,7 @@ export default function CompareModal({
                         {item.tags.map((t) => (
                           <span
                             key={t}
-                            className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white border border-slate-200 text-slate-600"
+                            className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-surface border border-studio-neutral-200 text-studio-neutral-600"
                           >
                             #{t}
                           </span>
@@ -143,14 +143,14 @@ export default function CompareModal({
                     )}
                   </div>
 
-                  <div className="pt-4 border-t border-slate-200/80 flex items-center justify-between">
+                  <div className="pt-4 border-t border-studio-neutral-200/80 flex items-center justify-between">
                     <button
                       type="button"
                       onClick={() => onToggleFavorite(item.id)}
-                      className="p-2 rounded-full hover:bg-slate-200/60 transition-colors"
+                      className="p-2 rounded-full hover:bg-studio-neutral-200/60 transition-colors"
                     >
                       <Heart
-                        className={`w-4 h-4 ${isFav ? "fill-red-500 text-red-500" : "text-slate-400"}`}
+                        className={`w-4 h-4 ${isFav ? "fill-red-500 text-red-500" : "text-studio-neutral-400"}`}
                       />
                     </button>
                     <a
@@ -169,14 +169,14 @@ export default function CompareModal({
 
             {/* Add Tool Slot */}
             {selectedItems.length < 3 && (
-              <div className="border-2 border-dashed border-slate-200 rounded-2xl p-6 flex flex-col items-center justify-center text-center bg-[#FAFCFD]/50 min-h-[260px]">
+              <div className="border-2 border-dashed border-studio-neutral-200 rounded-2xl p-6 flex flex-col items-center justify-center text-center bg-surface-soft/50 min-h-[260px]">
                 {!isAdding ? (
                   <button
                     type="button"
                     onClick={() => setIsAdding(true)}
-                    className="flex flex-col items-center gap-2 text-slate-500 hover:text-[#007BE5] transition-colors cursor-pointer"
+                    className="flex flex-col items-center gap-2 text-studio-neutral-500 hover:text-studio-blue transition-colors cursor-pointer"
                   >
-                    <div className="w-12 h-12 rounded-full bg-white shadow-xs border border-slate-200 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-full bg-surface shadow-xs border border-studio-neutral-200 flex items-center justify-center">
                       <Plus className="w-6 h-6" />
                     </div>
                     <span className="font-phudu text-sm font-bold">Add Tool to Compare</span>
@@ -188,7 +188,7 @@ export default function CompareModal({
                       placeholder="Search tool..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full px-3 py-2 text-xs rounded-xl bg-white border border-slate-300 text-[#14334D] placeholder-slate-400 focus:outline-hidden focus:border-[#007BE5]"
+                      className="w-full px-3 py-2 text-xs rounded-xl bg-surface border border-studio-neutral-300 text-studio-navy placeholder-studio-neutral-400 focus:outline-hidden focus:border-[#007BE5]"
                       autoFocus
                     />
                     <div className="max-h-40 overflow-y-auto space-y-1 text-left">
@@ -197,10 +197,10 @@ export default function CompareModal({
                           key={avail.id}
                           type="button"
                           onClick={() => handleAdd(avail)}
-                          className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs hover:bg-slate-200 text-[#14334D] flex items-center justify-between"
+                          className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs hover:bg-studio-neutral-200 text-studio-navy flex items-center justify-between"
                         >
                           <span className="font-semibold truncate">{avail.title}</span>
-                          <span className="text-[10px] text-slate-400 font-mono">
+                          <span className="text-[10px] text-studio-neutral-400 font-mono">
                             {avail.category}
                           </span>
                         </button>
@@ -209,7 +209,7 @@ export default function CompareModal({
                     <button
                       type="button"
                       onClick={() => setIsAdding(false)}
-                      className="text-xs text-slate-400 hover:text-slate-600 underline"
+                      className="text-xs text-studio-neutral-400 hover:text-studio-neutral-600 underline"
                     >
                       Cancel
                     </button>

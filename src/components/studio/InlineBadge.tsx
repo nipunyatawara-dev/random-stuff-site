@@ -87,7 +87,7 @@ export const InlineBadge: React.FC<InlineBadgeProps> = ({ type, className = '' }
 
   return (
     <span
-      className={`inline-flex items-center justify-center align-middle mx-1 w-7 h-7 md:w-8 md:h-8 rounded-lg bg-white shadow-sm border border-slate-200 -translate-y-0.5 ${className}`}
+      className={`inline-flex items-center justify-center align-middle mx-1 w-7 h-7 md:w-8 md:h-8 rounded-lg bg-surface shadow-sm border border-studio-neutral-200 -translate-y-0.5 ${className}`}
     >
       <svg viewBox="0 0 24 24" className="w-4 h-4">
         <path d="M3.61 2.22c-.37.38-.59.98-.59 1.76v16.04c0 .78.22 1.38.59 1.76l.08.08 9.03-9.03v-.17L3.69 2.14l-.08.08z" fill="#00D2FF" />

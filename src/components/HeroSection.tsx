@@ -38,16 +38,16 @@ export default function HeroSection({
     <section className="relative w-full pt-4 pb-12 md:pb-16 flex flex-col items-center select-none">
       {/* Main Display Headline */}
       <div className="max-w-[860px] mx-auto text-center px-2 sm:px-4 mb-3 sm:mb-4">
-        <h1 className="font-sans text-2xl sm:text-4xl md:text-5xl lg:text-[58px] font-semibold text-[#304F67] leading-[1.2] sm:leading-[1.16] tracking-[-0.035em]">
+        <h1 className="font-sans text-2xl sm:text-4xl md:text-5xl lg:text-[58px] font-semibold text-studio-slate leading-[1.2] sm:leading-[1.16] tracking-[-0.035em]">
           The <InlineBadge type="otter" /> directory{' '}
-          <span className="text-[#A0AFBB] font-normal">for builders</span>{' '}
+          <span className="text-studio-light-muted font-normal">for builders</span>{' '}
           <br className="hidden md:inline" />
-          <span className="text-[#A0AFBB] font-normal">who simply</span> can&apos;t afford to waste time
+          <span className="text-studio-light-muted font-normal">who simply</span> can&apos;t afford to waste time
         </h1>
 
-        <p className="text-sm sm:text-base md:text-lg text-[#456176] font-medium max-w-xl mx-auto mt-3 sm:mt-4 leading-relaxed">
+        <p className="text-sm sm:text-base md:text-lg text-studio-muted font-medium max-w-xl mx-auto mt-3 sm:mt-4 leading-relaxed">
           Every essential bookmark, desktop software, and script you need.{' '}
-          <span className="font-caveat text-xl sm:text-2xl md:text-3xl font-bold text-[#007BE5] underline decoration-wavy decoration-[#82CCFF]">
+          <span className="font-caveat text-xl sm:text-2xl md:text-3xl font-bold text-studio-blue underline decoration-wavy decoration-[#82CCFF]">
             Handpicked daily
           </span>
           . No sponsored noise, just craft.
@@ -69,7 +69,7 @@ export default function HeroSection({
           <MagneticButton
             variant="accent-lime"
             size="lg"
-            icon={<Sparkles className="w-5 h-5 text-[#14334D]" />}
+            icon={<Sparkles className="w-5 h-5 text-studio-navy" />}
             onClick={onRouletteClick}
           >
             Surprise Roulette
@@ -104,7 +104,7 @@ export default function HeroSection({
               <div className="w-full h-full bg-gradient-to-br from-slate-900 via-[#14334D] to-slate-800 p-4 flex flex-col justify-between items-center text-center">
                 <div className="flex items-center gap-2 pt-1">
                   <span className="w-2.5 h-2.5 rounded-full bg-red-400" />
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-slate-300 font-bold">
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-studio-neutral-300 font-bold">
                     Top Software
                   </span>
                 </div>
@@ -129,18 +129,18 @@ export default function HeroSection({
               onClick={scrollToCatalog}
             >
               <div className="w-full h-full bg-gradient-to-br from-[#8ED5FF] via-[#BFE5FF] to-[#73C800] p-4 flex flex-col justify-between items-center text-center">
-                <span className="font-mono text-[10px] uppercase tracking-wider text-[#14334D] font-bold">
+                <span className="font-mono text-[10px] uppercase tracking-wider text-studio-navy font-bold">
                   Curated Kits
                 </span>
                 <div className="my-auto flex flex-col items-center">
-                  <div className="w-12 h-12 rounded-2xl bg-white/80 shadow-studio-button flex items-center justify-center mb-1.5">
+                  <div className="w-12 h-12 rounded-2xl bg-surface/80 shadow-studio-button flex items-center justify-center mb-1.5">
                     <OtterLogo size={28} />
                   </div>
-                  <span className="font-phudu text-lg font-black text-[#14334D]">
+                  <span className="font-phudu text-lg font-black text-studio-navy">
                     Developer & Design
                   </span>
                 </div>
-                <span className="text-[10px] font-mono text-[#14334D] font-bold bg-white/60 px-2 py-0.5 rounded-full">
+                <span className="text-[10px] font-mono text-studio-navy font-bold bg-surface/60 px-2 py-0.5 rounded-full">
                   4 Power Stacks
                 </span>
               </div>
@@ -168,7 +168,7 @@ export default function HeroSection({
                     Only tools that matter
                   </span>
                 </div>
-                <span className="text-[10px] font-mono text-slate-300">
+                <span className="text-[10px] font-mono text-studio-neutral-300">
                   Community Driven
                 </span>
               </div>
@@ -182,7 +182,7 @@ export default function HeroSection({
         type="button"
         onClick={scrollToCatalog}
         aria-label="Scroll to directory catalog"
-        className="mt-2 flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-wider text-[#456176] hover:text-[#14334D] transition-colors cursor-pointer group"
+        className="mt-2 flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-wider text-studio-muted hover:text-studio-navy transition-colors cursor-pointer group"
       >
         <span>Browse All Tools Below</span>
         <ArrowDown className="w-3.5 h-3.5 group-hover:translate-y-0.5 transition-transform" />

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, Phudu, Caveat, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import ColorModeController from "@/components/ColorModeController";
+import { COLOR_MODE_INIT_SCRIPT } from "@/lib/color-mode";
 
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
@@ -75,9 +77,14 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${inter.variable} ${phudu.variable} ${caveat.variable} ${mono.variable}`}
     >
-      <body className="font-sans antialiased bg-[#F0F2F5] text-[#14334D] min-h-screen selection:bg-[#9DF71F] selection:text-[#14334D]">
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: COLOR_MODE_INIT_SCRIPT }} />
+      </head>
+      <body className="font-sans antialiased bg-canvas text-studio-navy min-h-screen selection:bg-[#9DF71F] selection:text-studio-ink">
+        <ColorModeController />
         {children}
         {shouldRenderVercelInsights ? <SpeedInsights /> : null}
         {shouldRenderVercelInsights ? <Analytics /> : null}

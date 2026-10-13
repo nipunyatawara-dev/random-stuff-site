@@ -92,14 +92,14 @@ export default function RandomRouletteModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg bg-white rounded-[22px] sm:rounded-[32px] p-4 sm:p-8 shadow-studio-card border border-slate-200 overflow-y-auto max-h-[90vh] flex flex-col relative select-none"
+        className="w-full max-w-lg bg-surface rounded-[22px] sm:rounded-[32px] p-4 sm:p-8 shadow-studio-card border border-studio-neutral-200 overflow-y-auto max-h-[90vh] flex flex-col relative select-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div className="flex items-center justify-between pb-4 border-b border-studio-neutral-100">
           <div className="flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-[#89E00F] animate-pulse" />
-            <h3 className="font-phudu text-lg font-bold text-[#14334D]">
+            <h3 className="font-phudu text-lg font-bold text-studio-navy">
               {isRolling ? "ROULETTE SCANNING..." : "DISCOVERED ITEM"}
             </h3>
           </div>
@@ -109,7 +109,7 @@ export default function RandomRouletteModal({
               playClickSound();
               onClose();
             }}
-            className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-200 transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-full bg-studio-neutral-100 flex items-center justify-center text-studio-neutral-500 hover:text-studio-neutral-800 hover:bg-studio-neutral-200 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -120,24 +120,24 @@ export default function RandomRouletteModal({
           <div
             className={`w-full py-6 sm:py-8 px-4 sm:px-6 rounded-2xl border transition-all duration-300 relative overflow-hidden mb-6 ${
               isRolling
-                ? "border-[#82CCFF] bg-[#F0F7FF] shadow-inner"
-                : "border-slate-200 bg-[#FAFCFD] shadow-studio-button"
+                ? "border-[#82CCFF] bg-studio-blue-wash shadow-inner"
+                : "border-studio-neutral-200 bg-surface-soft shadow-studio-button"
             }`}
           >
             {/* Category tag */}
             <div className="mb-3">
-              <span className="text-[11px] font-mono uppercase tracking-widest px-3 py-1 rounded-full bg-white border border-slate-200 text-[#007BE5] font-bold shadow-xs">
+              <span className="text-[11px] font-mono uppercase tracking-widest px-3 py-1 rounded-full bg-surface border border-studio-neutral-200 text-studio-blue font-bold shadow-xs">
                 {current?.category || "Tool"}
               </span>
             </div>
 
             {/* Title */}
-            <h2 className="font-phudu text-2xl sm:text-3xl font-black text-[#14334D] tracking-tight mb-2">
+            <h2 className="font-phudu text-2xl sm:text-3xl font-black text-studio-navy tracking-tight mb-2">
               {current?.title}
             </h2>
 
             {/* Description */}
-            <p className="text-sm text-[#456176] font-sans leading-relaxed line-clamp-3 max-w-sm mx-auto min-h-[4rem]">
+            <p className="text-sm text-studio-muted font-sans leading-relaxed line-clamp-3 max-w-sm mx-auto min-h-[4rem]">
               {current?.description}
             </p>
 
@@ -147,7 +147,7 @@ export default function RandomRouletteModal({
                 {current.tags.slice(0, 4).map((tag) => (
                   <span
                     key={tag}
-                    className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-white border border-slate-200 text-slate-600 shadow-2xs"
+                    className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-surface border border-studio-neutral-200 text-studio-neutral-600 shadow-2xs"
                   >
                     #{tag}
                   </span>
@@ -175,7 +175,7 @@ export default function RandomRouletteModal({
                   size="md"
                   icon={
                     <Heart
-                      className={`w-4 h-4 ${isFav ? "fill-red-500 text-red-500" : "text-slate-400"}`}
+                      className={`w-4 h-4 ${isFav ? "fill-red-500 text-red-500" : "text-studio-neutral-400"}`}
                     />
                   }
                   onClick={() => onToggleFavorite(current.id)}
@@ -186,7 +186,7 @@ export default function RandomRouletteModal({
                 <MagneticButton
                   variant="accent-lime"
                   size="md"
-                  icon={<ExternalLink className="w-4 h-4 text-[#14334D]" />}
+                  icon={<ExternalLink className="w-4 h-4 text-studio-navy" />}
                   href={current.website || current.github}
                   target="_blank"
                   rel="noopener noreferrer"

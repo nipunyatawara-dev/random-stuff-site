@@ -12,6 +12,7 @@ A handpicked directory of useful websites, desktop software, and scripts for bui
 - Curated tool stacks, random discovery through Surprise Roulette, and side-by-side comparisons.
 - Favorites saved in your browser, with bulk selection and Markdown, JSON, and HTML exports, plus JSON import.
 - Shareable links to tools, searches, and filters, an RSS feed, and offline caching.
+- Light and dark modes that follow your system preference until you choose a mode, with your choice saved locally.
 - A submission form that sends suggestions to a Discord channel for maintainer review.
 
 ## How it is built

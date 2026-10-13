@@ -53,7 +53,7 @@ export const PillTabs: React.FC<PillTabsProps> = ({
 
   return (
     <div
-      className={`inline-flex items-center gap-1 sm:gap-1.5 p-1 sm:p-1.5 rounded-full bg-[#E8ECEF]/80 backdrop-blur-xs border border-[#D6DCE1] shadow-inner min-w-max shrink-0 ${className}`}
+      className={`inline-flex items-center gap-1 sm:gap-1.5 p-1 sm:p-1.5 rounded-full bg-canvas-subtle/80 backdrop-blur-xs border border-border-subtle shadow-inner min-w-max shrink-0 ${className}`}
     >
       {tabs.map((tab) => {
         const isActive = tab.id === activeTab;
@@ -66,14 +66,14 @@ export const PillTabs: React.FC<PillTabsProps> = ({
             type="button"
             onClick={() => onChange(tab.id)}
             className={`relative px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap shrink-0 transition-colors duration-200 cursor-pointer select-none flex items-center gap-1.5 sm:gap-2 min-h-[38px] sm:min-h-[42px] touch-manipulation ${
-              isActive ? 'text-[#14334D]' : 'text-[#456176] hover:text-[#14334D]'
+              isActive ? 'text-studio-navy' : 'text-studio-muted hover:text-studio-navy'
             }`}
           >
             {isActive && (
               <motion.div
                 layoutId={`${layoutIdPrefix}Indicator`}
                 transition={{ type: 'spring', stiffness: 450, damping: 32 }}
-                className="absolute inset-0 rounded-full bg-white shadow-studio-button border border-[#D6DCE1]"
+                className="absolute inset-0 rounded-full bg-surface shadow-studio-button border border-border-subtle"
               />
             )}
             <span className="relative z-10 flex items-center gap-1.5 sm:gap-2">
@@ -82,7 +82,7 @@ export const PillTabs: React.FC<PillTabsProps> = ({
               {typeof tab.count === 'number' && (
                 <span
                   className={`text-[10px] sm:text-[11px] font-mono px-1.5 py-0.5 rounded-full shrink-0 ${
-                    isActive ? 'bg-[#9DF71F]/30 text-[#14334D] font-bold' : 'bg-slate-200/70 text-slate-500'
+                    isActive ? 'bg-[#9DF71F]/30 text-studio-navy font-bold' : 'bg-studio-neutral-200/70 text-studio-neutral-500'
                   }`}
                 >
                   {tab.count}

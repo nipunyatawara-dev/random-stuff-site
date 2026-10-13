@@ -356,19 +356,19 @@ export default function ContentSection({
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
           {/* Tactile Clay Search Input */}
           <div className="relative w-full sm:max-w-md">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#007BE5]" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-studio-blue" />
             <input
               type="text"
               placeholder="Search 350+ tools, tags (#cli, #macos)..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-11 pr-20 py-2.5 rounded-full bg-white shadow-studio-button border border-[#D6DCE1] text-sm text-[#14334D] placeholder-[#A0AFBB] focus:outline-hidden focus:ring-2 focus:ring-[#007BE5]/25 focus:border-[#007BE5] transition-all font-sans"
+              className="w-full pl-11 pr-20 py-2.5 rounded-full bg-surface shadow-studio-button border border-border-subtle text-sm text-studio-navy placeholder-studio-light-muted focus:outline-hidden focus:ring-2 focus:ring-[#007BE5]/25 focus:border-[#007BE5] transition-all font-sans"
             />
             {searchQuery ? (
               <button
                 type="button"
                 onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 rounded-full"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-studio-neutral-400 hover:text-studio-neutral-600 rounded-full"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -376,7 +376,7 @@ export default function ContentSection({
               <button
                 type="button"
                 onClick={() => setShowCommandPalette(true)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 hidden md:inline-flex items-center text-[10px] font-mono uppercase tracking-wider text-slate-400 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md hover:bg-slate-200 transition-colors cursor-pointer"
+                className="absolute right-3 top-1/2 -translate-y-1/2 hidden md:inline-flex items-center text-[10px] font-mono uppercase tracking-wider text-studio-neutral-400 bg-studio-neutral-100 border border-studio-neutral-200 px-2 py-0.5 rounded-md hover:bg-studio-neutral-200 transition-colors cursor-pointer"
               >
                 ⌘K
               </button>
@@ -388,7 +388,7 @@ export default function ContentSection({
             <MagneticButton
               variant="primary-light"
               size="sm"
-              icon={<Scale className="w-3.5 h-3.5 text-[#007BE5]" />}
+              icon={<Scale className="w-3.5 h-3.5 text-studio-blue" />}
               onClick={handleOpenCompare}
             >
               Compare
@@ -397,7 +397,7 @@ export default function ContentSection({
             <MagneticButton
               variant="accent-lime"
               size="sm"
-              icon={<Sparkles className="w-3.5 h-3.5 text-[#14334D]" />}
+              icon={<Sparkles className="w-3.5 h-3.5 text-studio-navy" />}
               onClick={handleOpenRoulette}
             >
               Roulette
@@ -408,40 +408,40 @@ export default function ContentSection({
                 <MagneticButton
                   variant="primary-light"
                   size="sm"
-                  icon={<Download className="w-3.5 h-3.5 text-[#304F67]" />}
+                  icon={<Download className="w-3.5 h-3.5 text-studio-slate" />}
                   onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
                 >
                   Export / Import
                 </MagneticButton>
 
                 {isExportMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-studio-popover border border-[#D6DCE1] p-2 z-30 space-y-1">
+                  <div className="absolute right-0 mt-2 w-48 bg-surface rounded-2xl shadow-studio-popover border border-border-subtle p-2 z-30 space-y-1">
                     <button
                       type="button"
                       onClick={() => handleExport("md")}
-                      className="w-full text-left px-3 py-1.5 rounded-xl text-xs text-[#14334D] hover:bg-[#F0F2F5] transition-colors"
+                      className="w-full text-left px-3 py-1.5 rounded-xl text-xs text-studio-navy hover:bg-canvas transition-colors"
                     >
                       Export as Markdown (.md)
                     </button>
                     <button
                       type="button"
                       onClick={() => handleExport("json")}
-                      className="w-full text-left px-3 py-1.5 rounded-xl text-xs text-[#14334D] hover:bg-[#F0F2F5] transition-colors"
+                      className="w-full text-left px-3 py-1.5 rounded-xl text-xs text-studio-navy hover:bg-canvas transition-colors"
                     >
                       Export as JSON (.json)
                     </button>
                     <button
                       type="button"
                       onClick={() => handleExport("html")}
-                      className="w-full text-left px-3 py-1.5 rounded-xl text-xs text-[#14334D] hover:bg-[#F0F2F5] transition-colors"
+                      className="w-full text-left px-3 py-1.5 rounded-xl text-xs text-studio-navy hover:bg-canvas transition-colors"
                     >
                       Export as HTML (.html)
                     </button>
-                    <div className="border-t border-slate-100 my-1" />
+                    <div className="border-t border-studio-neutral-100 my-1" />
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="w-full text-left px-3 py-1.5 rounded-xl text-xs text-[#007BE5] hover:bg-[#F0F2F5] font-semibold transition-colors flex items-center gap-1.5"
+                      className="w-full text-left px-3 py-1.5 rounded-xl text-xs text-studio-blue hover:bg-canvas font-semibold transition-colors flex items-center gap-1.5"
                     >
                       <Upload className="w-3 h-3" />
                       <span>Import JSON</span>
@@ -465,7 +465,7 @@ export default function ContentSection({
           <div
             className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 py-1"
           >
-            <span className="text-[11px] font-mono uppercase tracking-wider text-[#304F68]/50 font-bold mr-1 shrink-0">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-studio-label/50 font-bold mr-1 shrink-0">
               Filter:
             </span>
             {platformTags.map((tag) => {
@@ -480,8 +480,8 @@ export default function ContentSection({
                   }}
                   className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shrink-0 transition-all duration-200 cursor-pointer ${
                     isActive
-                      ? "bg-white text-[#14334D] shadow-studio-button font-bold border border-[#D6DCE1]"
-                      : "bg-[#F0F2F5] text-[#456176] hover:text-[#14334D] hover:bg-slate-200/80"
+                      ? "bg-surface text-studio-navy shadow-studio-button font-bold border border-border-subtle"
+                      : "bg-canvas text-studio-muted hover:text-studio-navy hover:bg-studio-neutral-200/80"
                   }`}
                 >
                   {tag.label}
@@ -495,12 +495,12 @@ export default function ContentSection({
       {/* CURATED STACKS VIEW */}
       {activeCategory === "stacks" && (
         <div className="mb-12">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-6 pb-2 border-b border-slate-100">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-6 pb-2 border-b border-studio-neutral-100">
             <div>
-              <span className="text-xs font-mono uppercase tracking-widest text-[#007BE5] font-bold">
+              <span className="text-xs font-mono uppercase tracking-widest text-studio-blue font-bold">
                 Tailored Toolkits
               </span>
-              <h2 className="font-phudu text-2xl md:text-3xl font-black text-[#14334D]">
+              <h2 className="font-phudu text-2xl md:text-3xl font-black text-studio-navy">
                 Curated Builder Stacks
               </h2>
             </div>
@@ -508,7 +508,7 @@ export default function ContentSection({
               <button
                 type="button"
                 onClick={() => setActiveStack(null)}
-                className="text-xs font-bold text-[#007BE5] hover:underline"
+                className="text-xs font-bold text-studio-blue hover:underline"
               >
                 ← View All Stacks
               </button>
@@ -536,15 +536,15 @@ export default function ContentSection({
               })}
             </div>
           ) : (
-            <div className="p-6 rounded-3xl bg-[#F0F2F5] border border-slate-200/80 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="p-6 rounded-3xl bg-canvas border border-studio-neutral-200/80 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
-                <span className="text-[10px] font-mono uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-white text-[#007BE5] font-bold border border-slate-200">
+                <span className="text-[10px] font-mono uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-surface text-studio-blue font-bold border border-studio-neutral-200">
                   Active Stack
                 </span>
-                <h3 className="font-phudu text-2xl font-black text-[#14334D] mt-1">
+                <h3 className="font-phudu text-2xl font-black text-studio-navy mt-1">
                   {activeStack.title}
                 </h3>
-                <p className="text-xs text-[#456176] mt-1 max-w-xl">
+                <p className="text-xs text-studio-muted mt-1 max-w-xl">
                   {activeStack.description}
                 </p>
               </div>
@@ -572,7 +572,7 @@ export default function ContentSection({
 
       {/* FAVORITES TOOLBAR (When in Favorites tab) */}
       {activeCategory === "favorites" && favorites.length > 0 && (
-        <div className="p-4 rounded-2xl bg-[#F0F2F5] border border-slate-200/80 mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div className="p-4 rounded-2xl bg-canvas border border-studio-neutral-200/80 mb-6 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -580,7 +580,7 @@ export default function ContentSection({
               className={`px-3 py-1.5 rounded-full text-xs font-semibold cursor-pointer transition-all ${
                 isSelectionMode
                   ? "bg-[#14334D] text-white"
-                  : "bg-white text-[#14334D] shadow-xs"
+                  : "bg-surface text-studio-navy shadow-xs"
               }`}
             >
               {isSelectionMode ? "Exit Selection" : "Select Multiple"}
@@ -591,11 +591,11 @@ export default function ContentSection({
                 <button
                   type="button"
                   onClick={handleSelectAllFavs}
-                  className="px-3 py-1.5 rounded-full text-xs font-semibold bg-white text-[#14334D] shadow-xs hover:bg-slate-100 transition-colors"
+                  className="px-3 py-1.5 rounded-full text-xs font-semibold bg-surface text-studio-navy shadow-xs hover:bg-studio-neutral-100 transition-colors"
                 >
                   {selectedFavs.length === favorites.length ? "Deselect All" : "Select All"}
                 </button>
-                <span className="text-xs font-mono text-[#456176]">
+                <span className="text-xs font-mono text-studio-muted">
                   ({selectedFavs.length} selected)
                 </span>
               </>
@@ -627,14 +627,14 @@ export default function ContentSection({
 
       {/* DIRECTORY ITEMS GRID */}
       {displayedItems.length === 0 ? (
-        <div className="py-20 text-center flex flex-col items-center justify-center bg-[#FAFCFD] rounded-3xl border border-slate-200/80 p-8">
-          <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-3">
+        <div className="py-20 text-center flex flex-col items-center justify-center bg-surface-soft rounded-3xl border border-studio-neutral-200/80 p-8">
+          <div className="w-16 h-16 rounded-full bg-studio-neutral-100 flex items-center justify-center text-studio-neutral-400 mb-3">
             <Search className="w-8 h-8" />
           </div>
-          <h3 className="font-phudu text-xl font-bold text-[#14334D] mb-1">
+          <h3 className="font-phudu text-xl font-bold text-studio-navy mb-1">
             No Tools Found
           </h3>
-          <p className="text-sm text-[#456176] max-w-md mb-4">
+          <p className="text-sm text-studio-muted max-w-md mb-4">
             {activeCategory === "favorites"
               ? "You haven't added any tools to your favorites yet. Click the heart icon on any card to save it!"
               : "Try adjusting your search keywords or switching platform filters."}
@@ -643,7 +643,7 @@ export default function ContentSection({
             <button
               type="button"
               onClick={() => setSearchQuery("")}
-              className="text-xs font-bold text-[#007BE5] hover:underline"
+              className="text-xs font-bold text-studio-blue hover:underline"
             >
               Clear Search Query
             </button>
@@ -692,16 +692,16 @@ export default function ContentSection({
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-lg bg-white rounded-[24px] sm:rounded-[32px] p-5 sm:p-8 shadow-studio-card border border-slate-200 overflow-y-auto max-h-[90vh] flex flex-col relative"
+              className="w-full max-w-lg bg-surface rounded-[24px] sm:rounded-[32px] p-5 sm:p-8 shadow-studio-card border border-studio-neutral-200 overflow-y-auto max-h-[90vh] flex flex-col relative"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
+              <div className="flex items-center justify-between pb-4 border-b border-studio-neutral-100 mb-5">
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-mono uppercase tracking-widest px-2.5 py-1 rounded-full bg-slate-100 text-[#007BE5] font-bold">
+                  <span className="text-[10px] font-mono uppercase tracking-widest px-2.5 py-1 rounded-full bg-studio-neutral-100 text-studio-blue font-bold">
                     {previewItem.category}
                   </span>
                   {previewItem.isNew && (
-                    <span className="text-[10px] font-mono uppercase tracking-widest px-2.5 py-1 rounded-full bg-[#9DF71F]/30 text-[#14334D] font-bold">
+                    <span className="text-[10px] font-mono uppercase tracking-widest px-2.5 py-1 rounded-full bg-[#9DF71F]/30 text-studio-navy font-bold">
                       New
                     </span>
                   )}
@@ -709,17 +709,17 @@ export default function ContentSection({
                 <button
                   type="button"
                   onClick={() => setPreviewItem(null)}
-                  className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
+                  className="w-8 h-8 rounded-full bg-studio-neutral-100 flex items-center justify-center text-studio-neutral-500 hover:text-studio-neutral-800 transition-colors cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
               <div className="mb-4">
-                <h3 className="font-phudu text-2xl sm:text-3xl font-black text-[#14334D] mb-1">
+                <h3 className="font-phudu text-2xl sm:text-3xl font-black text-studio-navy mb-1">
                   {previewItem.title}
                 </h3>
-                <p className="text-sm text-[#456176] font-sans leading-relaxed">
+                <p className="text-sm text-studio-muted font-sans leading-relaxed">
                   {previewItem.description}
                 </p>
               </div>
@@ -729,7 +729,7 @@ export default function ContentSection({
                   {previewItem.tags.map((t) => (
                     <span
                       key={t}
-                      className="text-[11px] font-mono font-semibold px-2.5 py-1 rounded-full bg-[#F0F2F5] text-slate-600"
+                      className="text-[11px] font-mono font-semibold px-2.5 py-1 rounded-full bg-canvas text-studio-neutral-600"
                     >
                       #{t}
                     </span>
@@ -737,7 +737,7 @@ export default function ContentSection({
                 </div>
               )}
 
-              <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-100">
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-studio-neutral-100">
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
@@ -745,11 +745,11 @@ export default function ContentSection({
                       playClickSound();
                       toggleFavorite(previewItem.id);
                     }}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#F0F2F5] text-xs font-semibold text-[#14334D] hover:bg-slate-200 transition-colors"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-canvas text-xs font-semibold text-studio-navy hover:bg-studio-neutral-200 transition-colors"
                   >
                     <Heart
                       className={`w-4 h-4 ${
-                        isFavorite(previewItem.id) ? "fill-red-500 text-red-500" : "text-slate-400"
+                        isFavorite(previewItem.id) ? "fill-red-500 text-red-500" : "text-studio-neutral-400"
                       }`}
                     />
                     <span>{isFavorite(previewItem.id) ? "In Favorites" : "Save Tool"}</span>
@@ -764,10 +764,10 @@ export default function ContentSection({
                       playSuccessSound();
                       setTimeout(() => setLinkCopied(false), 2000);
                     }}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[#F0F2F5] text-xs font-semibold text-[#14334D] hover:bg-slate-200 transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-canvas text-xs font-semibold text-studio-navy hover:bg-studio-neutral-200 transition-colors cursor-pointer"
                     title="Copy direct shareable link to this tool"
                   >
-                    <Link2 className="w-3.5 h-3.5 text-[#007BE5]" />
+                    <Link2 className="w-3.5 h-3.5 text-studio-blue" />
                     <span>{linkCopied ? "Link Copied!" : "Copy Link"}</span>
                   </button>
                 </div>
@@ -777,7 +777,7 @@ export default function ContentSection({
                     <MagneticButton
                       variant="primary-light"
                       size="md"
-                      icon={<Github className="w-4 h-4 text-[#14334D]" />}
+                      icon={<Github className="w-4 h-4 text-studio-navy" />}
                       href={previewItem.github}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -789,7 +789,7 @@ export default function ContentSection({
                   <MagneticButton
                     variant="accent-lime"
                     size="md"
-                    icon={<ExternalLink className="w-4 h-4 text-[#14334D]" />}
+                    icon={<ExternalLink className="w-4 h-4 text-studio-navy" />}
                     href={previewItem.website || previewItem.github}
                     target="_blank"
                     rel="noopener noreferrer"

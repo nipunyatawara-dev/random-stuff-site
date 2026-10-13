@@ -71,7 +71,7 @@ export default function CommandPalette({
         type: "action",
         title: "View Favorites",
         subtitle: "Browse your saved bookmarks and tools",
-        icon: <Compass className="w-4 h-4 text-[#007BE5]" />,
+        icon: <Compass className="w-4 h-4 text-studio-blue" />,
         handler: () => {
           onClose();
           onOpenFavorites();
@@ -95,7 +95,7 @@ export default function CommandPalette({
         type: "action",
         title: "Export Favorites",
         subtitle: "Download favorites as Markdown, JSON or HTML",
-        icon: <Download className="w-4 h-4 text-[#304F67]" />,
+        icon: <Download className="w-4 h-4 text-studio-slate" />,
         handler: () => {
           onClose();
           onExportFavorites();
@@ -183,24 +183,24 @@ export default function CommandPalette({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-xl bg-white rounded-[28px] shadow-studio-card border border-slate-200 overflow-hidden flex flex-col"
+        className="w-full max-w-xl bg-surface rounded-[28px] shadow-studio-card border border-studio-neutral-200 overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search Input Bar */}
-        <div className="flex items-center gap-3 px-5 py-3.5 border-b border-slate-100 bg-[#FAFCFD]">
-          <Search className="w-5 h-5 text-[#007BE5]" />
+        <div className="flex items-center gap-3 px-5 py-3.5 border-b border-studio-neutral-100 bg-surface-soft">
+          <Search className="w-5 h-5 text-studio-blue" />
           <input
             ref={inputRef}
             type="text"
             placeholder="Type a tool name, category (#macos, #cli), or command..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="flex-1 bg-transparent text-sm text-[#14334D] font-medium placeholder-slate-400 focus:outline-hidden"
+            className="flex-1 bg-transparent text-sm text-studio-navy font-medium placeholder-studio-neutral-400 focus:outline-hidden"
           />
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-colors"
+            className="p-1 rounded-full text-studio-neutral-400 hover:text-studio-neutral-600 hover:bg-studio-neutral-200 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -209,7 +209,7 @@ export default function CommandPalette({
         {/* Results List */}
         <div ref={listRef} className="max-h-96 overflow-y-auto p-3 space-y-1">
           {totalResults.length === 0 ? (
-            <div className="py-12 text-center text-xs text-slate-400 font-mono">
+            <div className="py-12 text-center text-xs text-studio-neutral-400 font-mono">
               No matching tools or commands found
             </div>
           ) : (
@@ -232,37 +232,37 @@ export default function CommandPalette({
                   }}
                   className={`w-full flex items-center justify-between p-3 rounded-2xl cursor-pointer transition-all ${
                     isSelected
-                      ? "bg-[#F0F2F5] shadow-xs text-[#14334D]"
-                      : "text-[#456176] hover:bg-slate-50"
+                      ? "bg-canvas shadow-xs text-studio-navy"
+                      : "text-studio-muted hover:bg-studio-neutral-50"
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-8 h-8 rounded-xl bg-white border border-slate-200/80 flex items-center justify-center shrink-0 shadow-xs">
+                    <div className="w-8 h-8 rounded-xl bg-surface border border-studio-neutral-200/80 flex items-center justify-center shrink-0 shadow-xs">
                       {isAction ? (
                         entry.icon
                       ) : (
-                        <span className="font-phudu font-bold text-xs text-[#007BE5]">
+                        <span className="font-phudu font-bold text-xs text-studio-blue">
                           {entry.title.charAt(0).toUpperCase()}
                         </span>
                       )}
                     </div>
                     <div className="min-w-0">
-                      <div className="text-sm font-bold text-[#14334D] truncate flex items-center gap-2">
+                      <div className="text-sm font-bold text-studio-navy truncate flex items-center gap-2">
                         <span>{entry.title}</span>
                         {!isAction && (
-                          <span className="text-[9px] font-mono uppercase px-2 py-0.5 rounded-full bg-slate-200 text-[#304F67]">
+                          <span className="text-[9px] font-mono uppercase px-2 py-0.5 rounded-full bg-studio-neutral-200 text-studio-slate">
                             {entry.category}
                           </span>
                         )}
                       </div>
-                      <div className="text-xs text-slate-400 truncate">
+                      <div className="text-xs text-studio-neutral-400 truncate">
                         {isAction ? entry.subtitle : entry.description}
                       </div>
                     </div>
                   </div>
 
                   {isSelected && (
-                    <CornerDownLeft className="w-4 h-4 text-[#007BE5] shrink-0 ml-2" />
+                    <CornerDownLeft className="w-4 h-4 text-studio-blue shrink-0 ml-2" />
                   )}
                 </div>
               );
@@ -271,13 +271,13 @@ export default function CommandPalette({
         </div>
 
         {/* Footer shortcuts */}
-        <div className="px-5 py-2.5 border-t border-slate-100 bg-[#FAFCFD] flex items-center justify-between text-[11px] text-slate-400 font-mono">
+        <div className="px-5 py-2.5 border-t border-studio-neutral-100 bg-surface-soft flex items-center justify-between text-[11px] text-studio-neutral-400 font-mono">
           <div className="flex items-center gap-3">
             <span>↑↓ Navigate</span>
             <span>↵ Select</span>
             <span>ESC Close</span>
           </div>
-          <span className="text-[#007BE5] font-bold">Random Stuff</span>
+          <span className="text-studio-blue font-bold">Random Stuff</span>
         </div>
       </div>
     </div>

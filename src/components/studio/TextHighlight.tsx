@@ -12,9 +12,9 @@ export const TextHighlight: React.FC<TextHighlightProps> = ({
   className = '',
 }) => {
   const colorMap = {
-    lime: 'bg-[#9DF71F] text-[#14334D]',
-    blue: 'bg-[#82CCFF] text-[#14334D]',
-    yellow: 'bg-[#FDE047] text-[#14334D]',
+    lime: 'bg-[#9DF71F] text-studio-ink',
+    blue: 'bg-[#82CCFF] text-studio-ink',
+    yellow: 'bg-[#FDE047] text-studio-ink',
   }[color];
 
   return (

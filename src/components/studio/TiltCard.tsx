@@ -39,7 +39,7 @@ export const TiltCard: React.FC<TiltCardProps> = ({
   const theme = {
     blue: {
       gradient: 'linear-gradient(135deg, #CCE8FF 0%, #89CEFF 50%, #54B4FF 100%)',
-      titleColor: 'text-[#007BE5]/30',
+      titleColor: 'text-studio-blue/30',
       textColor: 'text-[#0055AA]',
       borderColor: 'border-[#82CCFF]/60',
       subTextColor: 'text-[#0066CC]/80',
@@ -80,7 +80,7 @@ export const TiltCard: React.FC<TiltCardProps> = ({
           transformStyle: 'preserve-3d',
           background: theme.gradient,
         }}
-        className={`relative h-[240px] w-full rounded-[24px] p-6 flex flex-col justify-between overflow-hidden cursor-pointer shadow-studio-card border ${theme.borderColor} transition-shadow duration-300 hover:shadow-2xl`}
+        className={`studio-art relative h-[240px] w-full rounded-[24px] p-6 flex flex-col justify-between overflow-hidden cursor-pointer shadow-studio-card border ${theme.borderColor} transition-shadow duration-300 hover:shadow-2xl`}
       >
         {/* Interactive Dynamic Glare Sheen */}
         <motion.div
@@ -102,12 +102,12 @@ export const TiltCard: React.FC<TiltCardProps> = ({
         {/* Card Header */}
         <div className="relative z-10 flex items-start justify-between">
           <div className="flex items-center gap-2">
-            {icon && <span className="p-2 rounded-xl bg-white/50 backdrop-blur-xs text-[#14334D] shadow-xs">{icon}</span>}
+            {icon && <span className="p-2 rounded-xl bg-surface/50 backdrop-blur-xs text-studio-navy shadow-xs">{icon}</span>}
             <h4 className={`font-phudu text-2xl font-black tracking-tight ${theme.textColor}`}>
               {title}
             </h4>
           </div>
-          <span className="text-[10px] font-mono uppercase tracking-widest font-bold px-2.5 py-1 rounded-full bg-white/60 text-[#14334D] backdrop-blur-xs shadow-xs">
+          <span className="text-[10px] font-mono uppercase tracking-widest font-bold px-2.5 py-1 rounded-full bg-surface/60 text-studio-navy backdrop-blur-xs shadow-xs">
             {badgeText}
           </span>
         </div>
@@ -128,7 +128,7 @@ export const TiltCard: React.FC<TiltCardProps> = ({
             <h3 className={`font-phudu text-3xl font-black tracking-tight ${theme.textColor}`}>
               {countOrPrice}
             </h3>
-            <span className="text-xs font-bold text-[#14334D] bg-white/70 px-3 py-1 rounded-full shadow-xs">
+            <span className="text-xs font-bold text-studio-navy bg-surface/70 px-3 py-1 rounded-full shadow-xs">
               View Stack →
             </span>
           </div>

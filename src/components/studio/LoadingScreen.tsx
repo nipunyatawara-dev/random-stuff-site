@@ -92,7 +92,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
         duration: 0.55,
         ease: [0.16, 1, 0.3, 1], // Deceleration cubic-bezier
       }}
-      className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#F0F2F5] text-[#14334D] select-none overflow-hidden ${
+      className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-canvas text-studio-navy select-none overflow-hidden ${
         isFinishing ? "pointer-events-none" : ""
       }`}
       role="progressbar"
@@ -271,7 +271,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
 
         {/* Tactile Progress Pill Track (Only Otter & Progress Bar) */}
         <div className="w-48 sm:w-56 mt-4">
-          <div className="relative w-full h-2.5 sm:h-3 bg-white rounded-full p-0.5 border border-[#D6DCE1]/80 shadow-[0px_1px_2px_rgba(0,0,0,0.06),inset_0_1px_2px_rgba(0,0,0,0.08)] overflow-hidden">
+          <div className="relative w-full h-2.5 sm:h-3 bg-surface rounded-full p-0.5 border border-border-subtle/80 shadow-[0px_1px_2px_rgba(0,0,0,0.06),inset_0_1px_2px_rgba(0,0,0,0.08)] overflow-hidden">
             <motion.div
               className="h-full rounded-full bg-gradient-to-r from-[#007BE5] via-[#82CCFF] to-[#89E00F]"
               style={{ width: `${progress}%` }}

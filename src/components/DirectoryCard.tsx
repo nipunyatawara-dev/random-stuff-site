@@ -36,12 +36,12 @@ const DirectoryCard = memo(function DirectoryCard({
   return (
     <div
       onClick={() => onPreview(item)}
-      className="directory-card group relative bg-white rounded-[20px] sm:rounded-[24px] p-4 sm:p-5 md:p-6 shadow-studio-card border border-slate-100/90 hover:border-[#82CCFF]/70 hover:shadow-xl transition-all duration-300 flex flex-col justify-between h-full overflow-hidden select-none cursor-pointer"
+      className="directory-card group relative bg-surface rounded-[20px] sm:rounded-[24px] p-4 sm:p-5 md:p-6 shadow-studio-card border border-studio-neutral-100/90 hover:border-[#82CCFF]/70 hover:shadow-xl transition-all duration-300 flex flex-col justify-between h-full overflow-hidden select-none cursor-pointer"
     >
       <div>
         {/* Top Row: Avatar Icon + Category / New badges */}
         <div className="flex items-start justify-between gap-3 mb-3">
-          <div className="w-11 h-11 rounded-2xl bg-[#F0F2F5] border border-slate-200/80 flex items-center justify-center overflow-hidden shrink-0 shadow-xs relative">
+          <div className="w-11 h-11 rounded-2xl bg-canvas border border-studio-neutral-200/80 flex items-center justify-center overflow-hidden shrink-0 shadow-xs relative">
             {item.image ? (
               <Image
                 src={item.image}
@@ -52,7 +52,7 @@ const DirectoryCard = memo(function DirectoryCard({
                 className="w-full h-full object-cover"
               />
             ) : (
-              <span className="font-phudu font-bold text-base text-[#007BE5]">
+              <span className="font-phudu font-bold text-base text-studio-blue">
                 {item.title.charAt(0).toUpperCase()}
               </span>
             )}
@@ -60,11 +60,11 @@ const DirectoryCard = memo(function DirectoryCard({
 
           <div className="flex items-center gap-1.5 flex-wrap justify-end">
             {item.isNew && (
-              <span className="px-2 py-0.5 text-[9px] font-mono font-bold uppercase tracking-wider rounded-full bg-[#9DF71F]/30 text-[#14334D] border border-[#9DF71F]/50">
+              <span className="px-2 py-0.5 text-[9px] font-mono font-bold uppercase tracking-wider rounded-full bg-[#9DF71F]/30 text-studio-navy border border-[#9DF71F]/50">
                 New
               </span>
             )}
-            <span className="px-2 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider rounded-full bg-slate-100 text-[#456176]">
+            <span className="px-2 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider rounded-full bg-studio-neutral-100 text-studio-muted">
               {item.category}
             </span>
           </div>
@@ -77,21 +77,21 @@ const DirectoryCard = memo(function DirectoryCard({
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="font-phudu text-lg font-bold text-[#14334D] group-hover:text-[#007BE5] active:text-[#007BE5] transition-colors inline-flex items-center gap-1.5 tracking-tight"
+            className="font-phudu text-lg font-bold text-studio-navy group-hover:text-studio-blue active:text-studio-blue transition-colors inline-flex items-center gap-1.5 tracking-tight"
           >
             <span className="line-clamp-1">{item.title}</span>
-            <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-[#007BE5] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+            <ArrowUpRight className="w-4 h-4 text-studio-neutral-400 group-hover:text-studio-blue group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
           </a>
 
           {domain && (
-            <span className="text-[11px] font-mono text-[#A0AFBB] font-medium block truncate mt-0.5">
+            <span className="text-[11px] font-mono text-studio-light-muted font-medium block truncate mt-0.5">
               {domain}
             </span>
           )}
         </div>
 
         {/* Description */}
-        <p className="text-xs sm:text-sm text-[#456176] font-sans leading-relaxed line-clamp-3 mb-4">
+        <p className="text-xs sm:text-sm text-studio-muted font-sans leading-relaxed line-clamp-3 mb-4">
           {item.description}
         </p>
 
@@ -101,7 +101,7 @@ const DirectoryCard = memo(function DirectoryCard({
             {visibleTags.map((t) => (
               <span
                 key={t}
-                className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-[#F0F2F5] text-[#456176]"
+                className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-canvas text-studio-muted"
               >
                 #{t}
               </span>
@@ -111,7 +111,7 @@ const DirectoryCard = memo(function DirectoryCard({
       </div>
 
       {/* Footer Row: Source Button + Favorite + Launch */}
-      <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+      <div className="pt-3 border-t border-studio-neutral-100 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           {item.github && (
             <a
@@ -119,7 +119,7 @@ const DirectoryCard = memo(function DirectoryCard({
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#F0F2F5] hover:bg-[#14334D] text-[#14334D] hover:text-white text-xs font-semibold transition-colors cursor-pointer min-h-[36px] touch-manipulation"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-canvas hover:bg-[#14334D] text-studio-navy hover:text-white text-xs font-semibold transition-colors cursor-pointer min-h-[36px] touch-manipulation"
               title="Go to Source Code on GitHub"
             >
               <Github className="w-3.5 h-3.5" />
@@ -139,10 +139,10 @@ const DirectoryCard = memo(function DirectoryCard({
               className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
                 isSelected
                   ? "bg-[#14334D] text-white"
-                  : "bg-slate-100 text-slate-400 hover:bg-slate-200"
+                  : "bg-studio-neutral-100 text-studio-neutral-400 hover:bg-studio-neutral-200"
               }`}
             >
-              {isSelected ? <Check className="w-3.5 h-3.5" /> : <div className="w-2 h-2 rounded-full border border-slate-400" />}
+              {isSelected ? <Check className="w-3.5 h-3.5" /> : <div className="w-2 h-2 rounded-full border border-studio-neutral-400" />}
             </button>
           )}
 
@@ -153,12 +153,12 @@ const DirectoryCard = memo(function DirectoryCard({
               playClickSound();
               toggleFavorite(item.id);
             }}
-            className="p-2.5 min-w-[38px] min-h-[38px] rounded-full bg-[#F0F2F5] hover:bg-red-50 text-slate-400 hover:text-red-500 transition-all cursor-pointer group/fav flex items-center justify-center touch-manipulation"
+            className="p-2.5 min-w-[38px] min-h-[38px] rounded-full bg-canvas hover:bg-studio-red-50 text-studio-neutral-400 hover:text-red-500 transition-all cursor-pointer group/fav flex items-center justify-center touch-manipulation"
             aria-label={isFav ? "Remove from favorites" : "Add to favorites"}
           >
             <Heart
               className={`w-4 h-4 transition-transform duration-200 group-hover/fav:scale-115 ${
-                isFav ? "fill-red-500 text-red-500" : "text-slate-400"
+                isFav ? "fill-red-500 text-red-500" : "text-studio-neutral-400"
               }`}
             />
           </button>
@@ -168,7 +168,7 @@ const DirectoryCard = memo(function DirectoryCard({
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="p-2.5 min-w-[38px] min-h-[38px] rounded-full bg-[#F0F2F5] hover:bg-[#007BE5] text-slate-500 hover:text-white transition-all cursor-pointer flex items-center justify-center touch-manipulation"
+            className="p-2.5 min-w-[38px] min-h-[38px] rounded-full bg-canvas hover:bg-[#007BE5] text-studio-neutral-500 hover:text-white transition-all cursor-pointer flex items-center justify-center touch-manipulation"
             title={item.website ? "Visit Website" : "Open Tool"}
           >
             <ExternalLink className="w-4 h-4" />
