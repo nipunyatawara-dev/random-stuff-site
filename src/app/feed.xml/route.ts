@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getItems } from "@/lib/items-server";
+import { newestItems } from "@/lib/catalog-dates";
 
 export const dynamic = "force-static";
 
@@ -7,8 +8,7 @@ export async function GET() {
   const items = await getItems();
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://randomstuff.shocka.site";
 
-  // Take the most recent items (first 50)
-  const feedItems = items.slice(0, 50);
+  const feedItems = newestItems(items).slice(0, 50);
 
   const escapeXml = (unsafe: string) => {
     return unsafe
@@ -29,6 +29,7 @@ export async function GET() {
       <guid isPermaLink="false">${escapeXml(item.id)}</guid>
       <description>${escapeXml(item.description)}</description>
       <category>${escapeXml(item.category)}</category>
+      ${item.addedAt ? `<pubDate>${new Date(item.addedAt).toUTCString()}</pubDate>` : ""}
     </item>`;
     })
     .join("\n");

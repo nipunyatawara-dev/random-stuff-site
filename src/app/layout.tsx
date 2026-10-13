@@ -3,6 +3,7 @@ import { Inter, Phudu, Caveat, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import ColorModeController from "@/components/ColorModeController";
 import { COLOR_MODE_INIT_SCRIPT } from "@/lib/color-mode";
+import { items } from "@/data/items";
 
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
@@ -32,13 +33,15 @@ const mono = JetBrains_Mono({
   display: "swap",
 });
 
+const catalogDescription = `Directory of ${items.length} handpicked websites, desktop apps, and CLI scripts for builders and creators.`;
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://randomstuff.shocka.site"),
   title: {
     default: "Random Stuff - Curated Tools & Scripts Directory",
     template: "%s | Random Stuff",
   },
-  description: "Directory of 350+ handpicked websites, desktop apps, and CLI scripts for builders and creators.",
+  description: catalogDescription,
   manifest: "/manifest.webmanifest",
   icons: {
     icon: "/icon.png",
@@ -52,7 +55,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Random Stuff - Curated Directory for Builders",
-    description: "Directory of 350+ handpicked websites, desktop apps, and CLI scripts for builders and creators.",
+    description: catalogDescription,
     url: "https://randomstuff.shocka.site",
     siteName: "Random Stuff",
     locale: "en_US",
@@ -61,7 +64,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Random Stuff - Curated Directory for Builders",
-    description: "Directory of 350+ handpicked websites, desktop apps, and CLI scripts for builders and creators.",
+    description: catalogDescription,
     creator: "@nipunyatawara",
   },
 };

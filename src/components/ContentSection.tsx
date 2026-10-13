@@ -2,6 +2,9 @@
 
 import dynamic from "next/dynamic";
 import DirectoryCard from "./DirectoryCard";
+import Modal from "./Modal";
+import { readCatalogUrl, stackShareUrl } from "@/lib/catalog-url";
+import { formatCatalogDate, isRecentlyAdded } from "@/lib/catalog-dates";
 import React, { useEffect, useMemo, useRef, useState, useCallback, useDeferredValue } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { type Item } from "@/data/items";
@@ -42,6 +45,7 @@ export interface ContentSectionProps {
   onCategoryChange?: (category: string) => void;
   onOpenRoulette?: () => void;
   onOpenCompare?: () => void;
+  onReady?: () => void;
 }
 
 export default function ContentSection({
@@ -50,6 +54,7 @@ export default function ContentSection({
   onCategoryChange: externalCategoryChange,
   onOpenRoulette,
   onOpenCompare,
+  onReady,
 }: ContentSectionProps) {
   const [items] = useState<Item[]>(initialItems);
   const [internalCategory, setInternalCategory] = useState("all");
@@ -99,43 +104,49 @@ export default function ContentSection({
     }
   }, [onOpenCompare]);
 
-  // Sync initial state from URL search parameters or hash
+  const [activeStack, setActiveStack] = useState<CuratedStack | null>(null);
+  const [stackCopied, setStackCopied] = useState(false);
+  const [urlReady, setUrlReady] = useState(false);
+  const [now, setNow] = useState<number | null>(null);
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    const update = () => setNow(Date.now());
+    update();
+    const timer = setInterval(update, 3_600_000);
+    return () => clearInterval(timer);
+  }, []);
+  const recentIds = useMemo(() => new Set(items.filter((item) => now === null ? item.isNew : isRecentlyAdded(item.addedAt, now)).map((item) => item.id)), [items, now]);
 
-    try {
-      const url = new URL(window.location.href);
-      const q = url.searchParams.get("q");
-      const cat = url.searchParams.get("category");
-      const tag = url.searchParams.get("tag");
-      const toolId =
-        url.searchParams.get("tool") ||
-        (window.location.hash ? window.location.hash.replace(/^#/, "") : null);
-
-      if (q) setSearchQuery(q);
-      if (
-        cat &&
-        ["Websites", "Softwares", "Scripts", "stacks", "favorites", "all"].includes(cat)
-      ) {
-        setActiveCategory(cat);
+  // Restore initial links, browser history, and legacy shared stack hashes.
+  useEffect(() => {
+    const restore = () => {
+      try {
+        const state = readCatalogUrl(new URL(window.location.href), items);
+        setSearchQuery(state.query);
+        setActiveCategory(state.category);
+        setActiveTag(state.tag);
+        setActiveStack(state.stack);
+        setPreviewItem(state.tool);
+      } catch {
+        // Malformed links leave the current catalog available.
       }
-      if (tag) setActiveTag(tag);
-      if (toolId) {
-        const found = items.find((item) => item.id === toolId);
-        if (found) setPreviewItem(found);
-      }
-    } catch {
-      // Ignore URL parsing errors
-    }
+      setUrlReady(true);
+    };
+    restore();
+    window.addEventListener("popstate", restore);
+    window.addEventListener("hashchange", restore);
+    return () => {
+      window.removeEventListener("popstate", restore);
+      window.removeEventListener("hashchange", restore);
+    };
   }, [items, setActiveCategory]);
 
-  // Sync state changes back to URL without reloading
-  const isFirstSyncRef = useRef(true);
   useEffect(() => {
-    if (isFirstSyncRef.current) {
-      isFirstSyncRef.current = false;
-      return;
-    }
+    if (urlReady && searchQuery === deferredSearchQuery) onReady?.();
+  }, [urlReady, searchQuery, deferredSearchQuery, onReady]);
+
+  // Sync state changes back to URL without reloading
+  useEffect(() => {
+    if (!urlReady) return;
     if (typeof window === "undefined") return;
 
     const url = new URL(window.location.href);
@@ -163,14 +174,12 @@ export default function ContentSection({
       url.searchParams.delete("tool");
     }
 
+    if (activeCategory === "stacks" && activeStack) url.searchParams.set("stack", activeStack.id);
+    else url.searchParams.delete("stack");
     const nextSearch = url.searchParams.toString();
     const nextUrl = nextSearch ? `${url.pathname}?${nextSearch}` : url.pathname;
-    window.history.replaceState({}, "", nextUrl);
-  }, [searchQuery, activeCategory, activeTag, previewItem]);
-
-  // Stacks state
-  const [activeStack, setActiveStack] = useState<CuratedStack | null>(null);
-  const [stackCopied, setStackCopied] = useState(false);
+    window.history.replaceState(window.history.state, "", nextUrl);
+  }, [searchQuery, activeCategory, activeTag, previewItem, activeStack, urlReady]);
 
   // Global keyboard shortcut for Command Palette (Cmd+K / Ctrl+K)
   useEffect(() => {
@@ -225,10 +234,10 @@ export default function ContentSection({
 
   // Reset active stack when navigating to another category
   useEffect(() => {
-    if (activeCategory !== "stacks") {
+    if (urlReady && activeCategory !== "stacks") {
       setActiveStack(null);
     }
-  }, [activeCategory]);
+  }, [activeCategory, urlReady]);
 
   // Handle favorites batch actions
   const handleSelectFav = useCallback((id: string) => {
@@ -359,7 +368,7 @@ export default function ContentSection({
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-studio-blue" />
             <input
               type="text"
-              placeholder="Search 350+ tools, tags (#cli, #macos)..."
+              placeholder={`Search ${items.length} tools, tags (#cli, #macos)...`}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-11 pr-20 py-2.5 rounded-full bg-surface shadow-studio-button border border-border-subtle text-sm text-studio-navy placeholder-studio-light-muted focus:outline-hidden focus:ring-2 focus:ring-[#007BE5]/25 focus:border-[#007BE5] transition-all font-sans"
@@ -555,7 +564,7 @@ export default function ContentSection({
                   size="sm"
                   icon={<Share2 className="w-3.5 h-3.5" />}
                   onClick={() => {
-                    const shareUrl = `${window.location.origin}#stack=${activeStack.itemIds.join(",")}`;
+                    const shareUrl = stackShareUrl(window.location.origin, activeStack);
                     navigator.clipboard.writeText(shareUrl);
                     setStackCopied(true);
                     playSuccessSound();
@@ -655,6 +664,7 @@ export default function ContentSection({
             <DirectoryCard
               key={item.id}
               item={item}
+              isNew={recentIds.has(item.id)}
               isFav={isFavorite(item.id)}
               isSelected={selectedFavs.includes(item.id)}
               isSelectionMode={isSelectionMode}
@@ -682,11 +692,10 @@ export default function ContentSection({
       {/* MODAL: TOOL DETAILS INSPECTOR */}
       <AnimatePresence>
         {previewItem && (
-          <div
-            role="dialog"
-            aria-modal="true"
+          <Modal
+            label={`${previewItem.title} details`}
+            onClose={() => setPreviewItem(null)}
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-200 select-none"
-            onClick={() => setPreviewItem(null)}
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
@@ -700,7 +709,7 @@ export default function ContentSection({
                   <span className="text-[10px] font-mono uppercase tracking-widest px-2.5 py-1 rounded-full bg-studio-neutral-100 text-studio-blue font-bold">
                     {previewItem.category}
                   </span>
-                  {previewItem.isNew && (
+                  {recentIds.has(previewItem.id) && (
                     <span className="text-[10px] font-mono uppercase tracking-widest px-2.5 py-1 rounded-full bg-[#9DF71F]/30 text-studio-navy font-bold">
                       New
                     </span>
@@ -708,6 +717,7 @@ export default function ContentSection({
                 </div>
                 <button
                   type="button"
+                  aria-label="Close tool details"
                   onClick={() => setPreviewItem(null)}
                   className="w-8 h-8 rounded-full bg-studio-neutral-100 flex items-center justify-center text-studio-neutral-500 hover:text-studio-neutral-800 transition-colors cursor-pointer"
                 >
@@ -719,6 +729,11 @@ export default function ContentSection({
                 <h3 className="font-phudu text-2xl sm:text-3xl font-black text-studio-navy mb-1">
                   {previewItem.title}
                 </h3>
+                {previewItem.addedAt && (
+                  <p className="text-[11px] text-studio-neutral-400 mb-2">
+                    Added <time dateTime={previewItem.addedAt}>{formatCatalogDate(previewItem.addedAt)}</time>
+                  </p>
+                )}
                 <p className="text-sm text-studio-muted font-sans leading-relaxed">
                   {previewItem.description}
                 </p>
@@ -799,7 +814,7 @@ export default function ContentSection({
                 </div>
               </div>
             </motion.div>
-          </div>
+          </Modal>
         )}
       </AnimatePresence>
 

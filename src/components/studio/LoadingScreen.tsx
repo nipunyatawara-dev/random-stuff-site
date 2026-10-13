@@ -2,19 +2,19 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
+import type { PageLoadingProgress } from "@/lib/page-loading";
 
 export interface LoadingScreenProps {
   onComplete: () => void;
   onDismissStart?: () => void;
-  minDurationMs?: number;
+  progress: PageLoadingProgress;
 }
 
 export const LoadingScreen: React.FC<LoadingScreenProps> = ({
   onComplete,
   onDismissStart,
-  minDurationMs = 1400,
+  progress,
 }) => {
-  const [progress, setProgress] = useState(0);
   const [isFinishing, setIsFinishing] = useState(false);
   const finishingRef = React.useRef(false);
   const completeTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -48,41 +48,10 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleFinish]);
 
-  // Progress simulation
+  // Only resource completion starts dismissal; the timer above is exit motion.
   useEffect(() => {
-    const prefersReducedMotion =
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const duration = prefersReducedMotion ? Math.min(minDurationMs, 650) : minDurationMs;
-    const startTime = performance.now();
-    const interval = 20; // 50fps tick
-    let finishTimer: ReturnType<typeof setTimeout> | undefined;
-
-    const timer = setInterval(() => {
-      const elapsed = performance.now() - startTime;
-      const rawProgress = Math.min(100, (elapsed / duration) * 100);
-
-      // Smooth progress curve with gentle plateau near the end
-      const easedProgress = Math.round(
-        rawProgress < 85
-          ? rawProgress * 1.05
-          : 85 + (rawProgress - 85) * (15 / 15)
-      );
-
-      setProgress(Math.min(100, Math.max(0, easedProgress)));
-
-      if (elapsed >= duration) {
-        clearInterval(timer);
-        setProgress(100);
-        finishTimer = setTimeout(handleFinish, 160);
-      }
-    }, interval);
-
-    return () => {
-      clearInterval(timer);
-      if (finishTimer !== undefined) clearTimeout(finishTimer);
-    };
-  }, [minDurationMs, handleFinish]);
+    if (progress.done) handleFinish();
+  }, [progress.done, handleFinish]);
 
   return (
     <motion.div
@@ -95,11 +64,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
       className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-canvas text-studio-navy select-none overflow-hidden ${
         isFinishing ? "pointer-events-none" : ""
       }`}
-      role="progressbar"
-      aria-valuenow={progress}
-      aria-valuemin={0}
-      aria-valuemax={100}
-      aria-label="Loading directory content"
+      aria-label="Loading site"
     >
       {/* Ambient background studio lighting */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -270,12 +235,21 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
         </div>
 
         {/* Tactile Progress Pill Track (Only Otter & Progress Bar) */}
-        <div className="w-48 sm:w-56 mt-4">
+        <div className="w-48 sm:w-56 mt-4"
+          role="progressbar"
+          aria-label="Initial page resources"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={progress.known ? progress.percent : undefined}
+          aria-valuetext={progress.known
+            ? `${progress.completed} of ${progress.total} startup resources finished${progress.failed ? `; ${progress.failed} unavailable` : ""}`
+            : "Preparing the initial catalog"}
+          aria-busy={!progress.done}
+        >
           <div className="relative w-full h-2.5 sm:h-3 bg-surface rounded-full p-0.5 border border-border-subtle/80 shadow-[0px_1px_2px_rgba(0,0,0,0.06),inset_0_1px_2px_rgba(0,0,0,0.08)] overflow-hidden">
-            <motion.div
+            <div
               className="h-full rounded-full bg-gradient-to-r from-[#007BE5] via-[#82CCFF] to-[#89E00F]"
-              style={{ width: `${progress}%` }}
-              transition={{ ease: "easeOut", duration: 0.1 }}
+              style={{ width: `${progress.percent}%` }}
             />
           </div>
         </div>

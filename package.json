@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "check:catalog": "vitest run src/lib/catalog-integrity.test.ts",
+    "check:links": "node scripts/check-links.mjs"
   },
   "dependencies": {
     "@types/gsap": "^1.20.2",

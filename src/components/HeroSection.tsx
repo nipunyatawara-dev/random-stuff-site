@@ -11,14 +11,14 @@ import {
 import { Sparkles, Plus, ArrowDown } from 'lucide-react';
 
 export interface HeroSectionProps {
-  totalItemsCount?: number;
+  totalItemsCount: number;
   onExploreClick?: () => void;
   onRouletteClick?: () => void;
   onSubmitClick?: () => void;
 }
 
 export default function HeroSection({
-  totalItemsCount = 350,
+  totalItemsCount,
   onExploreClick,
   onRouletteClick,
   onSubmitClick,
@@ -62,7 +62,7 @@ export default function HeroSection({
           icon={<ProjectsFolderIcon size={22} />}
           onClick={scrollToCatalog}
         >
-          Explore {totalItemsCount}+ Tools
+          Explore {totalItemsCount} Tools
         </MagneticButton>
 
         {onRouletteClick && (

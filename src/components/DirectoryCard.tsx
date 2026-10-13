@@ -9,6 +9,7 @@ import { playClickSound } from "@/lib/sound-fx";
 
 type DirectoryCardProps = {
   item: Item;
+  isNew: boolean;
   isFav: boolean;
   isSelected: boolean;
   isSelectionMode: boolean;
@@ -19,7 +20,7 @@ type DirectoryCardProps = {
 
 // Keep unchanged cards out of search-input, modal, and favorites rerenders.
 const DirectoryCard = memo(function DirectoryCard({
-  item, isFav, isSelected, isSelectionMode, onPreview, onSelectFavorite, toggleFavorite,
+  item, isNew, isFav, isSelected, isSelectionMode, onPreview, onSelectFavorite, toggleFavorite,
 }: DirectoryCardProps) {
   const visibleTags = getVisiblePlatformTags(item);
   let domain = "";
@@ -38,6 +39,9 @@ const DirectoryCard = memo(function DirectoryCard({
       onClick={() => onPreview(item)}
       className="directory-card group relative bg-surface rounded-[20px] sm:rounded-[24px] p-4 sm:p-5 md:p-6 shadow-studio-card border border-studio-neutral-100/90 hover:border-[#82CCFF]/70 hover:shadow-xl transition-all duration-300 flex flex-col justify-between h-full overflow-hidden select-none cursor-pointer"
     >
+      <button type="button" className="sr-only preview-trigger" aria-haspopup="dialog">
+        View details for {item.title}
+      </button>
       <div>
         {/* Top Row: Avatar Icon + Category / New badges */}
         <div className="flex items-start justify-between gap-3 mb-3">
@@ -59,7 +63,7 @@ const DirectoryCard = memo(function DirectoryCard({
           </div>
 
           <div className="flex items-center gap-1.5 flex-wrap justify-end">
-            {item.isNew && (
+            {isNew && (
               <span className="px-2 py-0.5 text-[9px] font-mono font-bold uppercase tracking-wider rounded-full bg-[#9DF71F]/30 text-studio-navy border border-[#9DF71F]/50">
                 New
               </span>

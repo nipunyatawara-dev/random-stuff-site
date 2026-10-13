@@ -46,3 +46,6 @@ next-env.d.ts
 /data/*.db-shm
 /data/*.db-wal
 /data/submissions.json
+
+# Generated catalog link reports
+/reports/

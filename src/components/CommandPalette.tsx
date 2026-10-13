@@ -10,6 +10,7 @@ import {
   Compass,
   CornerDownLeft,
 } from "lucide-react";
+import Modal from "./Modal";
 import type { Item } from "@/data/items";
 import { searchItems } from "@/lib/item-search";
 import { playClickSound } from "@/lib/sound-fx";
@@ -140,7 +141,7 @@ export default function CommandPalette({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isOpen) return;
+      if (!isOpen || e.target !== inputRef.current) return;
 
       if (e.key === "ArrowDown") {
         e.preventDefault();
@@ -175,13 +176,10 @@ export default function CommandPalette({
   if (!isOpen) return null;
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label="Command Palette"
-      className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 p-4 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-200 select-none"
-      onClick={onClose}
-    >
+    <Modal
+      label="Command Palette"
+      onClose={onClose}
+      className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 p-4 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-200 select-none"    >
       <div
         className="w-full max-w-xl bg-surface rounded-[28px] shadow-studio-card border border-studio-neutral-200 overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
@@ -191,6 +189,12 @@ export default function CommandPalette({
           <Search className="w-5 h-5 text-studio-blue" />
           <input
             ref={inputRef}
+            role="combobox"
+            aria-label="Search tools and commands"
+            aria-expanded="true"
+            aria-autocomplete="list"
+            aria-controls="command-results"
+            aria-activedescendant={totalResults[selectedIndex] ? `command-${totalResults[selectedIndex].id}` : undefined}
             type="text"
             placeholder="Type a tool name, category (#macos, #cli), or command..."
             value={query}
@@ -199,6 +203,7 @@ export default function CommandPalette({
           />
           <button
             type="button"
+            aria-label="Close command palette"
             onClick={onClose}
             className="p-1 rounded-full text-studio-neutral-400 hover:text-studio-neutral-600 hover:bg-studio-neutral-200 transition-colors"
           >
@@ -207,7 +212,7 @@ export default function CommandPalette({
         </div>
 
         {/* Results List */}
-        <div ref={listRef} className="max-h-96 overflow-y-auto p-3 space-y-1">
+        <div ref={listRef} id="command-results" role="listbox" aria-label="Tools and commands" className="max-h-96 overflow-y-auto p-3 space-y-1">
           {totalResults.length === 0 ? (
             <div className="py-12 text-center text-xs text-studio-neutral-400 font-mono">
               No matching tools or commands found
@@ -220,6 +225,9 @@ export default function CommandPalette({
               return (
                 <div
                   key={entry.id}
+                  id={`command-${entry.id}`}
+                  role="option"
+                  aria-selected={isSelected}
                   onMouseEnter={() => setSelectedIndex(idx)}
                   onClick={() => {
                     playClickSound();
@@ -280,6 +288,6 @@ export default function CommandPalette({
           <span className="text-studio-blue font-bold">Random Stuff</span>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

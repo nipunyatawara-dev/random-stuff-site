@@ -390,3 +390,23 @@ html.lenis,
   :root:not([data-color-mode="light"]) .color-mode-moon { display: none; }
   :root:not([data-color-mode="light"]) .color-mode-sun { display: block; }
 }
+
+/* Native modal behavior with the existing full-viewport overlay appearance. */
+.studio-modal {
+  margin: 0;
+  width: 100%;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  border: 0;
+  color: inherit;
+}
+.studio-modal::backdrop { background: transparent; }
+.directory-card:has(.preview-trigger:focus-visible) {
+  outline: 2px solid var(--studio-blue);
+  outline-offset: 3px;
+}
+[role="button"]:focus-visible {
+  outline: 2px solid var(--studio-blue);
+  outline-offset: 3px;
+}

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { Sparkles, ExternalLink, RotateCw, X, Heart } from "lucide-react";
+import Modal from "./Modal";
 import type { Item } from "@/data/items";
 import { playRollSound, playSuccessSound, playClickSound } from "@/lib/sound-fx";
 import { MagneticButton } from "./studio/MagneticButton";
@@ -84,13 +85,10 @@ export default function RandomRouletteModal({
   const isFav = current ? favorites.includes(current.id) : false;
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label="Random Tool Roulette"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-200"
-      onClick={onClose}
-    >
+    <Modal
+      label="Random Tool Roulette"
+      onClose={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-200"    >
       <div
         className="w-full max-w-lg bg-surface rounded-[22px] sm:rounded-[32px] p-4 sm:p-8 shadow-studio-card border border-studio-neutral-200 overflow-y-auto max-h-[90vh] flex flex-col relative select-none"
         onClick={(e) => e.stopPropagation()}
@@ -105,6 +103,7 @@ export default function RandomRouletteModal({
           </div>
           <button
             type="button"
+            aria-label="Close random tool roulette"
             onClick={() => {
               playClickSound();
               onClose();
@@ -198,6 +197,6 @@ export default function RandomRouletteModal({
           </div>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

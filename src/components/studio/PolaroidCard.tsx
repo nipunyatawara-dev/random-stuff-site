@@ -23,6 +23,15 @@ export const PolaroidCard: React.FC<PolaroidCardProps> = ({
   return (
     <div
       onClick={onClick}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      aria-label={onClick ? caption : undefined}
+      onKeyDown={(event) => {
+        if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) {
+          event.preventDefault();
+          onClick?.();
+        }
+      }}
       style={{
         transform: `rotate(${rotation}deg)`,
       }}

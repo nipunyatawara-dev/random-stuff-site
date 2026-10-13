@@ -71,6 +71,15 @@ export const TiltCard: React.FC<TiltCardProps> = ({
     <div style={{ perspective: 1000 }} className={`w-full select-none ${className}`}>
       <motion.div
         ref={cardRef}
+        role={onClick ? "button" : undefined}
+        tabIndex={onClick ? 0 : undefined}
+        aria-label={onClick ? `View ${title} stack` : undefined}
+        onKeyDown={(event) => {
+          if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) {
+            event.preventDefault();
+            onClick?.();
+          }
+        }}
         onClick={onClick}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}

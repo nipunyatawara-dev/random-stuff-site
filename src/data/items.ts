@@ -1,4 +1,7 @@
 import { getTopicsForItem, type SearchTopic } from "@/lib/search-topics";
+import { CATALOG_ADDED_AT } from "./catalog-dates";
+import { COMPARISON_DETAILS, type ComparisonDetails } from "./comparison-details";
+import { isRecentlyAdded } from "@/lib/catalog-dates";
 
 export interface Item {
   id: string;
@@ -12,6 +15,8 @@ export interface Item {
   searchTerms?: string[];
   image?: string;
   isNew?: boolean;
+  addedAt?: string;
+  details?: ComparisonDetails;
 }
 
 type RawItem = Omit<Item, "id" | "topics">;
@@ -72,7 +77,7 @@ const rawItems: RawItem[] = [
   {
     "title": "Ffmpeg Script",
     "description": "Quickly convert MKV to MP4 without losing quality.",
-    "website": "#",
+    "website": "https://ffmpeg.org/ffmpeg.html",
     "category": "Scripts",
     "tags": [
       "macos",
@@ -2782,12 +2787,6 @@ function slugify(value: string) {
 
 const idCounts = new Map<string, number>();
 
-// Mark the last 6 items in the raw array as "new"
-const NEW_ITEM_COUNT = 6;
-const newItemTitles = new Set(
-  rawItems.slice(-NEW_ITEM_COUNT).map(i => i.title)
-);
-
 export const items: Item[] = rawItems.map((item) => {
   const baseId = `${slugify(item.category) || "category"}-${slugify(item.title) || "item"}`;
   const count = idCounts.get(baseId) ?? 0;
@@ -2795,13 +2794,17 @@ export const items: Item[] = rawItems.map((item) => {
 
   // Auto-populate image from website favicon if missing
   const image = item.image || getFaviconUrl(item.website) || getFaviconUrl(item.github);
+  const addedAt = item.addedAt ?? CATALOG_ADDED_AT[`${item.category}:${item.title.toLowerCase().trim()}`];
+  const id = count === 0 ? baseId : `${baseId}-${count + 1}`;
 
   return {
     ...item,
     topics: getTopicsForItem(item.title),
     image,
-    isNew: newItemTitles.has(item.title),
-    id: count === 0 ? baseId : `${baseId}-${count + 1}`,
+    addedAt,
+    details: item.details ?? COMPARISON_DETAILS[id],
+    isNew: isRecentlyAdded(addedAt),
+    id,
   };
 });
 

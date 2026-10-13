@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import { X, Scale, Plus, ExternalLink, Trash2, Heart } from "lucide-react";
+import Modal from "./Modal";
+import ComparisonFacts from "./ComparisonFacts";
 import type { Item } from "@/data/items";
 import { playClickSound } from "@/lib/sound-fx";
 
@@ -58,13 +60,10 @@ export default function CompareModal({
     .slice(0, 10);
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label="Compare Tools"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-200"
-      onClick={onClose}
-    >
+    <Modal
+      label="Compare Tools"
+      onClose={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-200"    >
       <div
         className="w-full max-w-5xl bg-surface rounded-[22px] sm:rounded-[32px] p-4 sm:p-8 shadow-studio-card border border-studio-neutral-200 overflow-hidden flex flex-col max-h-[90vh] relative select-none"
         onClick={(e) => e.stopPropagation()}
@@ -86,6 +85,7 @@ export default function CompareModal({
           </div>
           <button
             type="button"
+            aria-label="Close compare tools"
             onClick={() => {
               playClickSound();
               onClose();
@@ -141,12 +141,14 @@ export default function CompareModal({
                         ))}
                       </div>
                     )}
+                    <ComparisonFacts item={item} />
                   </div>
 
                   <div className="pt-4 border-t border-studio-neutral-200/80 flex items-center justify-between">
                     <button
                       type="button"
                       onClick={() => onToggleFavorite(item.id)}
+                      aria-label={`${isFav ? "Remove" : "Save"} ${item.title} ${isFav ? "from" : "to"} favorites`}
                       className="p-2 rounded-full hover:bg-studio-neutral-200/60 transition-colors"
                     >
                       <Heart
@@ -220,6 +222,6 @@ export default function CompareModal({
           </div>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

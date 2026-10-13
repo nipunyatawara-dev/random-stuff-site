@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import dynamic from "next/dynamic";
 import type { Item } from "@/data/items";
 import { OtterLogo, MagneticButton, LoadingScreen } from "./studio";
 import HeroSection from "./HeroSection";
 import ContentSection from "./ContentSection";
 import Footer from "./Footer";
+import Modal from "./Modal";
+import { INITIAL_PAGE_LOADING, trackPageLoading } from "@/lib/page-loading";
 import ColorModeToggle from "./ColorModeToggle";
 import { useFavorites } from "@/hooks/useFavorites";
 import {
@@ -27,7 +29,7 @@ import {
   VolumeX,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { scrollToY, stopLenis, startLenis } from "@/lib/lenis";
+import { scrollToY, lockPageScroll } from "@/lib/lenis";
 import { isSoundEnabled, toggleSound } from "@/lib/sound-fx";
 const RandomRouletteModal = dynamic(() => import("./RandomRouletteModal"));
 const CompareModal = dynamic(() => import("./CompareModal"));
@@ -43,8 +45,15 @@ export default function ClientPageLayout({ items }: { items: Item[] }) {
     setHasOpenedCompare(true);
     setShowCompare(true);
   };
-  const [isLoadingScreenVisible, setIsLoadingScreenVisible] = useState(false);
+  const [isLoadingScreenVisible, setIsLoadingScreenVisible] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState(INITIAL_PAGE_LOADING);
   const [isIntroDismissing, setIsIntroDismissing] = useState(false);
+  const catalogReadyRef = useRef(false);
+  const loadingTrackerRef = useRef<ReturnType<typeof trackPageLoading> | null>(null);
+  const handleCatalogReady = useCallback(() => {
+    catalogReadyRef.current = true;
+    loadingTrackerRef.current?.markCatalogReady();
+  }, []);
   const [soundOn, setSoundOn] = useState(false);
 
   // Sync sound effect preference
@@ -73,9 +82,15 @@ export default function ClientPageLayout({ items }: { items: Item[] }) {
     window.scrollTo(0, 0);
   }, []);
 
-  // Show initial loading screen on mount
+  // Recheck readiness on every page load, including cached and returning visits.
   useEffect(() => {
-    setIsLoadingScreenVisible(true);
+    const tracker = trackPageLoading(document, window, setLoadingProgress);
+    loadingTrackerRef.current = tracker;
+    if (catalogReadyRef.current) tracker.markCatalogReady();
+    return () => {
+      tracker.dispose();
+      loadingTrackerRef.current = null;
+    };
   }, []);
 
   const handleLoadingComplete = () => {
@@ -83,29 +98,9 @@ export default function ClientPageLayout({ items }: { items: Item[] }) {
     setIsIntroDismissing(false);
   };
 
-  // Lock body scroll and halt virtual scroll when mobile drawer or active loading screen is open
   useEffect(() => {
-    if (mobileDrawerOpen || (isLoadingScreenVisible && !isIntroDismissing)) {
-      const prev = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
-      stopLenis();
-      return () => {
-        document.body.style.overflow = prev;
-        startLenis();
-      };
-    }
-  }, [mobileDrawerOpen, isLoadingScreenVisible, isIntroDismissing]);
-
-  // Close drawer on Escape key
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && mobileDrawerOpen) {
-        setMobileDrawerOpen(false);
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [mobileDrawerOpen]);
+    if (isLoadingScreenVisible && !isIntroDismissing) return lockPageScroll();
+  }, [isLoadingScreenVisible, isIntroDismissing]);
 
   const scrollToCatalog = () => {
     const el = document.getElementById("catalog-section");
@@ -161,6 +156,7 @@ export default function ClientPageLayout({ items }: { items: Item[] }) {
       <AnimatePresence>
         {isLoadingScreenVisible && (
           <LoadingScreen
+            progress={loadingProgress}
             onComplete={handleLoadingComplete}
             onDismissStart={() => setIsIntroDismissing(true)}
           />
@@ -170,20 +166,16 @@ export default function ClientPageLayout({ items }: { items: Item[] }) {
       {/* Top Global Studio Navigation Bar */}
       <header className="sticky top-0 z-40 bg-canvas/85 backdrop-blur-md border-b border-border-subtle px-4 md:px-8 py-3 select-none">
         <div className="max-w-[1400px] mx-auto flex items-center justify-between gap-4">
-          <button
-            type="button"
-            onClick={() => setIsLoadingScreenVisible(true)}
-            className="flex items-center gap-3 cursor-pointer group text-left"
-            title="Replay Otter Intro"
-            aria-label="Replay intro animation"
+          <div
+            className="flex items-center gap-3 text-left"
           >
-            <div className="group-hover:scale-105 transition-transform duration-200">
+            <div className="shrink-0">
               <OtterLogo size={32} />
             </div>
             <span className="font-phudu font-bold text-lg md:text-xl text-studio-navy tracking-tight">
               RANDOM STUFF
             </span>
-          </button>
+          </div>
 
           {/* Desktop Right Quick Actions */}
           <div className="hidden sm:flex items-center gap-2.5">
@@ -256,7 +248,7 @@ export default function ClientPageLayout({ items }: { items: Item[] }) {
       {/* Mobile Slide-Over Navigation Drawer */}
       <AnimatePresence>
         {mobileDrawerOpen && (
-          <div className="fixed inset-0 z-50 flex justify-end select-none">
+          <Modal label="Mobile navigation" onClose={() => setMobileDrawerOpen(false)} className="fixed inset-0 z-50 flex justify-end select-none bg-transparent">
             {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -278,23 +270,16 @@ export default function ClientPageLayout({ items }: { items: Item[] }) {
               <div>
                 {/* Drawer Header */}
                 <div className="flex items-center justify-between pb-5 border-b border-studio-neutral-100 mb-6">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMobileDrawerOpen(false);
-                      setIsLoadingScreenVisible(true);
-                    }}
-                    className="flex items-center gap-2.5 cursor-pointer text-left group"
-                    title="Replay Otter Intro"
-                    aria-label="Replay intro animation"
+                  <div
+                    className="flex items-center gap-2.5 text-left"
                   >
-                    <div className="group-hover:scale-105 transition-transform duration-200">
+                    <div className="shrink-0">
                       <OtterLogo size={28} />
                     </div>
                     <span className="font-phudu font-bold text-base text-studio-navy">
                       RANDOM STUFF
                     </span>
-                  </button>
+                  </div>
                   <button
                     type="button"
                     onClick={() => setMobileDrawerOpen(false)}
@@ -417,11 +402,11 @@ export default function ClientPageLayout({ items }: { items: Item[] }) {
 
               {/* Drawer Bottom Credit */}
               <div className="pt-4 border-t border-studio-neutral-100 text-[11px] font-mono text-studio-neutral-400 flex items-center justify-between">
-                <span>350+ Curated Tools</span>
+                <span>{items.length} Curated Tools</span>
                 <span className="text-[#89E00F] font-bold">100% Free</span>
               </div>
             </motion.div>
-          </div>
+          </Modal>
         )}
       </AnimatePresence>
 
@@ -439,6 +424,7 @@ export default function ClientPageLayout({ items }: { items: Item[] }) {
           />
 
           <ContentSection
+            onReady={handleCatalogReady}
             initialItems={items}
             activeCategory={activeCategory}
             onCategoryChange={setActiveCategory}
