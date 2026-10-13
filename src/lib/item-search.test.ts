@@ -66,4 +66,22 @@ describe("topic-aware item search", () => {
     expect(titlesFor("GIMP")[0]).toBe("GIMP");
     expect(titlesFor("image")).toEqual(titlesFor("image"));
   });
+
+  it("keeps ranking identical when filtering into new candidate arrays", () => {
+    searchItems(items, "image");
+    const candidates = items.filter((item) => item.category === "Softwares");
+    for (const query of ["image compression", "programing", "#macos", "GIMP"]) {
+      const cached = searchItems(candidates, query).map((item) => item.id);
+      const fresh = searchItems(candidates.map((item) => ({ ...item })), query).map((item) => item.id);
+      expect(cached).toEqual(fresh);
+    }
+  });
+
+  it("indexes replacement records independently even if their IDs are unchanged", () => {
+    const original = { ...items[0], title: "Unique original", description: "", topics: [], tags: [] };
+    searchItems([original], "unique");
+    const replacement = { ...original, title: "Replacement title" };
+    expect(searchItems([replacement], "replacement")).toEqual([replacement]);
+    expect(searchItems([replacement], "unique")).toEqual([]);
+  });
 });

@@ -1,14 +1,22 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 
 const STORAGE_KEY = "random-stuff-favorites";
 const SYNC_EVENT = "random-stuff-favorites-sync";
+
+function parseStoredFavorites(value: string | null): string[] {
+    const parsed: unknown = value ? JSON.parse(value) : [];
+    return Array.isArray(parsed)
+        ? [...new Set(parsed.filter((id): id is string => typeof id === "string"))]
+        : [];
+}
 
 export function useFavorites() {
     const [favorites, setFavorites] = useState<string[]>([]);
     const [isLoaded, setIsLoaded] = useState(false);
     const favoritesRef = useRef<string[]>(favorites);
+    const favoriteIds = useMemo(() => new Set(favorites), [favorites]);
 
     useEffect(() => {
         favoritesRef.current = favorites;
@@ -18,10 +26,9 @@ export function useFavorites() {
     useEffect(() => {
         const loadFavorites = () => {
             try {
-                const stored = localStorage.getItem(STORAGE_KEY);
-                if (stored) {
-                    setFavorites(JSON.parse(stored));
-                }
+                const stored = parseStoredFavorites(localStorage.getItem(STORAGE_KEY));
+                favoritesRef.current = stored;
+                setFavorites(stored);
             } catch (error) {
                 console.error("Failed to load favorites:", error);
             }
@@ -32,9 +39,11 @@ export function useFavorites() {
 
         // Listen for updates from other browser tabs
         const handleStorage = (e: StorageEvent) => {
-            if (e.key === STORAGE_KEY && e.newValue) {
+            if (e.key === STORAGE_KEY || e.key === null) {
                 try {
-                    setFavorites(JSON.parse(e.newValue));
+                    const next = parseStoredFavorites(e.newValue);
+                    favoritesRef.current = next;
+                    setFavorites(next);
                 } catch {
                     // Ignore parse errors
                 }
@@ -45,6 +54,7 @@ export function useFavorites() {
         const handleCustomSync = (e: Event) => {
             const customEvent = e as CustomEvent<string[]>;
             if (Array.isArray(customEvent.detail)) {
+                favoritesRef.current = customEvent.detail;
                 setFavorites((prev) => {
                     if (
                         prev.length === customEvent.detail.length &&
@@ -69,6 +79,7 @@ export function useFavorites() {
     const updateAndPersist = useCallback(
         (updater: (current: string[]) => string[]) => {
             const next = updater(favoritesRef.current);
+            if (next === favoritesRef.current) return;
             favoritesRef.current = next;
             setFavorites(next);
 
@@ -94,6 +105,14 @@ export function useFavorites() {
         [updateAndPersist]
     );
 
+    // Import a collection with one storage write and one synchronization event.
+    const addFavorites = useCallback(
+        (ids: string[]) => {
+            updateAndPersist((prev) => [...new Set([...prev, ...ids])]);
+        },
+        [updateAndPersist]
+    );
+
     const removeFavorite = useCallback(
         (id: string) => {
             updateAndPersist((prev) => prev.filter((fav) => fav !== id));
@@ -103,7 +122,8 @@ export function useFavorites() {
 
     const removeFavorites = useCallback(
         (ids: string[]) => {
-            updateAndPersist((prev) => prev.filter((fav) => !ids.includes(fav)));
+            const removed = new Set(ids);
+            updateAndPersist((prev) => prev.filter((fav) => !removed.has(fav)));
         },
         [updateAndPersist]
     );
@@ -125,14 +145,15 @@ export function useFavorites() {
     }, [updateAndPersist]);
 
     const isFavorite = useCallback(
-        (id: string) => favorites.includes(id),
-        [favorites]
+        (id: string) => favoriteIds.has(id),
+        [favoriteIds]
     );
 
     return {
         favorites,
         isLoaded,
         addFavorite,
+        addFavorites,
         removeFavorite,
         removeFavorites,
         toggleFavorite,

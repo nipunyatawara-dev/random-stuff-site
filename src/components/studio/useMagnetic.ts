@@ -89,6 +89,7 @@ export function useMagnetic({
     return () => {
       container.removeEventListener('mousemove', handleMouseMove);
       container.removeEventListener('mouseleave', handleMouseLeave);
+      gsap.killTweensOf([container, inner]);
       // Clean up inline transforms on unmount
       gsap.set([container, inner], { x: 0, y: 0 });
     };

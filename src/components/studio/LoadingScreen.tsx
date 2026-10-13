@@ -16,17 +16,25 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
 }) => {
   const [progress, setProgress] = useState(0);
   const [isFinishing, setIsFinishing] = useState(false);
+  const finishingRef = React.useRef(false);
+  const completeTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const onCompleteRef = React.useRef(onComplete);
   onCompleteRef.current = onComplete;
   const onDismissStartRef = React.useRef(onDismissStart);
   onDismissStartRef.current = onDismissStart;
 
   const handleFinish = useCallback(() => {
+    if (finishingRef.current) return;
+    finishingRef.current = true;
     setIsFinishing(true);
     onDismissStartRef.current?.();
-    setTimeout(() => {
+    completeTimerRef.current = setTimeout(() => {
       onCompleteRef.current();
     }, 450);
+  }, []);
+
+  useEffect(() => () => {
+    if (completeTimerRef.current) clearTimeout(completeTimerRef.current);
   }, []);
 
   // Handle escape key to skip
@@ -48,6 +56,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
     const duration = prefersReducedMotion ? Math.min(minDurationMs, 650) : minDurationMs;
     const startTime = performance.now();
     const interval = 20; // 50fps tick
+    let finishTimer: ReturnType<typeof setTimeout> | undefined;
 
     const timer = setInterval(() => {
       const elapsed = performance.now() - startTime;
@@ -65,11 +74,14 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
       if (elapsed >= duration) {
         clearInterval(timer);
         setProgress(100);
-        setTimeout(handleFinish, 160);
+        finishTimer = setTimeout(handleFinish, 160);
       }
     }, interval);
 
-    return () => clearInterval(timer);
+    return () => {
+      clearInterval(timer);
+      if (finishTimer !== undefined) clearTimeout(finishTimer);
+    };
   }, [minDurationMs, handleFinish]);
 
   return (

@@ -1,20 +1,19 @@
 "use client";
 
-import Image from "next/image";
-import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import dynamic from "next/dynamic";
+import DirectoryCard from "./DirectoryCard";
+import React, { useEffect, useMemo, useRef, useState, useCallback, useDeferredValue } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { type Item } from "@/data/items";
 import { CURATED_STACKS, type CuratedStack } from "@/data/stacks";
 import {
   Search,
   Heart,
-  ArrowUpRight,
   Sparkles,
   Scale,
   Download,
   Upload,
   X,
-  Check,
   ExternalLink,
   Share2,
   Trash2,
@@ -22,24 +21,17 @@ import {
   Link2,
 } from "lucide-react";
 import { useFavorites } from "@/hooks/useFavorites";
-import { getVisiblePlatformTags, itemMatchesPlatformTag } from "@/lib/platform-tags";
+import { itemMatchesPlatformTag } from "@/lib/platform-tags";
 import { searchItems } from "@/lib/item-search";
-import {
-  exportFavoritesMarkdown,
-  exportFavoritesJson,
-  exportFavoritesHtml,
-  triggerFileDownload,
-  parseFavoritesImport,
-} from "@/lib/export-favorites";
 import { playClickSound, playSuccessSound } from "@/lib/sound-fx";
 import {
   PillTabs,
   TiltCard,
   MagneticButton,
 } from "./studio";
-import CommandPalette from "./CommandPalette";
-import CompareModal from "./CompareModal";
-import RandomRouletteModal from "./RandomRouletteModal";
+const CommandPalette = dynamic(() => import("./CommandPalette"));
+const CompareModal = dynamic(() => import("./CompareModal"));
+const RandomRouletteModal = dynamic(() => import("./RandomRouletteModal"));
 
 const INITIAL_VISIBLE_ITEMS = 36;
 const LOAD_MORE_ITEMS = 24;
@@ -76,12 +68,13 @@ export default function ContentSection({
 
   const [activeTag, setActiveTag] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const deferredSearchQuery = useDeferredValue(searchQuery);
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_ITEMS);
   const [previewItem, setPreviewItem] = useState<Item | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
 
   // Favorites state
-  const { favorites, isFavorite, toggleFavorite, clearFavorites, removeFavorites, addFavorite } = useFavorites();
+  const { favorites, isFavorite, toggleFavorite, clearFavorites, removeFavorites, addFavorites } = useFavorites();
   const [selectedFavs, setSelectedFavs] = useState<string[]>([]);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
@@ -90,6 +83,7 @@ export default function ContentSection({
   // Modals state
   const [showRoulette, setShowRoulette] = useState(false);
   const [showCompare, setShowCompare] = useState(false);
+  const [hasOpenedCompare, setHasOpenedCompare] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
 
   const handleOpenRoulette = useCallback(() => {
@@ -99,7 +93,10 @@ export default function ContentSection({
 
   const handleOpenCompare = useCallback(() => {
     if (onOpenCompare) onOpenCompare();
-    else setShowCompare(true);
+    else {
+      setHasOpenedCompare(true);
+      setShowCompare(true);
+    }
   }, [onOpenCompare]);
 
   // Sync initial state from URL search parameters or hash
@@ -187,8 +184,8 @@ export default function ContentSection({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Filtered tools computation
-  const filteredItems = useMemo(() => {
+  // Keep the candidate array stable while typing so search can reuse its index.
+  const candidateItems = useMemo(() => {
     let list = items;
 
     // Filter by category tab
@@ -208,13 +205,14 @@ export default function ContentSection({
       list = list.filter((i) => itemMatchesPlatformTag(i, activeTag));
     }
 
-    // Filter by search query
-    if (searchQuery.trim()) {
-      list = searchItems(list, searchQuery);
-    }
-
     return list;
-  }, [items, activeCategory, activeTag, searchQuery, isFavorite, activeStack]);
+  }, [items, activeCategory, activeTag, isFavorite, activeStack]);
+
+  const filteredItems = useMemo(() => {
+    return deferredSearchQuery.trim()
+      ? searchItems(candidateItems, deferredSearchQuery)
+      : candidateItems;
+  }, [candidateItems, deferredSearchQuery]);
 
   const displayedItems = useMemo(() => {
     return filteredItems.slice(0, visibleCount);
@@ -223,7 +221,7 @@ export default function ContentSection({
   // Reset pagination when filter criteria change
   useEffect(() => {
     setVisibleCount(INITIAL_VISIBLE_ITEMS);
-  }, [activeCategory, activeTag, searchQuery, activeStack]);
+  }, [activeCategory, activeTag, deferredSearchQuery, activeStack]);
 
   // Reset active stack when navigating to another category
   useEffect(() => {
@@ -233,11 +231,11 @@ export default function ContentSection({
   }, [activeCategory]);
 
   // Handle favorites batch actions
-  const handleSelectFav = (id: string) => {
+  const handleSelectFav = useCallback((id: string) => {
     setSelectedFavs((prev) =>
       prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
     );
-  };
+  }, []);
 
   const handleSelectAllFavs = () => {
     const favIds = items.filter((item) => isFavorite(item.id)).map((item) => item.id);
@@ -276,11 +274,14 @@ export default function ContentSection({
     }
   };
 
-  const handleExport = (format: "md" | "json" | "html") => {
+  const handleExport = async (format: "md" | "json" | "html") => {
     playClickSound();
     const favItems = items.filter((item) => isFavorite(item.id));
     if (favItems.length === 0) return;
 
+    const {
+      triggerFileDownload, exportFavoritesMarkdown, exportFavoritesJson, exportFavoritesHtml,
+    } = await import("@/lib/export-favorites");
     if (format === "md") {
       triggerFileDownload("favorites.md", exportFavoritesMarkdown(favItems), "text/markdown");
     } else if (format === "json") {
@@ -298,9 +299,10 @@ export default function ContentSection({
 
     try {
       const text = await file.text();
+      const { parseFavoritesImport } = await import("@/lib/export-favorites");
       const res = parseFavoritesImport(text);
       if (res.ids.length > 0) {
-        res.ids.forEach((id) => addFavorite(id));
+        addFavorites(res.ids);
         alert(`Successfully imported ${res.ids.length} tools into your favorites!`);
       }
     } catch {
@@ -649,168 +651,18 @@ export default function ContentSection({
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
-          {displayedItems.map((item) => {
-            const isFav = isFavorite(item.id);
-            const isSelected = selectedFavs.includes(item.id);
-            const visibleTags = getVisiblePlatformTags(item);
-
-            let domain = "";
-            try {
-              const rawUrl = item.website || item.github;
-              if (rawUrl) {
-                const u = new URL(rawUrl);
-                domain = u.hostname.replace(/^www\./, "");
-              }
-            } catch {
-              domain = "";
-            }
-
-            return (
-              <div
-                key={item.id}
-                onClick={() => setPreviewItem(item)}
-                className="directory-card group relative bg-white rounded-[20px] sm:rounded-[24px] p-4 sm:p-5 md:p-6 shadow-studio-card border border-slate-100/90 hover:border-[#82CCFF]/70 hover:shadow-xl transition-all duration-300 flex flex-col justify-between h-full overflow-hidden select-none cursor-pointer"
-              >
-                <div>
-                  {/* Top Row: Avatar Icon + Category / New badges */}
-                  <div className="flex items-start justify-between gap-3 mb-3">
-                    <div className="w-11 h-11 rounded-2xl bg-[#F0F2F5] border border-slate-200/80 flex items-center justify-center overflow-hidden shrink-0 shadow-xs relative">
-                      {item.image ? (
-                        <Image
-                          src={item.image}
-                          alt={item.title}
-                          width={44}
-                          height={44}
-                          unoptimized
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <span className="font-phudu font-bold text-base text-[#007BE5]">
-                          {item.title.charAt(0).toUpperCase()}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-1.5 flex-wrap justify-end">
-                      {item.isNew && (
-                        <span className="px-2 py-0.5 text-[9px] font-mono font-bold uppercase tracking-wider rounded-full bg-[#9DF71F]/30 text-[#14334D] border border-[#9DF71F]/50">
-                          New
-                        </span>
-                      )}
-                      <span className="px-2 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider rounded-full bg-slate-100 text-[#456176]">
-                        {item.category}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Title and Domain */}
-                  <div className="mb-2">
-                    <a
-                      href={item.website || item.github}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                      className="font-phudu text-lg font-bold text-[#14334D] group-hover:text-[#007BE5] active:text-[#007BE5] transition-colors inline-flex items-center gap-1.5 tracking-tight"
-                    >
-                      <span className="line-clamp-1">{item.title}</span>
-                      <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-[#007BE5] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
-                    </a>
-
-                    {domain && (
-                      <span className="text-[11px] font-mono text-[#A0AFBB] font-medium block truncate mt-0.5">
-                        {domain}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Description */}
-                  <p className="text-xs sm:text-sm text-[#456176] font-sans leading-relaxed line-clamp-3 mb-4">
-                    {item.description}
-                  </p>
-
-                  {/* Visible Platform Tags */}
-                  {visibleTags.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mb-4">
-                      {visibleTags.map((t) => (
-                        <span
-                          key={t}
-                          className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-[#F0F2F5] text-[#456176]"
-                        >
-                          #{t}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Footer Row: Source Button + Favorite + Launch */}
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    {item.github && (
-                      <a
-                        href={item.github}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#F0F2F5] hover:bg-[#14334D] text-[#14334D] hover:text-white text-xs font-semibold transition-colors cursor-pointer min-h-[36px] touch-manipulation"
-                        title="Go to Source Code on GitHub"
-                      >
-                        <Github className="w-3.5 h-3.5" />
-                        <span>Source</span>
-                      </a>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-1.5">
-                    {isSelectionMode && (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleSelectFav(item.id);
-                        }}
-                        className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-                          isSelected
-                            ? "bg-[#14334D] text-white"
-                            : "bg-slate-100 text-slate-400 hover:bg-slate-200"
-                        }`}
-                      >
-                        {isSelected ? <Check className="w-3.5 h-3.5" /> : <div className="w-2 h-2 rounded-full border border-slate-400" />}
-                      </button>
-                    )}
-
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        playClickSound();
-                        toggleFavorite(item.id);
-                      }}
-                      className="p-2.5 min-w-[38px] min-h-[38px] rounded-full bg-[#F0F2F5] hover:bg-red-50 text-slate-400 hover:text-red-500 transition-all cursor-pointer group/fav flex items-center justify-center touch-manipulation"
-                      aria-label={isFav ? "Remove from favorites" : "Add to favorites"}
-                    >
-                      <Heart
-                        className={`w-4 h-4 transition-transform duration-200 group-hover/fav:scale-115 ${
-                          isFav ? "fill-red-500 text-red-500" : "text-slate-400"
-                        }`}
-                      />
-                    </button>
-
-                    <a
-                      href={item.website || item.github}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                      className="p-2.5 min-w-[38px] min-h-[38px] rounded-full bg-[#F0F2F5] hover:bg-[#007BE5] text-slate-500 hover:text-white transition-all cursor-pointer flex items-center justify-center touch-manipulation"
-                      title={item.website ? "Visit Website" : "Open Tool"}
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                    </a>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+          {displayedItems.map((item) => (
+            <DirectoryCard
+              key={item.id}
+              item={item}
+              isFav={isFavorite(item.id)}
+              isSelected={selectedFavs.includes(item.id)}
+              isSelectionMode={isSelectionMode}
+              onPreview={setPreviewItem}
+              onSelectFavorite={handleSelectFav}
+              toggleFavorite={toggleFavorite}
+            />
+          ))}
         </div>
       )}
 
@@ -952,22 +804,23 @@ export default function ContentSection({
       </AnimatePresence>
 
       {/* COMMAND PALETTE */}
-      <CommandPalette
-        isOpen={showCommandPalette}
-        onClose={() => setShowCommandPalette(false)}
-        items={items}
-        onSelectItem={(item) => {
-          setPreviewItem(item);
-        }}
-        onOpenRandom={handleOpenRoulette}
-        onOpenFavorites={() => setActiveCategory("favorites")}
-        onOpenSandbox={() => {}}
-        onOpenCompare={handleOpenCompare}
-        onExportFavorites={() => handleExport("md")}
-      />
+      {showCommandPalette && (
+        <CommandPalette
+          isOpen={showCommandPalette}
+          onClose={() => setShowCommandPalette(false)}
+          items={items}
+          onSelectItem={(item) => {
+            setPreviewItem(item);
+          }}
+          onOpenRandom={handleOpenRoulette}
+          onOpenFavorites={() => setActiveCategory("favorites")}
+          onOpenCompare={handleOpenCompare}
+          onExportFavorites={() => handleExport("md")}
+        />
+      )}
 
       {/* Fallback Modals (Only active if not controlled globally by parent layout) */}
-      {!onOpenCompare && (
+      {!onOpenCompare && hasOpenedCompare && (
         <CompareModal
           isOpen={showCompare}
           onClose={() => setShowCompare(false)}
@@ -977,7 +830,7 @@ export default function ContentSection({
         />
       )}
 
-      {!onOpenRoulette && (
+      {!onOpenRoulette && showRoulette && (
         <RandomRouletteModal
           isOpen={showRoulette}
           onClose={() => setShowRoulette(false)}

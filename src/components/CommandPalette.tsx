@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useDeferredValue } from "react";
 import {
   Search,
   Sparkles,
@@ -47,6 +47,7 @@ export default function CommandPalette({
   onExportFavorites,
 }: CommandPaletteProps) {
   const [query, setQuery] = useState("");
+  const deferredQuery = useDeferredValue(query);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -106,9 +107,9 @@ export default function CommandPalette({
   );
 
   const filteredItems = useMemo(() => {
-    if (!query.trim()) return [];
-    return searchItems(items, query).slice(0, 8);
-  }, [items, query]);
+    if (!deferredQuery.trim()) return [];
+    return searchItems(items, deferredQuery).slice(0, 8);
+  }, [items, deferredQuery]);
 
   const filteredActions = useMemo(() => {
     if (!query.trim()) return actions;
@@ -126,13 +127,14 @@ export default function CommandPalette({
 
   useEffect(() => {
     setSelectedIndex(0);
-  }, [query]);
+  }, [query, deferredQuery]);
 
   useEffect(() => {
     if (isOpen) {
       setQuery("");
       setSelectedIndex(0);
-      setTimeout(() => inputRef.current?.focus(), 50);
+      const timer = setTimeout(() => inputRef.current?.focus(), 50);
+      return () => clearTimeout(timer);
     }
   }, [isOpen]);
 

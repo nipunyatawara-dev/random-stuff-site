@@ -7,10 +7,30 @@ import { clearLenisInstance, setLenisInstance } from "@/lib/lenis";
 export default function PageClientWrapper({ children }: { children: React.ReactNode }) {
   const [isMobile, setIsMobile] = useState<boolean | null>(null);
 
-  // Initialize service worker in production
+  // Defer offline precaching until the page's initial resources have loaded.
   useEffect(() => {
     if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") {
-      navigator.serviceWorker.register("/sw.js").catch(() => {});
+      let cancelled = false;
+      let idleId: number | undefined;
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      const register = () => {
+        if (!cancelled) navigator.serviceWorker.register("/sw.js").catch(() => {});
+      };
+      const schedule = () => {
+        if ("requestIdleCallback" in window) {
+          idleId = window.requestIdleCallback(register, { timeout: 3000 });
+        } else {
+          timer = setTimeout(register, 1000);
+        }
+      };
+      if (document.readyState === "complete") schedule();
+      else window.addEventListener("load", schedule, { once: true });
+      return () => {
+        cancelled = true;
+        window.removeEventListener("load", schedule);
+        if (idleId !== undefined) window.cancelIdleCallback(idleId);
+        if (timer !== undefined) clearTimeout(timer);
+      };
     }
   }, []);
 
@@ -48,10 +68,17 @@ export default function PageClientWrapper({ children }: { children: React.ReactN
     }
     rafId = requestAnimationFrame(raf);
 
+    const onVisibilityChange = () => {
+      cancelAnimationFrame(rafId);
+      if (!document.hidden) rafId = requestAnimationFrame(raf);
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
     return () => {
       clearLenisInstance(lenis);
       lenis.destroy();
       cancelAnimationFrame(rafId);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
     };
   }, [isMobile]);
 

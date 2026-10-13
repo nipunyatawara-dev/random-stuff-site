@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getItems } from "@/lib/items-server";
 
+export const dynamic = "force-static";
+
 export async function GET() {
   const items = await getItems();
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://randomstuff.shocka.site";

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import type { Item } from "@/data/items";
 import { OtterLogo, MagneticButton, LoadingScreen } from "./studio";
 import HeroSection from "./HeroSection";
@@ -27,8 +28,8 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { scrollToY, stopLenis, startLenis } from "@/lib/lenis";
 import { isSoundEnabled, toggleSound } from "@/lib/sound-fx";
-import RandomRouletteModal from "./RandomRouletteModal";
-import CompareModal from "./CompareModal";
+const RandomRouletteModal = dynamic(() => import("./RandomRouletteModal"));
+const CompareModal = dynamic(() => import("./CompareModal"));
 
 export default function ClientPageLayout({ items }: { items: Item[] }) {
   const [activeCategory, setActiveCategory] = useState("all");
@@ -36,6 +37,11 @@ export default function ClientPageLayout({ items }: { items: Item[] }) {
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [showRoulette, setShowRoulette] = useState(false);
   const [showCompare, setShowCompare] = useState(false);
+  const [hasOpenedCompare, setHasOpenedCompare] = useState(false);
+  const openCompare = () => {
+    setHasOpenedCompare(true);
+    setShowCompare(true);
+  };
   const [isLoadingScreenVisible, setIsLoadingScreenVisible] = useState(false);
   const [isIntroDismissing, setIsIntroDismissing] = useState(false);
   const [soundOn, setSoundOn] = useState(false);
@@ -370,7 +376,7 @@ export default function ClientPageLayout({ items }: { items: Item[] }) {
                     type="button"
                     onClick={() => {
                       setMobileDrawerOpen(false);
-                      setShowCompare(true);
+                      openCompare();
                     }}
                     className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-[#14334D] bg-[#F0F2F5]/70 hover:bg-[#F0F2F5] transition-colors"
                   >
@@ -434,27 +440,31 @@ export default function ClientPageLayout({ items }: { items: Item[] }) {
             activeCategory={activeCategory}
             onCategoryChange={setActiveCategory}
             onOpenRoulette={() => setShowRoulette(true)}
-            onOpenCompare={() => setShowCompare(true)}
+            onOpenCompare={openCompare}
           />
         </div>
       </main>
 
       {/* Global Modals for Top Actions */}
-      <RandomRouletteModal
-        isOpen={showRoulette}
-        onClose={() => setShowRoulette(false)}
-        items={items}
-        favorites={favorites}
-        onToggleFavorite={toggleFavorite}
-      />
+      {showRoulette && (
+        <RandomRouletteModal
+          isOpen={showRoulette}
+          onClose={() => setShowRoulette(false)}
+          items={items}
+          favorites={favorites}
+          onToggleFavorite={toggleFavorite}
+        />
+      )}
 
-      <CompareModal
-        isOpen={showCompare}
-        onClose={() => setShowCompare(false)}
-        allItems={items}
-        favorites={favorites}
-        onToggleFavorite={toggleFavorite}
-      />
+      {hasOpenedCompare && (
+        <CompareModal
+          isOpen={showCompare}
+          onClose={() => setShowCompare(false)}
+          allItems={items}
+          favorites={favorites}
+          onToggleFavorite={toggleFavorite}
+        />
+      )}
 
       {/* Studio Desk Footer */}
       <Footer />

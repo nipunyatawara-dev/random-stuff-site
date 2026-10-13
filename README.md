@@ -1,150 +1,48 @@
 # Random Stuff
 
-[![Stack](https://img.shields.io/badge/stack-Next.js%2016%20%2B%20React%2019-green)](https://github.com/nipunyatawara-dev/random-stuff-site)
-[![Deployment](https://img.shields.io/badge/hosting-Vercel-black)](https://randomstuff.shocka.site/)
+A handpicked directory of useful websites, desktop software, and scripts for builders and creators. Explore tools for development, design, productivity, media, privacy, and everyday workflows.
 
----
+[Explore the directory](https://randomstuff.shocka.site/) · [Submit a tool](https://randomstuff.shocka.site/submit)
 
-### Links
+## What the site showcases
 
-* [Live site](https://randomstuff.shocka.site/)
-* [Submit a tool](https://randomstuff.shocka.site/submit)
+- 300+ tools with descriptions, links, platform tags, and source repositories where available.
+- Categories for websites, software, and scripts, with platform, CLI, and open-source filters.
+- Topic-aware search with aliases and typo matching, plus a command palette (`⌘K` / `Ctrl+K`).
+- Curated tool stacks, random discovery through Surprise Roulette, and side-by-side comparisons.
+- Favorites saved in your browser, with bulk selection and Markdown, JSON, and HTML exports, plus JSON import.
+- Shareable links to tools, searches, and filters, an RSS feed, and offline caching.
+- A submission form that sends suggestions to a Discord channel for maintainer review.
 
----
+## How it is built
 
-Random Stuff is a directory of useful websites, desktop apps, and scripts.
+Next.js, React, and TypeScript, styled with Tailwind CSS. Framer Motion, GSAP, and Lenis power the animations and interactions.
 
-* Directory of tools across websites, software, and scripts
-* Search and tag filtering by platform (macOS, Windows, Linux, web)
-* Automatic favicon and metadata previews
-* Submission form connected to a Discord review channel
+The entire catalog lives in [`src/data/items.ts`](src/data/items.ts); curated stacks live in [`src/data/stacks.ts`](src/data/stacks.ts). No external database is required. The homepage, catalog API, and RSS feed are generated at build time, and search and filtering run locally in the browser. Favorites stay in local storage.
 
-# Contents
+## Run locally
 
-- [Key features](#key-features)
-- [Architecture](#architecture)
-- [Tech stack](#tech-stack)
-- [Local development](#local-development)
-- [Star history](#star-history)
-- [Contributing](#contributing)
-
-# Key features
-
-### Discovery and filtering
-* Filter by category: Websites, Softwares, and Scripts
-* Filter by platform tag (`#macos`, `#windows`, `#linux`, `#android`, `#ios`)
-* Live search across titles, descriptions, and tags
-* Badge indicator on recently added items
-
-### Visual and motion
-* Three.js background canvas with particle effects
-* Lenis smooth scrolling with Framer Motion transitions
-* Favicon resolution via Google S2 service
-* High-contrast dark theme with category accent highlights
-
-### Submissions and review
-* Submission form at `/submit`
-* URL duplicate detection against existing items
-* Discord webhook notifications for maintainer review
-
-# Architecture
-
-Next.js 16 web application with static data bundling:
-
-```
-src/
- ├── app/                      # Next.js App Router (pages, layout, submit API)
- ├── components/               # UI views, filter controls, item cards, canvas
- ├── data/                     # Bundled items dataset (items.ts)
- ├── hooks/                    # Custom React hooks (favorites, media queries)
- └── lib/                      # Helper utilities and search index
-```
-
-| Layer | Key files | Responsibility |
-| --- | --- | --- |
-| **UI and layout** | `src/app/page.tsx`, `src/components/ContentSection.tsx` | Grid display, filter controls, search bar, modals |
-| **Canvas background** | `src/components/GridBackground.tsx`, `src/components/ConstellationWords.tsx` | Interactive background graphics and text constellation |
-| **Dataset** | `src/data/items.ts` | Static item records, category assignments, and metadata |
-| **Submissions** | `src/app/submit/page.tsx`, `src/app/api/submit/route.ts` | Submission form and Discord webhook handler |
-
-# Tech stack
-
-| Area | Technology |
-| --- | --- |
-| **Framework** | Next.js 16 (App Router), React 19, TypeScript |
-| **Styling** | Tailwind CSS 4, PostCSS |
-| **Motion** | Framer Motion, Lenis |
-| **3D & Canvas** | Three.js |
-| **Icons** | Lucide React |
-| **Hosting** | Vercel |
-
-# Local development
-
-### Prerequisites
-
-* Node.js 20+
-* npm
-
-### Setup
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/nipunyatawara-dev/random-stuff-site.git
-   cd random-stuff-site
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Start the development server:
-   ```bash
-   npm run dev
-   ```
-
-4. Open `http://localhost:3000` in your browser.
-
-### Typecheck and lint
+Use Node.js 20.9+ and npm.
 
 ```bash
-# Typecheck
-npx tsc --noEmit
+npm ci
+npm run dev
+```
 
-# Lint
+Open [localhost:3000](http://localhost:3000).
+
+```bash
 npm run lint
-
-# Tests
+npx tsc --noEmit
 npm test
-```
-
-Build for production:
-
-```bash
 npm run build
-npm run start
+npm start
 ```
 
-# Star history
+To enable submission delivery, set `DISCORD_WEBHOOK_URL` in `.env.local` (or your hosting environment). The catalog works without it. `NEXT_PUBLIC_SITE_URL` optionally overrides the RSS feed's site URL.
 
-<a href="https://www.star-history.com/?repos=nipunyatawara-dev%2Frandom-stuff-site&type=date&legend=bottom-right">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=nipunyatawara-dev/random-stuff-site&type=date&theme=dark&legend=bottom-right" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=nipunyatawara-dev/random-stuff-site&type=date&legend=bottom-right" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=nipunyatawara-dev/random-stuff-site&type=date&legend=bottom-right" />
- </picture>
-</a>
+## Add a tool
 
-# Contributing
-
-1. Fork the repository
-2. Create a branch (`git checkout -b feat/add-new-tool`)
-3. Add the item record to `src/data/items.ts`
-4. Verify with `npx tsc --noEmit && npm test`
-5. Open a pull request
-
-You can also submit tools directly via the [submission page](https://randomstuff.shocka.site/submit).
-
----
+Add a record to `src/data/items.ts`, then run the checks above and open a pull request. You can also suggest a tool through the [submission form](https://randomstuff.shocka.site/submit).
 
 Built by [Nipun Yatawara / ShockaGG](https://shocka.site/).

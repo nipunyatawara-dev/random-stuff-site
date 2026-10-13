@@ -30,6 +30,7 @@ const STOP_WORDS = new Set([
 ]);
 
 const indexCache = new WeakMap<readonly Item[], IndexedItem[]>();
+const itemIndexCache = new WeakMap<Item, IndexedItem>();
 
 export function normalizeSearchText(value: string) {
   return value
@@ -51,11 +52,14 @@ function getIndex(items: readonly Item[]) {
   if (cached) return cached;
 
   const index = items.map((item): IndexedItem => {
+    const cachedItem = itemIndexCache.get(item);
+    if (cachedItem) return cachedItem;
+
     const title = normalizeSearchText(item.title);
     const description = normalizeSearchText(item.description);
     const searchTerms = (item.searchTerms ?? []).map(normalizeSearchText);
 
-    return {
+    const indexed = {
       item,
       title,
       description,
@@ -66,6 +70,8 @@ function getIndex(items: readonly Item[]) {
       descriptionTokens: tokenize(description),
       searchTermTokens: searchTerms.flatMap(tokenize),
     };
+    itemIndexCache.set(item, indexed);
+    return indexed;
   });
 
   indexCache.set(items, index);
@@ -81,6 +87,10 @@ const aliasEntries = (Object.entries(SEARCH_TOPICS) as [SearchTopic, readonly st
   .sort((a, b) => b.tokens.length - a.tokens.length || b.alias.length - a.alias.length);
 
 const singleTokenAliases = aliasEntries.filter((entry) => entry.tokens.length === 1);
+const multiTokenAliases = aliasEntries.filter((entry) => entry.tokens.length > 1);
+const normalizedTopicAliases = Object.fromEntries(
+  Object.entries(SEARCH_TOPICS).map(([topic, aliases]) => [topic, aliases.map(normalizeSearchText)]),
+) as Record<SearchTopic, string[]>;
 
 function editDistance(a: string, b: string) {
   if (a === b) return 0;
@@ -137,7 +147,7 @@ function parseQuery(query: string): QueryConcept[] {
   const consumed = new Set<number>();
   const concepts: QueryConcept[] = [];
 
-  for (const entry of aliasEntries.filter((candidate) => candidate.tokens.length > 1)) {
+  for (const entry of multiTokenAliases) {
     for (let start = 0; start <= tokens.length - entry.tokens.length; start += 1) {
       const indexes = entry.tokens.map((_, offset) => start + offset);
       if (indexes.some((index) => consumed.has(index))) continue;
@@ -196,7 +206,7 @@ function fuzzyTokenMatch(tokens: string[], term: string) {
 function scoreTopic(indexed: IndexedItem, topic: SearchTopic, source: string) {
   if (!indexed.item.topics.includes(topic)) return null;
 
-  const aliases = SEARCH_TOPICS[topic].map(normalizeSearchText);
+  const aliases = normalizedTopicAliases[topic];
   let score = 60;
 
   if (hasWord(indexed.title, source)) score += 55;
