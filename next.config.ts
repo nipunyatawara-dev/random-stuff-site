@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { finalizeOffline } from "./scripts/finalize-offline.mjs";
 const isDev = process.env.NODE_ENV !== "production";
 // Static pages include Next's inline Flight bootstrap. Enforce an origin policy,
 // and evaluate a strict script policy in report-only mode before promoting it.
@@ -18,6 +19,11 @@ const csp = [
 ].join("; ");
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  compiler: {
+    async runAfterProductionCompile(metadata) {
+      finalizeOffline(metadata);
+    },
+  },
   poweredByHeader: false,
   images: { remotePatterns: [] },
   async headers() {
