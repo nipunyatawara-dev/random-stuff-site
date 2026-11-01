@@ -1,15 +1,17 @@
 {
-  "name":"Random Stuff — Useful tools, handpicked",
-  "short_name":"Random Stuff",
-  "description":"An independent directory of useful websites, desktop apps and scripts.",
-  "id":"/",
-  "start_url":"/",
-  "scope":"/",
-  "display":"standalone",
-  "background_color":"#F0F2F5",
-  "theme_color":"#14334D",
-  "icons":[
-    {"src":"/app-icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
-    {"src":"/app-icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+  "name": "Random Stuff - Curated Web Tools",
+  "short_name": "RandomStuff",
+  "description": "A curated directory of useful websites, developer tools, software, and scripts.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#a3e635",
+  "icons": [
+    {
+      "src": "/window.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
   ]
 }

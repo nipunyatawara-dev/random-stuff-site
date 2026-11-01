@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Hanken_Grotesk } from "next/font/google";
+import { Inter, Phudu, Caveat, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import StorageNotice from "@/components/StorageNotice";
 import ColorModeController from "@/components/ColorModeController";
@@ -9,9 +9,28 @@ import { items } from "@/data/items";
 import { SITE_URL } from "@/lib/site";
 import PrivacySpeedInsights from "@/components/PrivacySpeedInsights";
 
-const hanken = Hanken_Grotesk({
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-hanken",
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const phudu = Phudu({
+  subsets: ["latin"],
+  variable: "--font-phudu",
+  display: "swap",
+  weight: ["400", "500", "600", "700", "800", "900"],
+});
+
+const caveat = Caveat({
+  subsets: ["latin"],
+  variable: "--font-caveat",
+  display: "swap",
+});
+
+const mono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
   display: "swap",
 });
 
@@ -27,7 +46,7 @@ export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
   icons: {
     icon: "/icon.png",
-    apple: "/apple-touch-icon.png",
+    apple: "/icon.png",
   },
   alternates: {
     canonical: "/",
@@ -60,7 +79,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={hanken.variable}>
+    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${phudu.variable} ${caveat.variable} ${mono.variable}`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: COLOR_MODE_INIT_SCRIPT }} />
       </head>

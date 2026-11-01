@@ -44,15 +44,3 @@ writeFileSync(
 console.log(
   `Prepared ${items.length} local monograms and versioned offline worker.`,
 );
-// Raster install icons are rendered from a code-native vector, not downloaded artwork.
-const { default: sharp } = await import("sharp");
-const icon = Buffer.from(
-  '<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512"><rect width="512" height="512" rx="100" fill="#14334D"/><circle cx="150" cy="165" r="45" fill="#9DF71F"/><circle cx="362" cy="165" r="45" fill="#9DF71F"/><ellipse cx="256" cy="270" rx="152" ry="150" fill="#9DF71F"/><ellipse cx="256" cy="286" rx="116" ry="112" fill="#CCE8FF"/><circle cx="209" cy="250" r="16" fill="#14334D"/><circle cx="303" cy="250" r="16" fill="#14334D"/><ellipse cx="256" cy="299" rx="28" ry="21" fill="#14334D"/><path d="M220 337 Q256 368 292 337" fill="none" stroke="#14334D" stroke-width="14" stroke-linecap="round"/></svg>',
-);
-mkdirSync("public/app-icons", { recursive: true });
-for (const size of [192, 512])
-  await sharp(icon)
-    .resize(size, size)
-    .png()
-    .toFile(`public/app-icons/icon-${size}.png`);
-await sharp(icon).resize(180, 180).png().toFile("public/apple-touch-icon.png");

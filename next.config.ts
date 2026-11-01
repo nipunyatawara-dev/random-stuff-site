@@ -7,7 +7,7 @@ const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob:",
+  "img-src 'self' data: blob: https://t0.gstatic.com https://t1.gstatic.com https://t2.gstatic.com https://t3.gstatic.com https://ascii-magic.com https://corca.app https://deck.gallery https://delphi.tools https://diskanalyzer.com https://dotmatrix.zzzzshawn.cloud https://earweb.bttl.xyz https://evilcharts.com https://excalidraw.com https://github.com https://ipsw.me https://is1-ssl.mzstatic.com https://labs.google https://lmstudio.ai https://lucide-animated.com https://mounty.app https://poketube.fun https://reactbits.dev https://sileo.aaryan.design https://torph.lochie.me https://ui.unlumen.com https://www.google.com https://www.ilovepdf.com",
   "font-src 'self'",
   "connect-src 'self' https://vitals.vercel-insights.com",
   "worker-src 'self'",

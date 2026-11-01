@@ -1,120 +1,135 @@
 "use client";
-import React, {
-  useCallback,
-  useDeferredValue,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+
 import dynamic from "next/dynamic";
-import Link from "next/link";
+import DirectoryCard from "./DirectoryCard";
+import Modal from "./Modal";
+import { readCatalogUrl, stackShareUrl } from "@/lib/catalog-url";
+import { formatCatalogDate, isRecentlyAdded } from "@/lib/catalog-dates";
+import React, { useEffect, useMemo, useRef, useState, useCallback, useDeferredValue } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { type Item } from "@/data/items";
+import { CURATED_STACKS, type CuratedStack } from "@/data/stacks";
 import {
   Search,
-  X,
   Heart,
-  SlidersHorizontal,
-  Scale,
   Sparkles,
+  Scale,
   Download,
   Upload,
-  ArrowUpRight,
+  X,
+  ExternalLink,
+  Share2,
+  Trash2,
+  Github,
+  Link2,
 } from "lucide-react";
-import type { Item } from "@/data/items";
-import { CURATED_STACKS, type CuratedStack } from "@/data/stacks";
 import { useFavorites } from "@/hooks/useFavorites";
-import { readCatalogUrl } from "@/lib/catalog-url";
-import { searchItems } from "@/lib/item-search";
 import { itemMatchesPlatformTag } from "@/lib/platform-tags";
-import { isRecentlyAdded } from "@/lib/catalog-dates";
-import { copyText } from "@/lib/client-actions";
-import DirectoryCard from "./DirectoryCard";
-import ComparisonFacts from "./ComparisonFacts";
-import Modal from "./Modal";
-const CompareModal = dynamic(() => import("./CompareModal"));
+import { searchItems } from "@/lib/item-search";
+import { playClickSound, playSuccessSound } from "@/lib/sound-fx";
+import {
+  PillTabs,
+  TiltCard,
+  MagneticButton,
+} from "./studio";
 const CommandPalette = dynamic(() => import("./CommandPalette"));
-const Roulette = dynamic(() => import("./RandomRouletteModal"));
-const categories = [
-  ["all", "All tools"],
-  ["Websites", "Websites"],
-  ["Softwares", "Software"],
-  ["Scripts", "Scripts"],
-  ["stacks", "Stacks"],
-  ["favorites", "Saved"],
-];
-const platforms = [
-  ["all", "Any platform"],
-  ["macos", "macOS"],
-  ["windows", "Windows"],
-  ["linux", "Linux"],
-  ["web", "Web"],
-];
-const features = [
-  ["cli", "CLI / terminal"],
-  ["open-source", "Verified open source"],
-  ["free", "Verified free"],
-];
+const CompareModal = dynamic(() => import("./CompareModal"));
+const RandomRouletteModal = dynamic(() => import("./RandomRouletteModal"));
+
+const INITIAL_VISIBLE_ITEMS = 36;
+const LOAD_MORE_ITEMS = 24;
+
 export interface ContentSectionProps {
   initialItems: Item[];
+  activeCategory?: string;
+  onCategoryChange?: (category: string) => void;
+  onOpenRoulette?: () => void;
+  onOpenCompare?: () => void;
+  onReady?: () => void;
 }
+
 export default function ContentSection({
-  initialItems: items,
+  initialItems,
+  activeCategory: externalCategory,
+  onCategoryChange: externalCategoryChange,
+  onOpenRoulette,
+  onOpenCompare,
+  onReady,
 }: ContentSectionProps) {
-  const {
-    favorites,
-    isFavorite,
-    toggleFavorite,
-    addFavorites,
-    removeFavorites,
-  } = useFavorites();
-  const [category, setCategory] = useState("all"),
-    [tag, setTag] = useState("all"),
-    [attributes, setAttributes] = useState<string[]>([]),
-    [query, setQuery] = useState("");
-  const deferred = useDeferredValue(query);
-  const [stack, setStack] = useState<CuratedStack | null>(null),
-    [preview, setPreview] = useState<Item | null>(null),
-    [count, setCount] = useState(24),
-    [ready, setReady] = useState(false);
-  const [showFilters, setShowFilters] = useState(false),
-    [showCompare, setShowCompare] = useState(false),
-    [palette, setPalette] = useState(false),
-    [roulette, setRoulette] = useState(false);
-  const [compareIds, setCompareIds] = useState<string[]>([]),
-    [selected, setSelected] = useState<string[]>([]),
-    [selectionMode, setSelectionMode] = useState(false),
-    [confirmRemove, setConfirmRemove] = useState(false);
-  const [notice, setNotice] = useState(""),
-    [fallbackLink, setFallbackLink] = useState(""),
-    [offline, setOffline] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null),
-    searchRef = useRef<HTMLInputElement>(null),
-    historyMode = useRef<"push" | "replace">("replace");
+  const [items] = useState<Item[]>(initialItems);
+  const [internalCategory, setInternalCategory] = useState("all");
+  const activeCategory = externalCategory ?? internalCategory;
+
+  const setActiveCategory = useCallback(
+    (cat: string) => {
+      if (externalCategoryChange) {
+        externalCategoryChange(cat);
+      } else {
+        setInternalCategory(cat);
+      }
+    },
+    [externalCategoryChange]
+  );
+
+  const [activeTag, setActiveTag] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const deferredSearchQuery = useDeferredValue(searchQuery);
+  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_ITEMS);
+  const [previewItem, setPreviewItem] = useState<Item | null>(null);
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  // Favorites state
+  const { favorites, isFavorite, toggleFavorite, clearFavorites, removeFavorites, addFavorites } = useFavorites();
+  const [selectedFavs, setSelectedFavs] = useState<string[]>([]);
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Modals state
+  const [showRoulette, setShowRoulette] = useState(false);
+  const [showCompare, setShowCompare] = useState(false);
+  const [hasOpenedCompare, setHasOpenedCompare] = useState(false);
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
+
+  const handleOpenRoulette = useCallback(() => {
+    if (onOpenRoulette) onOpenRoulette();
+    else setShowRoulette(true);
+  }, [onOpenRoulette]);
+
+  const handleOpenCompare = useCallback(() => {
+    if (onOpenCompare) onOpenCompare();
+    else {
+      setHasOpenedCompare(true);
+      setShowCompare(true);
+    }
+  }, [onOpenCompare]);
+
+  const [activeStack, setActiveStack] = useState<CuratedStack | null>(null);
+  const [stackCopied, setStackCopied] = useState(false);
+  const [urlReady, setUrlReady] = useState(false);
   const [now, setNow] = useState<number | null>(null);
   useEffect(() => {
     const update = () => setNow(Date.now());
     update();
-    const id = setInterval(update, 3600000);
-    return () => clearInterval(id);
+    const timer = setInterval(update, 3_600_000);
+    return () => clearInterval(timer);
   }, []);
-  const transition = () => {
-    historyMode.current = "push";
-  };
+  const recentIds = useMemo(() => new Set(items.filter((item) => now === null ? item.isNew : isRecentlyAdded(item.addedAt, now)).map((item) => item.id)), [items, now]);
+
+  // Restore initial links, browser history, and legacy shared stack hashes.
   useEffect(() => {
     const restore = () => {
-      const state = readCatalogUrl(new URL(location.href), items);
-      setCategory(state.category);
-      setTag(state.tag);
-      setQuery(state.query);
-      setStack(state.stack);
-      setPreview(state.tool);
-      setAttributes(
-        (new URL(location.href).searchParams.get("features") || "")
-          .split(",")
-          .filter((v) => features.some(([id]) => id === v)),
-      );
-      historyMode.current = "replace";
-      setReady(true);
+      try {
+        const state = readCatalogUrl(new URL(window.location.href), items);
+        setSearchQuery(state.query);
+        setActiveCategory(state.category);
+        setActiveTag(state.tag);
+        setActiveStack(state.stack);
+        setPreviewItem(state.tool);
+      } catch {
+        // Malformed links leave the current catalog available.
+      }
+      setUrlReady(true);
     };
     restore();
     window.addEventListener("popstate", restore);
@@ -123,741 +138,726 @@ export default function ContentSection({
       window.removeEventListener("popstate", restore);
       window.removeEventListener("hashchange", restore);
     };
-  }, [items]);
+  }, [items, setActiveCategory]);
+
   useEffect(() => {
-    if (!ready) return;
-    const url = new URL(location.href);
-    const set = (name: string, value: string) =>
-      value ? url.searchParams.set(name, value) : url.searchParams.delete(name);
-    set("q", query.trim());
-    set("category", category === "all" ? "" : category);
-    set("tag", tag === "all" ? "" : tag);
-    set("features", attributes.join(","));
-    set("stack", stack?.id || "");
-    set("tool", preview?.id || "");
-    const next = url.pathname + url.search + url.hash;
-    if (next !== location.pathname + location.search + location.hash) {
-      if (historyMode.current === "push")
-        history.pushState(history.state, "", next);
-      else history.replaceState(history.state, "", next);
+    if (urlReady && searchQuery === deferredSearchQuery) onReady?.();
+  }, [urlReady, searchQuery, deferredSearchQuery, onReady]);
+
+  // Sync state changes back to URL without reloading
+  useEffect(() => {
+    if (!urlReady) return;
+    if (typeof window === "undefined") return;
+
+    const url = new URL(window.location.href);
+    if (searchQuery.trim()) {
+      url.searchParams.set("q", searchQuery.trim());
+    } else {
+      url.searchParams.delete("q");
     }
-    historyMode.current = "replace";
-  }, [ready, query, category, tag, attributes, stack, preview]);
+
+    if (activeCategory && activeCategory !== "all") {
+      url.searchParams.set("category", activeCategory);
+    } else {
+      url.searchParams.delete("category");
+    }
+
+    if (activeTag && activeTag !== "all") {
+      url.searchParams.set("tag", activeTag);
+    } else {
+      url.searchParams.delete("tag");
+    }
+
+    if (previewItem) {
+      url.searchParams.set("tool", previewItem.id);
+    } else {
+      url.searchParams.delete("tool");
+    }
+
+    if (activeCategory === "stacks" && activeStack) url.searchParams.set("stack", activeStack.id);
+    else url.searchParams.delete("stack");
+    const nextSearch = url.searchParams.toString();
+    const nextUrl = nextSearch ? `${url.pathname}?${nextSearch}` : url.pathname;
+    window.history.replaceState(window.history.state, "", nextUrl);
+  }, [searchQuery, activeCategory, activeTag, previewItem, activeStack, urlReady]);
+
+  // Global keyboard shortcut for Command Palette (Cmd+K / Ctrl+K)
   useEffect(() => {
-    setCount(24);
-    setSelected([]);
-    setSelectionMode(false);
-  }, [category, tag, deferred, attributes, stack]);
-  useEffect(() => {
-    const key = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
-        setPalette((v) => !v);
+        setShowCommandPalette((prev) => !prev);
       }
     };
-    const status = () => setOffline(!navigator.onLine);
-    const message = (e: Event) => setNotice((e as CustomEvent<string>).detail);
-    status();
-    window.addEventListener("keydown", key);
-    window.addEventListener("online", status);
-    window.addEventListener("offline", status);
-    window.addEventListener("favorites-notice", message);
-    return () => {
-      window.removeEventListener("keydown", key);
-      window.removeEventListener("online", status);
-      window.removeEventListener("offline", status);
-      window.removeEventListener("favorites-notice", message);
-    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
-  const chooseCategory = (value: string) => {
-    transition();
-    setCategory(value);
-    setStack(null);
-    setQuery("");
-    setTag("all");
-    setAttributes([]);
-  };
-  const clearFilters = () => {
-    setQuery("");
-    setTag("all");
-    setAttributes([]);
-  };
-  const onPreview = useCallback((item: Item) => {
-    historyMode.current = "push";
-    setPreview(item);
-    setFallbackLink("");
-  }, []);
-  const toggleCompare = (item: Item) => {
-    setCompareIds((ids) => {
-      if (ids.includes(item.id)) return ids.filter((id) => id !== item.id);
-      if (ids.length === 3) {
-        setNotice("Compare up to three tools. Remove one to add another.");
-        return ids;
+
+  // Keep the candidate array stable while typing so search can reuse its index.
+  const candidateItems = useMemo(() => {
+    let list = items;
+
+    // Filter by category tab
+    if (activeCategory === "favorites") {
+      list = list.filter((i) => isFavorite(i.id));
+    } else if (activeCategory === "stacks") {
+      if (activeStack) {
+        const stackSet = new Set(activeStack.itemIds);
+        list = list.filter((i) => stackSet.has(i.id));
       }
-      return [...ids, item.id];
+    } else if (activeCategory !== "all") {
+      list = list.filter((i) => i.category === activeCategory);
+    }
+
+    // Filter by platform / tag
+    if (activeTag !== "all") {
+      list = list.filter((i) => itemMatchesPlatformTag(i, activeTag));
+    }
+
+    return list;
+  }, [items, activeCategory, activeTag, isFavorite, activeStack]);
+
+  const filteredItems = useMemo(() => {
+    return deferredSearchQuery.trim()
+      ? searchItems(candidateItems, deferredSearchQuery)
+      : candidateItems;
+  }, [candidateItems, deferredSearchQuery]);
+
+  const displayedItems = useMemo(() => {
+    return filteredItems.slice(0, visibleCount);
+  }, [filteredItems, visibleCount]);
+
+  // Reset pagination when filter criteria change
+  useEffect(() => {
+    setVisibleCount(INITIAL_VISIBLE_ITEMS);
+  }, [activeCategory, activeTag, deferredSearchQuery, activeStack]);
+
+  // Reset active stack when navigating to another category
+  useEffect(() => {
+    if (urlReady && activeCategory !== "stacks") {
+      setActiveStack(null);
+    }
+  }, [activeCategory, urlReady]);
+
+  // Handle favorites batch actions
+  const handleSelectFav = useCallback((id: string) => {
+    setSelectedFavs((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  }, []);
+
+  const handleSelectAllFavs = () => {
+    const favIds = items.filter((item) => isFavorite(item.id)).map((item) => item.id);
+    if (selectedFavs.length === favIds.length) {
+      setSelectedFavs([]);
+    } else {
+      setSelectedFavs(favIds);
+    }
+  };
+
+  const handleOpenSelected = () => {
+    const selected = items.filter((item) => selectedFavs.includes(item.id));
+    if (selected.length > 5) {
+      if (!confirm(`You are about to open ${selected.length} tabs. Continue?`)) return;
+    }
+    selected.forEach((item, index) => {
+      setTimeout(() => {
+        if (!item.linkUnavailable) window.open(item.website || item.github, "_blank", "noopener,noreferrer");
+      }, index * 100);
     });
   };
-  const candidates = useMemo(
-    () =>
-      items.filter(
-        (item) =>
-          (category === "favorites"
-            ? favorites.includes(item.id)
-            : category === "stacks"
-              ? Boolean(stack?.itemIds.includes(item.id))
-              : category === "all" || item.category === category) &&
-          itemMatchesPlatformTag(item, tag) &&
-          attributes.every((attr) => itemMatchesPlatformTag(item, attr)),
-      ),
-    [items, category, favorites, stack, tag, attributes],
-  );
-  const results = useMemo(
-    () => (deferred.trim() ? searchItems(candidates, deferred) : candidates),
-    [candidates, deferred],
-  );
-  const overview = category === "stacks" && !stack;
-  const shownStacks = CURATED_STACKS.filter(
-    (s) =>
-      !deferred.trim() ||
-      `${s.title} ${s.description}`
-        .toLowerCase()
-        .includes(deferred.toLowerCase()),
-  );
-  const activeFilters =
-    (tag === "all" ? 0 : 1) + attributes.length + (query.trim() ? 1 : 0);
-  const save = (id: string) => {
-    const wasSaved = isFavorite(id);
-    toggleFavorite(id);
-    const title = items.find((i) => i.id === id)?.title;
-    setNotice(
-      `${title} ${wasSaved ? "removed from" : "saved to"} this browser's favorites.`,
-    );
-  };
-  const copy = async (value: string) => {
-    if (await copyText(value)) {
-      setNotice("Link copied.");
-      setFallbackLink("");
+
+  const handleRemoveSelected = () => {
+    if (selectedFavs.length > 0) {
+      if (confirm(`Remove ${selectedFavs.length} items from favorites?`)) {
+        removeFavorites(selectedFavs);
+        setSelectedFavs([]);
+        setIsSelectionMode(false);
+      }
     } else {
-      setFallbackLink(value);
-      setNotice("Copy was unavailable. Select and copy the link below.");
+      if (confirm("Are you sure you want to remove all favorites?")) {
+        clearFavorites();
+        setSelectedFavs([]);
+        setIsSelectionMode(false);
+      }
     }
   };
-  const exportFile = async (format: "txt" | "md" | "json" | "html") => {
-    const lib = await import("@/lib/export-favorites");
-    const saved = items.filter((i) => favorites.includes(i.id));
-    if (!saved.length) {
-      setNotice("Save a tool before exporting. You can import a backup now.");
-      return;
+
+  const handleExport = async (format: "txt" | "md" | "json" | "html") => {
+    playClickSound();
+    const favItems = items.filter((item) => isFavorite(item.id));
+    if (favItems.length === 0) return;
+
+    const {
+      triggerFileDownload, exportFavoritesText, exportFavoritesMarkdown, exportFavoritesJson, exportFavoritesHtml,
+    } = await import("@/lib/export-favorites");
+    if (format === "txt") {
+      triggerFileDownload("random-stuff-favorites.txt", exportFavoritesText(items.filter((item) => favorites.includes(item.id))), "text/plain;charset=utf-8");
+    } else if (format === "md") {
+      triggerFileDownload("favorites.md", exportFavoritesMarkdown(favItems), "text/markdown");
+    } else if (format === "json") {
+      triggerFileDownload("favorites.json", exportFavoritesJson(favItems), "application/json");
+    } else if (format === "html") {
+      triggerFileDownload("favorites.html", exportFavoritesHtml(favItems), "text/html");
     }
-    const content =
-      format === "txt"
-        ? lib.exportFavoritesText(saved)
-        : format === "md"
-        ? lib.exportFavoritesMarkdown(saved)
-        : format === "json"
-          ? lib.exportFavoritesJson(saved)
-          : lib.exportFavoritesHtml(saved);
-    lib.triggerFileDownload(
-      `random-stuff-favorites.${format}`,
-      content,
-      format === "txt"
-        ? "text/plain;charset=utf-8"
-        : format === "json"
-        ? "application/json"
-        : format === "html"
-          ? "text/html"
-          : "text/markdown",
-    );
-    setNotice("Export downloaded.");
+    setIsExportMenuOpen(false);
+    playSuccessSound();
   };
-  const importFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
     try {
-      if (file.size > 1_000_000)
-        throw new Error("Choose a JSON backup smaller than 1 MB.");
+      const text = await file.text();
       const { parseFavoritesImport } = await import("@/lib/export-favorites");
-      const result = parseFavoritesImport(await file.text());
-      const newIds = result.ids.filter((id) => !favorites.includes(id));
-      addFavorites(newIds);
-      setNotice(
-        `${newIds.length} imported, ${result.ids.length - newIds.length} already saved, ${result.unknownCount} unknown, ${result.duplicateCount} duplicate IDs ignored.`,
-      );
-    } catch (error) {
-      setNotice(
-        error instanceof Error
-          ? error.message
-          : "Could not import this backup.",
-      );
+      const res = parseFavoritesImport(text);
+      if (res.ids.length > 0) {
+        addFavorites(res.ids);
+        alert(`Successfully imported ${res.ids.length} tools into your favorites!`);
+      }
+    } catch {
+      alert("Failed to parse favorites file. Please upload a valid JSON export.");
     }
-    e.target.value = "";
+
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
+
+  const categoryTabs = [
+    { id: "all", label: "All Tools", count: items.length },
+    { id: "Websites", label: "Websites", count: items.filter((i) => i.category === "Websites").length },
+    { id: "Softwares", label: "Software", count: items.filter((i) => i.category === "Softwares").length },
+    { id: "Scripts", label: "Scripts", count: items.filter((i) => i.category === "Scripts").length },
+    { id: "stacks", label: "Curated Stacks" },
+    { id: "favorites", label: "Favorites", count: favorites.length },
+  ];
+
+  const platformTags = [
+    { id: "all", label: "All Platforms" },
+    { id: "macos", label: "macOS" },
+    { id: "windows", label: "Windows" },
+    { id: "linux", label: "Linux" },
+    { id: "web", label: "Web" },
+    { id: "cli", label: "CLI / Terminal" },
+    { id: "open-source", label: "Open Source" },
+  ];
+
   return (
-    <section
-      id="catalog-section"
-      className="catalog"
-      aria-labelledby="catalog-title"
-    >
-      {offline && (
-        <p className="notice" role="status">
-          You are offline. Saved pages and the catalog remain available;
-          external tools and suggestions need a connection.
-        </p>
-      )}
-      <h2 id="catalog-title" className="sr-only">
-        Find your next useful tool
-      </h2>
-      <div className="search-row">
-        <div className="catalog-search">
-          <Search aria-hidden="true" size={22} />
-          <label htmlFor="catalog-search" className="sr-only">
-            {overview
-              ? "Search curated stacks"
-              : "Search tools by name, task or tag"}
-          </label>
-          <input
-            id="catalog-search"
-            ref={searchRef}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            type="search"
-            placeholder={
-              overview
-                ? "Find a stack…"
-                : `Search ${items.length} tools, or a task…`
-            }
-            autoComplete="off"
-            maxLength={200}
-          />
-          {query ? (
-            <button
-              className="icon-button"
-              aria-label="Clear search"
-              onClick={() => setQuery("")}
-            >
-              <X size={20} />
-            </button>
-          ) : (
-            <button
-              className="search-shortcut"
-              onClick={() => setPalette(true)}
-              aria-label="Open command palette"
-            >
-              Ctrl / ⌘ K
-            </button>
-          )}
-        </div>
-        {!overview && (
-          <button
-            className="button filter-toggle"
-            aria-expanded={showFilters}
-            aria-controls="catalog-filters"
-            onClick={() => setShowFilters((v) => !v)}
+    <section id="catalog-section" className="w-full select-none">
+      {/* Top Filter & Navigation Bar */}
+      <div className="flex flex-col gap-6 mb-8">
+        {/* Category Pill Tabs */}
+        <div className="w-full relative">
+          <div
+            className="w-full overflow-x-auto no-scrollbar flex items-center justify-start md:justify-center py-1.5 px-0.5"
           >
-            <SlidersHorizontal size={18} />
-            Filters{activeFilters > 0 ? ` (${activeFilters})` : ""}
-          </button>
-        )}
-      </div>
-      <div
-        className="catalog-navigation"
-        role="group"
-        aria-label="Browse collection"
-      >
-        {categories.map(([id, label]) => (
-          <button
-            key={id}
-            aria-pressed={category === id}
-            onClick={() => chooseCategory(id)}
-          >
-            {label}
-            {id === "favorites" && favorites.length > 0 && (
-              <span>{favorites.length}</span>
-            )}
-          </button>
-        ))}
-      </div>
-      {!overview && (
-        <div
-          id="catalog-filters"
-          className={`catalog-filters ${showFilters ? "filters-open" : ""}`}
-        >
-          <div>
-            <label htmlFor="platform-filter">Platform</label>
-            <select
-              id="platform-filter"
-              value={tag}
-              onChange={(e) => {
-                transition();
-                setTag(e.target.value);
+            <PillTabs
+              tabs={categoryTabs}
+              activeTab={activeCategory}
+              onChange={(id) => {
+                playClickSound();
+                setActiveCategory(id);
+                if (id !== "stacks") setActiveStack(null);
               }}
-            >
-              {platforms.map(([id, label]) => (
-                <option value={id} key={id}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <fieldset>
-            <legend>Verified attributes</legend>
-            {features.map(([id, label]) => (
-              <label key={id}>
-                <input
-                  type="checkbox"
-                  checked={attributes.includes(id)}
-                  onChange={() => {
-                    transition();
-                    setAttributes((values) =>
-                      values.includes(id)
-                        ? values.filter((v) => v !== id)
-                        : [...values, id],
-                    );
-                  }}
-                />
-                {label}
-              </label>
-            ))}
-          </fieldset>
-          <p className="filter-help">
-            A source link alone does not prove a license. Unknown platforms and
-            facts are excluded from specific filters.
-          </p>
-        </div>
-      )}
-      <div className="results-toolbar">
-        <p role="status" aria-live="polite" aria-atomic="true">
-          {overview
-            ? `${shownStacks.length} curated stacks`
-            : `${results.length} ${results.length === 1 ? "tool" : "tools"}${category === "favorites" ? " saved on this browser" : ""}`}
-          {activeFilters > 0 && (
-            <>
-              {" "}
-              ·{" "}
-              <button className="text-button" onClick={clearFilters}>
-                Clear all filters
-              </button>
-            </>
-          )}
-        </p>
-        <div>
-          <button className="text-button" onClick={() => setShowCompare(true)}>
-            <Scale size={17} />
-            Compare
-          </button>
-          <button className="text-button" onClick={() => setRoulette(true)}>
-            <Sparkles size={17} />
-            Surprise me
-          </button>
-        </div>
-      </div>
-      {category === "favorites" && (
-        <div className="favorites-toolbar">
-          <div>
-            <strong>Your useful little collection</strong>
-            <p>Saved in this browser. Export every saved tool as text, or use a JSON backup to move devices.</p>
-          </div>
-          <div className="favorites-controls">
-            <button className="button" onClick={() => fileRef.current?.click()}>
-              <Upload size={16} />
-              Import JSON
-            </button>
-            <details className="export-menu">
-              <summary className="button">
-                <Download size={16} />
-                Export all favorites
-              </summary>
-              <div>
-                {(["txt", "json", "md", "html"] as const).map((format) => (
-                  <button
-                    key={format}
-                    disabled={!favorites.length}
-                    onClick={() => exportFile(format)}
-                  >
-                    {format === "txt" ? "Plain text (.txt)" : `Download .${format}`}
-                  </button>
-                ))}
-              </div>
-            </details>
-            {favorites.length > 0 && (
-              <button
-                className="button"
-                aria-pressed={selectionMode}
-                onClick={() => setSelectionMode((v) => !v)}
-              >
-                {selectionMode ? "Done selecting" : "Select tools"}
-              </button>
-            )}
-            <input
-              type="file"
-              ref={fileRef}
-              accept="application/json,.json"
-              className="sr-only"
-              tabIndex={-1}
-              aria-label="Import favorites JSON"
-              onChange={importFile}
             />
           </div>
         </div>
-      )}
-      {selectionMode && (
-        <div className="selection-toolbar">
-          <button
-            className="button"
-            onClick={() =>
-              setSelected(
-                selected.length === results.length
-                  ? []
-                  : results.map((i) => i.id),
-              )
-            }
-          >
-            Select matching tools
-          </button>
-          <span>{selected.length} selected</span>
-          <button
-            className="button"
-            disabled={!selected.length}
-            onClick={() => setConfirmRemove(true)}
-          >
-            Remove selected
-          </button>
-          <details>
-            <summary>Open selected tools individually</summary>
-            <p>
-              Browsers limit opening many tabs at once. Use these safe links.
-            </p>
-            {selected.map((id) => {
-              const item = items.find((i) => i.id === id)!;
-              return (
-                <a
-                  key={id}
-                  href={item.website || item.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
+
+        {/* Search Bar & Quick Tool Actions */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+          {/* Tactile Clay Search Input */}
+          <div className="relative w-full sm:max-w-md">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-studio-blue" />
+            <input
+              type="search"
+              aria-label="Search tools by name, task or tag"
+              placeholder={`Search ${items.length} tools, tags (#cli, #macos)...`}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-11 pr-20 py-2.5 rounded-full bg-surface shadow-studio-button border border-border-subtle text-sm text-studio-navy placeholder-studio-light-muted focus:outline-hidden focus:ring-2 focus:ring-[#007BE5]/25 focus:border-[#007BE5] transition-all font-sans"
+            />
+            {searchQuery ? (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-studio-neutral-400 hover:text-studio-neutral-600 rounded-full"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowCommandPalette(true)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 hidden md:inline-flex items-center text-[10px] font-mono uppercase tracking-wider text-studio-neutral-400 bg-studio-neutral-100 border border-studio-neutral-200 px-2 py-0.5 rounded-md hover:bg-studio-neutral-200 transition-colors cursor-pointer"
+              >
+                ⌘K
+              </button>
+            )}
+          </div>
+
+          {/* Quick Utility Actions */}
+          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full sm:w-auto justify-start sm:justify-end">
+            <MagneticButton
+              variant="primary-light"
+              size="sm"
+              icon={<Scale className="w-3.5 h-3.5 text-studio-blue" />}
+              onClick={handleOpenCompare}
+            >
+              Compare
+            </MagneticButton>
+
+            <MagneticButton
+              variant="accent-lime"
+              size="sm"
+              icon={<Sparkles className="w-3.5 h-3.5 text-studio-navy" />}
+              onClick={handleOpenRoulette}
+            >
+              Roulette
+            </MagneticButton>
+
+            {activeCategory === "favorites" && (
+              <div className="relative">
+                <MagneticButton
+                  variant="primary-light"
+                  size="sm"
+                  icon={<Download className="w-3.5 h-3.5 text-studio-slate" />}
+                  onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
                 >
-                  {item.title} ↗
-                </a>
+                  Export / Import
+                </MagneticButton>
+
+                {isExportMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-surface rounded-2xl shadow-studio-popover border border-border-subtle p-2 z-30 space-y-1">
+                    <button type="button" onClick={() => handleExport("txt")} className="w-full text-left px-3 py-1.5 rounded-xl text-xs text-studio-navy hover:bg-canvas transition-colors">
+                      Export as plain text (.txt)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleExport("md")}
+                      className="w-full text-left px-3 py-1.5 rounded-xl text-xs text-studio-navy hover:bg-canvas transition-colors"
+                    >
+                      Export as Markdown (.md)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleExport("json")}
+                      className="w-full text-left px-3 py-1.5 rounded-xl text-xs text-studio-navy hover:bg-canvas transition-colors"
+                    >
+                      Export as JSON (.json)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleExport("html")}
+                      className="w-full text-left px-3 py-1.5 rounded-xl text-xs text-studio-navy hover:bg-canvas transition-colors"
+                    >
+                      Export as HTML (.html)
+                    </button>
+                    <div className="border-t border-studio-neutral-100 my-1" />
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full text-left px-3 py-1.5 rounded-xl text-xs text-studio-blue hover:bg-canvas font-semibold transition-colors flex items-center gap-1.5"
+                    >
+                      <Upload className="w-3 h-3" />
+                      <span>Import JSON</span>
+                    </button>
+                  </div>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".json"
+                  className="hidden"
+                  onChange={handleImportFile}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Platform Tags Filter Bar */}
+        {activeCategory !== "stacks" && (
+          <div
+            className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 py-1"
+          >
+            <span className="text-[11px] font-mono uppercase tracking-wider text-studio-label/50 font-bold mr-1 shrink-0">
+              Filter:
+            </span>
+            {platformTags.map((tag) => {
+              const isActive = activeTag === tag.id;
+              return (
+                <button
+                  key={tag.id}
+                  type="button"
+                  onClick={() => {
+                    playClickSound();
+                    setActiveTag(tag.id);
+                  }}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shrink-0 transition-all duration-200 cursor-pointer ${
+                    isActive
+                      ? "bg-surface text-studio-navy shadow-studio-button font-bold border border-border-subtle"
+                      : "bg-canvas text-studio-muted hover:text-studio-navy hover:bg-studio-neutral-200/80"
+                  }`}
+                >
+                  {tag.label}
+                </button>
               );
             })}
-          </details>
-        </div>
-      )}
-      {overview ? (
-        <div className="stack-grid">
-          {shownStacks.map((s) => (
-            <article className="stack-card" key={s.id}>
-              <h3>
-                <Link href={`/stacks/${s.id}`}>{s.title}</Link>
-              </h3>
-              <p>{s.description}</p>
-              <div>
-                <span>{s.itemIds.length} tools</span>
-                <button
-                  className="text-button"
-                  onClick={() => {
-                    transition();
-                    setStack(s);
-                    clearFilters();
-                  }}
-                >
-                  Explore this kit <ArrowUpRight size={18} />
-                </button>
-              </div>
-            </article>
-          ))}
-        </div>
-      ) : (
-        <>
-          {stack && (
-            <div className="stack-summary">
-              <div>
-                <button
-                  className="text-button"
-                  onClick={() => {
-                    transition();
-                    setStack(null);
-                    clearFilters();
-                  }}
-                >
-                  ← All stacks
-                </button>
-                <h2>{stack.title}</h2>
-                <p>{stack.description}</p>
-                <Link href={`/stacks/${stack.id}`}>
-                  Read the workflow and tool roles →
-                </Link>
-              </div>
-              <div>
-                <button
-                  className="button"
-                  onClick={() => {
-                    const added = stack.itemIds.filter(
-                      (id) => !favorites.includes(id),
-                    );
-                    addFavorites(added);
-                    setNotice(
-                      `${added.length} new tools saved; ${stack.itemIds.length - added.length} already saved.`,
-                    );
-                  }}
-                >
-                  Save this stack
-                </button>
-                <button
-                  className="button"
-                  onClick={() => copy(`${location.origin}/stacks/${stack.id}`)}
-                >
-                  Share stack
-                </button>
-              </div>
+          </div>
+        )}
+      </div>
+
+      {/* CURATED STACKS VIEW */}
+      {activeCategory === "stacks" && (
+        <div className="mb-12">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-6 pb-2 border-b border-studio-neutral-100">
+            <div>
+              <span className="text-xs font-mono uppercase tracking-widest text-studio-blue font-bold">
+                Tailored Toolkits
+              </span>
+              <h2 className="font-phudu text-2xl md:text-3xl font-black text-studio-navy">
+                Curated Builder Stacks
+              </h2>
             </div>
-          )}
-          {results.length ? (
-            <div className="directory-grid">
-              {results.slice(0, count).map((item) => (
-                <DirectoryCard
-                  key={item.id}
-                  item={item}
-                  isNew={now !== null && isRecentlyAdded(item.addedAt, now)}
-                  isFav={isFavorite(item.id)}
-                  isSelected={selected.includes(item.id)}
-                  isSelectionMode={selectionMode}
-                  onPreview={onPreview}
-                  onSelectFavorite={(id) =>
-                    setSelected((ids) =>
-                      ids.includes(id)
-                        ? ids.filter((v) => v !== id)
-                        : [...ids, id],
-                    )
-                  }
-                  toggleFavorite={save}
-                  onCompare={toggleCompare}
-                  compared={compareIds.includes(item.id)}
-                />
-              ))}
+            {activeStack && (
+              <button
+                type="button"
+                onClick={() => setActiveStack(null)}
+                className="text-xs font-bold text-studio-blue hover:underline"
+              >
+                ← View All Stacks
+              </button>
+            )}
+          </div>
+
+          {!activeStack ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+              {CURATED_STACKS.map((stack, idx) => {
+                const variants: Array<"blue" | "green" | "amber" | "slate"> = ["blue", "green", "slate", "amber"];
+                return (
+                  <TiltCard
+                    key={stack.id}
+                    variant={variants[idx % variants.length]}
+                    title={stack.title}
+                    category="CURATED STACK"
+                    countOrPrice={`${stack.itemIds.length} Tools`}
+                    description={stack.description}
+                    onClick={() => {
+                      playClickSound();
+                      setActiveStack(stack);
+                    }}
+                  />
+                );
+              })}
             </div>
           ) : (
-            <div className="empty-state">
-              <Heart size={32} />
-              <h3>
-                {category === "favorites" && !favorites.length
-                  ? "Your collection starts here"
-                  : "No matching tools"}
-              </h3>
-              <p>
-                {category === "favorites" && !favorites.length
-                  ? "Save a tool using its heart, or import a JSON backup above."
-                  : "Your collection is still here. Try another search or clear the active filters."}
-              </p>
-              <button
-                className="button"
-                onClick={() =>
-                  category === "favorites" && !favorites.length
-                    ? chooseCategory("all")
-                    : clearFilters()
-                }
-              >
-                {category === "favorites" && !favorites.length
-                  ? "Explore tools"
-                  : "Reset filters"}
-              </button>
-            </div>
-          )}
-          {count < results.length && (
-            <div className="load-more">
-              <button
-                className="button button-primary"
-                onClick={() => setCount((c) => c + 24)}
-              >
-                Show 24 more · {results.length - count} remaining
-              </button>
-              <p>
-                Showing {Math.min(count, results.length)} of {results.length}
-              </p>
-            </div>
-          )}
-        </>
-      )}
-      {notice && (
-        <div className="status-notice" role="status">
-          <span>{notice}</span>
-          <button
-            className="icon-button"
-            aria-label="Dismiss notification"
-            onClick={() => setNotice("")}
-          >
-            <X size={18} />
-          </button>
-        </div>
-      )}
-      {fallbackLink && !preview && (
-        <label className="fallback-link">
-          Link to copy
-          <input
-            readOnly
-            value={fallbackLink}
-            onFocus={(e) => e.currentTarget.select()}
-          />
-        </label>
-      )}
-      {compareIds.length > 0 && (
-        <div className="compare-tray">
-          <span>{compareIds.length} selected for comparison</span>
-          <button
-            className="button button-primary"
-            onClick={() => setShowCompare(true)}
-          >
-            Compare selected
-          </button>
-          <button
-            className="icon-button"
-            aria-label="Clear comparison selection"
-            onClick={() => setCompareIds([])}
-          >
-            <X size={18} />
-          </button>
-        </div>
-      )}
-      {preview && (
-        <Modal
-          label={`${preview.title} details`}
-          onClose={() => {
-            transition();
-            setPreview(null);
-          }}
-          className="modal-overlay"
-        >
-          <div className="dialog-panel">
-            <div className="dialog-heading">
-              <h2>{preview.title}</h2>
-              <button
-                className="icon-button"
-                aria-label="Close tool details"
-                onClick={() => {
-                  transition();
-                  setPreview(null);
-                }}
-              >
-                <X />
-              </button>
-            </div>
-            <p>{preview.description}</p>
-            <ComparisonFacts item={preview} />
-            <div className="dialog-actions">
-              <button
-                className="button"
-                aria-pressed={isFavorite(preview.id)}
-                onClick={() => save(preview.id)}
-              >
-                {isFavorite(preview.id) ? "Saved" : "Save tool"}
-              </button>
-              <button
-                className="button"
-                onClick={() => {
-                  toggleCompare(preview);
-                  setNotice("Added to your comparison selection.");
-                }}
-              >
-                Compare
-              </button>
-              <button
-                className="button"
-                onClick={() => copy(`${location.origin}/tools/${preview.id}`)}
-              >
-                Copy link
-              </button>
-            </div>
-            {fallbackLink && (
-              <label className="fallback-link">
-                Link to copy
-                <input
-                  readOnly
-                  value={fallbackLink}
-                  onFocus={(e) => e.currentTarget.select()}
-                />
-              </label>
-            )}
-            <div className="dialog-actions">
-              <Link href={`/tools/${preview.id}`}>
-                Full details & alternatives →
-              </Link>
-              {!preview.linkUnavailable && (
-                <a
-                  className="button button-primary"
-                  href={preview.website || preview.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
+            <div className="p-6 rounded-3xl bg-canvas border border-studio-neutral-200/80 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <span className="text-[10px] font-mono uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-surface text-studio-blue font-bold border border-studio-neutral-200">
+                  Active Stack
+                </span>
+                <h3 className="font-phudu text-2xl font-black text-studio-navy mt-1">
+                  {activeStack.title}
+                </h3>
+                <p className="text-xs text-studio-muted mt-1 max-w-xl">
+                  {activeStack.description}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <MagneticButton
+                  variant="primary-light"
+                  size="sm"
+                  icon={<Share2 className="w-3.5 h-3.5" />}
+                  onClick={() => {
+                    const shareUrl = stackShareUrl(window.location.origin, activeStack);
+                    navigator.clipboard.writeText(shareUrl);
+                    setStackCopied(true);
+                    playSuccessSound();
+                    setTimeout(() => setStackCopied(false), 2000);
+                  }}
                 >
-                  Visit tool ↗
-                </a>
+                  {stackCopied ? "Link Copied!" : "Share Stack"}
+                </MagneticButton>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* FAVORITES TOOLBAR (When in Favorites tab) */}
+      {activeCategory === "favorites" && favorites.length > 0 && (
+        <div className="p-4 rounded-2xl bg-canvas border border-studio-neutral-200/80 mb-6 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setIsSelectionMode(!isSelectionMode)}
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold cursor-pointer transition-all ${
+                isSelectionMode
+                  ? "bg-[#14334D] text-white"
+                  : "bg-surface text-studio-navy shadow-xs"
+              }`}
+            >
+              {isSelectionMode ? "Exit Selection" : "Select Multiple"}
+            </button>
+
+            {isSelectionMode && (
+              <>
+                <button
+                  type="button"
+                  onClick={handleSelectAllFavs}
+                  className="px-3 py-1.5 rounded-full text-xs font-semibold bg-surface text-studio-navy shadow-xs hover:bg-studio-neutral-100 transition-colors"
+                >
+                  {selectedFavs.length === favorites.length ? "Deselect All" : "Select All"}
+                </button>
+                <span className="text-xs font-mono text-studio-muted">
+                  ({selectedFavs.length} selected)
+                </span>
+              </>
+            )}
+          </div>
+
+          {isSelectionMode && selectedFavs.length > 0 && (
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleOpenSelected}
+                className="px-3 py-1.5 rounded-full text-xs font-semibold bg-[#007BE5] text-white hover:bg-[#0066CC] transition-colors flex items-center gap-1.5 shadow-xs"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>Open in Tabs</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleRemoveSelected}
+                className="px-3 py-1.5 rounded-full text-xs font-semibold bg-red-500 text-white hover:bg-red-600 transition-colors flex items-center gap-1.5 shadow-xs"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Remove</span>
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* DIRECTORY ITEMS GRID */}
+      {displayedItems.length === 0 ? (
+        <div className="py-20 text-center flex flex-col items-center justify-center bg-surface-soft rounded-3xl border border-studio-neutral-200/80 p-8">
+          <div className="w-16 h-16 rounded-full bg-studio-neutral-100 flex items-center justify-center text-studio-neutral-400 mb-3">
+            <Search className="w-8 h-8" />
+          </div>
+          <h3 className="font-phudu text-xl font-bold text-studio-navy mb-1">
+            No Tools Found
+          </h3>
+          <p className="text-sm text-studio-muted max-w-md mb-4">
+            {activeCategory === "favorites"
+              ? "You haven't added any tools to your favorites yet. Click the heart icon on any card to save it!"
+              : "Try adjusting your search keywords or switching platform filters."}
+          </p>
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery("")}
+              className="text-xs font-bold text-studio-blue hover:underline"
+            >
+              Clear Search Query
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+          {displayedItems.map((item) => (
+            <DirectoryCard
+              key={item.id}
+              item={item}
+              isNew={recentIds.has(item.id)}
+              isFav={isFavorite(item.id)}
+              isSelected={selectedFavs.includes(item.id)}
+              isSelectionMode={isSelectionMode}
+              onPreview={setPreviewItem}
+              onSelectFavorite={handleSelectFav}
+              toggleFavorite={toggleFavorite}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* PROGRESSIVE LOAD / LOAD MORE BUTTON */}
+      {displayedItems.length < filteredItems.length && (
+        <div className="flex justify-center mt-12 mb-4">
+          <MagneticButton
+            variant="primary-light"
+            size="lg"
+            onClick={() => setVisibleCount((prev) => prev + LOAD_MORE_ITEMS)}
+          >
+            Load More Tools ({filteredItems.length - displayedItems.length} remaining)
+          </MagneticButton>
+        </div>
+      )}
+
+      {/* MODAL: TOOL DETAILS INSPECTOR */}
+      <AnimatePresence>
+        {previewItem && (
+          <Modal
+            label={`${previewItem.title} details`}
+            onClose={() => setPreviewItem(null)}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-200 select-none"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="w-full max-w-lg bg-surface rounded-[24px] sm:rounded-[32px] p-5 sm:p-8 shadow-studio-card border border-studio-neutral-200 overflow-y-auto max-h-[90vh] flex flex-col relative"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between pb-4 border-b border-studio-neutral-100 mb-5">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-mono uppercase tracking-widest px-2.5 py-1 rounded-full bg-studio-neutral-100 text-studio-blue font-bold">
+                    {previewItem.category}
+                  </span>
+                  {recentIds.has(previewItem.id) && (
+                    <span className="text-[10px] font-mono uppercase tracking-widest px-2.5 py-1 rounded-full bg-[#9DF71F]/30 text-studio-navy font-bold">
+                      New
+                    </span>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  aria-label="Close tool details"
+                  onClick={() => setPreviewItem(null)}
+                  className="w-8 h-8 rounded-full bg-studio-neutral-100 flex items-center justify-center text-studio-neutral-500 hover:text-studio-neutral-800 transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="mb-4">
+                <h3 className="font-phudu text-2xl sm:text-3xl font-black text-studio-navy mb-1">
+                  {previewItem.title}
+                </h3>
+                {previewItem.addedAt && (
+                  <p className="text-[11px] text-studio-neutral-400 mb-2">
+                    Added <time dateTime={previewItem.addedAt}>{formatCatalogDate(previewItem.addedAt)}</time>
+                  </p>
+                )}
+                <p className="text-sm text-studio-muted font-sans leading-relaxed">
+                  {previewItem.description}
+                </p>
+              </div>
+
+              {previewItem.tags && previewItem.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mb-6">
+                  {previewItem.tags.map((t) => (
+                    <span
+                      key={t}
+                      className="text-[11px] font-mono font-semibold px-2.5 py-1 rounded-full bg-canvas text-studio-neutral-600"
+                    >
+                      #{t}
+                    </span>
+                  ))}
+                </div>
               )}
-            </div>
-          </div>
-        </Modal>
+
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-studio-neutral-100">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      playClickSound();
+                      toggleFavorite(previewItem.id);
+                    }}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-canvas text-xs font-semibold text-studio-navy hover:bg-studio-neutral-200 transition-colors"
+                  >
+                    <Heart
+                      className={`w-4 h-4 ${
+                        isFavorite(previewItem.id) ? "fill-red-500 text-red-500" : "text-studio-neutral-400"
+                      }`}
+                    />
+                    <span>{isFavorite(previewItem.id) ? "In Favorites" : "Save Tool"}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const toolUrl = `${window.location.origin}/?tool=${previewItem.id}`;
+                      navigator.clipboard.writeText(toolUrl);
+                      setLinkCopied(true);
+                      playSuccessSound();
+                      setTimeout(() => setLinkCopied(false), 2000);
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-canvas text-xs font-semibold text-studio-navy hover:bg-studio-neutral-200 transition-colors cursor-pointer"
+                    title="Copy direct shareable link to this tool"
+                  >
+                    <Link2 className="w-3.5 h-3.5 text-studio-blue" />
+                    <span>{linkCopied ? "Link Copied!" : "Copy Link"}</span>
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {previewItem.github && (
+                    <MagneticButton
+                      variant="primary-light"
+                      size="md"
+                      icon={<Github className="w-4 h-4 text-studio-navy" />}
+                      href={previewItem.github}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Go to Source
+                    </MagneticButton>
+                  )}
+
+                  <MagneticButton
+                    variant="accent-lime"
+                    size="md"
+                    icon={<ExternalLink className="w-4 h-4 text-studio-navy" />}
+                    href={previewItem.website || previewItem.github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {previewItem.website ? "Visit Website →" : "Launch Tool →"}
+                  </MagneticButton>
+                </div>
+              </div>
+            </motion.div>
+          </Modal>
+        )}
+      </AnimatePresence>
+
+      {/* COMMAND PALETTE */}
+      {showCommandPalette && (
+        <CommandPalette
+          isOpen={showCommandPalette}
+          onClose={() => setShowCommandPalette(false)}
+          items={items}
+          onSelectItem={(item) => {
+            setPreviewItem(item);
+          }}
+          onOpenRandom={handleOpenRoulette}
+          onOpenFavorites={() => setActiveCategory("favorites")}
+          onOpenCompare={handleOpenCompare}
+          onExportFavorites={() => handleExport("md")}
+        />
       )}
-      {confirmRemove && (
-        <Modal
-          label="Remove saved tools"
-          onClose={() => setConfirmRemove(false)}
-          className="modal-overlay"
-        >
-          <div className="dialog-panel">
-            <h2>Remove {selected.length} saved tools?</h2>
-            <p>
-              This changes this browser’s collection. Export a backup first if
-              you want to keep a copy.
-            </p>
-            <div className="dialog-actions">
-              <button
-                className="button"
-                onClick={() => setConfirmRemove(false)}
-              >
-                Keep them
-              </button>
-              <button
-                className="button button-primary"
-                onClick={() => {
-                  removeFavorites(selected);
-                  setNotice(`${selected.length} tools removed.`);
-                  setSelected([]);
-                  setConfirmRemove(false);
-                }}
-              >
-                Remove selected
-              </button>
-            </div>
-          </div>
-        </Modal>
-      )}
-      {showCompare && (
+
+      {/* Fallback Modals (Only active if not controlled globally by parent layout) */}
+      {!onOpenCompare && hasOpenedCompare && (
         <CompareModal
-          isOpen
+          isOpen={showCompare}
           onClose={() => setShowCompare(false)}
           allItems={items}
-          initialItems={compareIds.map((id) => items.find((i) => i.id === id)!)}
           favorites={favorites}
-          onToggleFavorite={save}
+          onToggleFavorite={toggleFavorite}
         />
       )}
-      {roulette && (
-        <Roulette
-          isOpen
-          onClose={() => setRoulette(false)}
-          items={results.length ? results : items}
-          favorites={favorites}
-          onToggleFavorite={save}
-        />
-      )}
-      {palette && (
-        <CommandPalette
-          isOpen
-          onClose={() => setPalette(false)}
+
+      {!onOpenRoulette && showRoulette && (
+        <RandomRouletteModal
+          isOpen={showRoulette}
+          onClose={() => setShowRoulette(false)}
           items={items}
-          onSelectItem={onPreview}
-          onOpenRandom={() => setRoulette(true)}
-          onOpenFavorites={() => chooseCategory("favorites")}
-          onOpenCompare={() => setShowCompare(true)}
-          onExportFavorites={() => exportFile("json")}
+          favorites={favorites}
+          onToggleFavorite={toggleFavorite}
         />
       )}
     </section>

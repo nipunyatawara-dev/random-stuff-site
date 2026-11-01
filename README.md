@@ -6,7 +6,7 @@ An independent directory of handpicked websites, desktop apps and scripts, maint
 
 Search by name, task or tag. Browse categories, combine a platform with verified attributes, compare sourced facts, discover a random tool, and save favorites in this browser. JSON backups can be imported into an empty collection; Plain-text (.txt), Markdown and HTML exports include every saved tool, even when the list is filtered. Favorites do not sync between devices.
 
-Tools and curated workflows have static `/tools/[id]` and `/stacks/[id]` pages with individual metadata, source reviews and correction links. A complete alphabetical text index works without JavaScript. Unknown pricing, license and platform facts are kept explicit. The site uses one self-hosted font, local monogram icons, native scrolling and keyboard-accessible dialogs. Light/dark themes follow system preference until changed. Reduced motion is honored; the directory is never blocked by an intro animation.
+Tools and curated workflows have static `/tools/[id]` and `/stacks/[id]` pages with individual metadata, source reviews and correction links. A complete alphabetical text index works without JavaScript. Unknown pricing, license and platform facts are kept explicit. The original studio design uses Inter, Phudu, Caveat and JetBrains Mono, the existing tool icons, animated otter intro, tactile cards and buttons, and smooth scrolling. Light/dark themes follow system preference until changed. Favorites can be exported as plain text containing only tool names, descriptions and related links.
 
 Use Node.js 24:
 

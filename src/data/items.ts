@@ -1,3 +1,4 @@
+import { CATALOG_IMAGES } from "./catalog-images";
 import { type SearchTopic } from "@/lib/search-topics";
 import {
   COMPARISON_DETAILS,
@@ -3606,7 +3607,7 @@ const rawItems: Omit<Item, "image" | "isNew" | "details">[] = [
 
 export const items: Item[] = rawItems.map((item) => ({
   ...item,
-  image: `/tool-icons/${item.id}.svg`,
+  image: CATALOG_IMAGES[item.id] || `/tool-icons/${item.id}.svg`,
   details: COMPARISON_DETAILS[item.id],
   isNew: isRecentlyAdded(item.addedAt),
 }));
