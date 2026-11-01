@@ -49,3 +49,8 @@ next-env.d.ts
 
 # Generated catalog link reports
 /reports/
+
+# Browser verification artifacts
+/test-results/
+/playwright-report/
+/.taste-skill/

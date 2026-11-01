@@ -21,7 +21,10 @@ describe("New Power-User Features", () => {
       for (const stack of CURATED_STACKS) {
         expect(stack.itemIds.length).toBeGreaterThan(0);
         for (const id of stack.itemIds) {
-          expect(allCatalogIds.has(id), `Missing tool ID "${id}" in stack "${stack.title}"`).toBe(true);
+          expect(
+            allCatalogIds.has(id),
+            `Missing tool ID "${id}" in stack "${stack.title}"`,
+          ).toBe(true);
         }
       }
     });
@@ -71,14 +74,33 @@ describe("New Power-User Features", () => {
   });
 
   describe("Utility Filter Tags", () => {
-    it("matches open-source items with github link or oss tags", () => {
-      const ossItem = items.find((i) => i.github) || items[0];
+    it("matches only verified open-source licenses", () => {
+      const ossItem = items.find((i) => i.id === "softwares-tabby")!;
+      expect(
+        itemMatchesPlatformTag(
+          {
+            category: "Softwares",
+            tags: [],
+            github: "https://github.com/example",
+          },
+          "open-source",
+        ),
+      ).toBe(false);
+      expect(
+        itemMatchesPlatformTag(
+          items.find((i) => i.id === "websites-react-bits")!,
+          "open-source",
+        ),
+      ).toBe(false);
       expect(itemMatchesPlatformTag(ossItem, "open-source")).toBe(true);
       expect(itemMatchesPlatformTag(ossItem, "oss")).toBe(true);
     });
 
     it("matches cli items by tag or category", () => {
-      const cliItem = items.find((i) => i.tags.includes("terminal") || i.tags.includes("cli")) || items[0];
+      const cliItem =
+        items.find(
+          (i) => i.tags.includes("terminal") || i.tags.includes("cli"),
+        ) || items[0];
       expect(itemMatchesPlatformTag(cliItem, "cli")).toBe(true);
     });
 

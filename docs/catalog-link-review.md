@@ -1,28 +1,24 @@
 # Catalog link review
 
-Checked on October 14, 2026. The audit tested 485 unique website/source URLs: 465 responded successfully, 9 returned HTTP 404, and 11 require review. Responses can change; no entries were removed or automatically rewritten.
+Checked 2026-11-01T07:13:59.767Z. 469 active URLs responded, 0 returned HTTP 404/410, and 12 need manual review.
 
-Run `npm run check:links` to refresh `reports/catalog-links.json`. Authentication, anti-bot responses, rate limits, and connection errors are flagged for review rather than treated as confirmed dead tools.
+Confirmed broken destinations were corrected against official sources. Net-Bar has no verified working replacement, so external launch links are disabled while its stable listing is preserved. GitHub Store was renamed to Komi Store with its existing ID retained. OmniGet now links to its official author site; the inaccessible repository was removed. Other corrected destinations: Actiona, GSmartControl, Thunderbird, Nora and Cline.
+
+Official evidence: [Komi repository](https://github.com/komi-store/komi-store), [GSmartControl repository](https://github.com/ashaduri/gsmartcontrol), [Actiona repository](https://github.com/Jmgr/actiona), [Nora repository](https://github.com/Sandakan/Nora), [OmniGet security page](https://getomniget.com/security), [Cline installation](https://cline.bot/install), [Thunderbird development](https://developer.thunderbird.net/thunderbird-development/setting-up-a-build-environment).
+
+The remaining cases are not treated as dead tools: anti-bot responses, legal restrictions, rate limits and network errors need a human review. The checker runs weekly in CI and writes an artifact.
 
 | Tools | Result | URL |
 | --- | --- | --- |
-| Dither | fetch failed | [https://dither.fun/](https://dither.fun/) |
-| Paperless-ngx | HTTP 403 | [https://docs.paperless-ngx.com](https://docs.paperless-ngx.com) |
-| Net-Bar | HTTP 404 | [https://github.com/iad1tya/Net-Bar](https://github.com/iad1tya/Net-Bar) |
-| Droppy | HTTP 451 | [https://github.com/iordv/Droppy](https://github.com/iordv/Droppy) |
-| Actiona | HTTP 404 | [https://github.com/Jxtkez/actiona](https://github.com/Jxtkez/actiona) |
-| GSmartControl | HTTP 404 | [https://github.com/kzsolt/gsmartcontrol](https://github.com/kzsolt/gsmartcontrol) |
-| LiveContainer | HTTP 404 | [https://github.com/LiveContainer/LiveContainer](https://github.com/LiveContainer/LiveContainer) |
-| Mozilla Thunderbird | HTTP 404 | [https://github.com/mozilla/thunderbird-bin](https://github.com/mozilla/thunderbird-bin) |
-| Nora | HTTP 404 | [https://github.com/NoraPlayer/Nora](https://github.com/NoraPlayer/Nora) |
-| OmniGet | HTTP 404 | [https://github.com/tonhowtf/omniget](https://github.com/tonhowtf/omniget) |
-| GSmartControl | fetch failed | [https://gsmartcontrol.shadedlands.com](https://gsmartcontrol.shadedlands.com) |
-| Inkscape | The operation was aborted due to timeout | [https://inkscape.org](https://inkscape.org) |
-| Cline | HTTP 404 | [https://marketplace.visualstudio.com/items?itemName=saoudrizwan.claude-dev](https://marketplace.visualstudio.com/items?itemName=saoudrizwan.claude-dev) |
-| Moody | fetch failed | [https://moody.mjarosz.com](https://moody.mjarosz.com) |
-| QuillBot | HTTP 403 | [https://quillbot.com](https://quillbot.com) |
-| Simple Icons | fetch failed | [https://simple-icons.org](https://simple-icons.org) |
-| Vocal Remover | HTTP 403 | [https://vocalremover.org](https://vocalremover.org) |
-| Github Store | HTTP 404 | [https://www.github-store.org/](https://www.github-store.org/) |
-| Printed Matter | HTTP 403 | [https://www.printedmatter.org/](https://www.printedmatter.org/) |
-| SVG Repo | HTTP 429 | [https://www.svgrepo.com](https://www.svgrepo.com) |
+| Deck.Gallery | HTTP 403 | https://deck.gallery/ |
+| Dither | fetch failed | https://dither.fun/ |
+| Paperless-ngx | HTTP 403 | https://docs.paperless-ngx.com |
+| FFmpeg conversion guide | fetch failed | https://ffmpeg.org/ffmpeg.html |
+| Droppy | HTTP 451 | https://github.com/iordv/Droppy |
+| Inkscape | The operation was aborted due to timeout | https://inkscape.org |
+| QuillBot | HTTP 403 | https://quillbot.com |
+| Simple Icons | fetch failed | https://simple-icons.org |
+| Vocal Remover | HTTP 403 | https://vocalremover.org |
+| emailcn | HTTP 503 | https://www.emailcn.run |
+| Printed Matter | HTTP 403 | https://www.printedmatter.org/ |
+| SVG Repo | HTTP 429 | https://www.svgrepo.com |

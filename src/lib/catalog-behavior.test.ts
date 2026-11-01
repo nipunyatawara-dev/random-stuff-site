@@ -62,3 +62,11 @@ describe("link checks", () => {
     expect(result.result).toBe("review");
   });
 });
+
+describe("shared URL input bounds", () => {
+  it("ignores malformed legacy hashes and bounds search input", () => {
+    expect(() => readCatalogUrl(new URL("https://example.com/#stack=%E0%A4"), items)).not.toThrow();
+    expect(readCatalogUrl(new URL(`https://example.com/?q=${"a".repeat(500)}`), items).query.length).toBe(200);
+    expect(readCatalogUrl(new URL("https://example.com/?tag=unknown"), items).tag).toBe("all");
+  });
+});

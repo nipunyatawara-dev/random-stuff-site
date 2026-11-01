@@ -1,9 +1,12 @@
-import { getTopicsForItem, type SearchTopic } from "@/lib/search-topics";
-import { CATALOG_ADDED_AT } from "./catalog-dates";
-import { COMPARISON_DETAILS, type ComparisonDetails } from "./comparison-details";
+import { type SearchTopic } from "@/lib/search-topics";
+import {
+  COMPARISON_DETAILS,
+  type ComparisonDetails,
+} from "./comparison-details";
 import { isRecentlyAdded } from "@/lib/catalog-dates";
 
 export interface Item {
+  linkUnavailable?: boolean;
   id: string;
   title: string;
   description: string;
@@ -19,2798 +22,3591 @@ export interface Item {
   details?: ComparisonDetails;
 }
 
-type RawItem = Omit<Item, "id" | "topics">;
-
-/** Extract a favicon URL from a website URL */
-function getFaviconUrl(url?: string): string | undefined {
-  if (!url || url === "#") return undefined;
-  try {
-    const domain = new URL(url).hostname;
-    return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
-  } catch {
-    return undefined;
-  }
-}
-
-const rawItems: RawItem[] = [
-  {
-    "title": "Tabby",
-    "description": "A terminal for a more modern age.",
-    "website": "https://tabby.sh",
-    "github": "https://github.com/Eugeny/tabby",
-    "category": "Softwares",
-    "tags": [
-      "terminal",
-      "all"
-    ]
-  },
-  {
-    "title": "React Bits",
-    "description": "A huge library of animated React components.",
-    "website": "https://reactbits.dev",
-    "category": "Websites",
-    "tags": [
-      "all"
-    ],
-    "image": "https://reactbits.dev/favicon.ico"
-  },
-  {
-    "title": "WizTree",
-    "description": "Find what's eating your disk space on Windows.",
-    "website": "https://diskanalyzer.com",
-    "category": "Softwares",
-    "tags": [
-      "windows"
-    ],
-    "image": "https://diskanalyzer.com/favicon.ico"
-  },
-  {
-    "title": "Raycast",
-    "description": "The best launcher for macOS. Replaces Spotlight.",
-    "website": "https://raycast.com",
-    "github": "https://github.com/raycast",
-    "category": "Softwares",
-    "tags": [
-      "macos"
-    ],
-  },
-  {
-    "title": "Ffmpeg Script",
-    "description": "Quickly convert MKV to MP4 without losing quality.",
-    "website": "https://ffmpeg.org/ffmpeg.html",
-    "category": "Scripts",
-    "tags": [
-      "macos",
-      "windows",
-      "linux"
-    ]
-  },
-  {
-    "title": "Chris Titus WinUtil",
-    "description": "Windows utility to debloat, install apps, and adjust system settings.",
-    "website": "https://christitus.com/one-tool-for-everything/",
-    "category": "Scripts",
-    "tags": [
-      "windows"
-    ]
-  },
-  {
-    "title": "PlayCover",
-    "description": "Run iOS apps and games on Apple Silicon Macs with keyboard support.",
-    "website": "https://playcover.io",
-    "github": "https://github.com/PlayCover/PlayCover/",
-    "category": "Softwares",
-    "tags": [
-      "macos"
-    ],
-    "image": "https://github.com/PlayCover.png"
-  },
-  {
-    "title": "FMHY",
-    "description": "The largest collection of free stuff on the internet (tools, piracy, etc).",
-    "website": "https://fmhy.net/",
-    "github": "https://github.com/fmhy/bookmarks",
-    "category": "Websites",
-    "tags": [
-      "all"
-    ],
-  },
-  {
-    "title": "Github Store",
-    "description": "A free app store to browse and install apps from GitHub releases.",
-    "website": "https://www.github-store.org/",
-    "github": "https://github.com/rainxchzed/Github-Store/",
-    "category": "Softwares",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/rainxchzed.png"
-  },
-  {
-    "title": "Awesome Swift Apps",
-    "description": "List of open-source macOS applications built with Swift.",
-    "github": "https://github.com/jaywcjlove/awesome-swift-macos-apps/",
-    "category": "Websites",
-    "tags": [
-      "macos"
-    ],
-    "image": "https://github.com/jaywcjlove.png"
-  },
-  {
-    "title": "Popcorn Time",
-    "description": "Watch movies and TV shows instantly via torrent streaming.",
-    "website": "https://popcorntime.app",
-    "github": "https://github.com/popcorntime/popcorntime",
-    "category": "Softwares",
-    "tags": [
-      "macos",
-      "windows",
-      "linux"
-    ],
-    "image": "https://github.com/popcorntime.png"
-  },
-  {
-    "title": "Brisk",
-    "description": "An ultra-fast, modern download manager for macOS and Linux.",
-    "github": "https://github.com/BrisklyDev/brisk/",
-    "category": "Softwares",
-    "tags": [
-      "macos",
-      "linux"
-    ],
-    "image": "https://github.com/BrisklyDev.png"
-  },
-  {
-    "title": "Cobalt",
-    "description": "Download media from YouTube, Twitter, and more without ads or tracking.",
-    "website": "https://cobalt.tools/",
-    "category": "Websites",
-    "tags": [
-      "all"
-    ],
-  },
-  {
-    "title": "Mole",
-    "description": "A terminal tool for deep macOS cleanup and app uninstallation.",
-    "website": "https://x.com/HiTw93/status/2037873590461464915",
-    "github": "https://github.com/tw93/Mole",
-    "category": "Softwares",
-    "tags": [
-      "macos"
-    ],
-    "image": "https://github.com/tw93.png"
-  },
-  {
-    "title": "Vert",
-    "description": "Securely convert files locally in your browser using WebAssembly.",
-    "website": "https://vert.sh/",
-    "github": "https://github.com/VERT-sh/VERT",
-    "category": "Websites",
-    "tags": [
-      "all"
-    ]
-  },
-  {
-    "title": "Mounty",
-    "description": "A tiny tool to re-mount write-protected NTFS volumes on macOS.",
-    "website": "https://mounty.app/",
-    "github": "https://github.com/tuxera/ntfs-3g",
-    "category": "Softwares",
-    "tags": [
-      "macos"
-    ],
-    "image": "https://mounty.app/favicon.ico"
-  },
-  {
-    "title": "Isocons",
-    "description": "A free collection of customizable isometric icons.",
-    "website": "https://www.isocons.app/",
-    "category": "Websites",
-    "tags": [
-      "all"
-    ]
-  },
-  {
-    "title": "Boring Notch",
-    "description": "Turns your MacBook notch into a dynamic, functional hub.",
-    "website": "https://theboring.name/",
-    "github": "https://github.com/TheBoredTeam/boring.notch/?tab=readme-ov-file",
-    "category": "Softwares",
-    "tags": [
-      "macos"
-    ],
-    "image": "https://github.com/TheBoredTeam.png"
-  },
-  {
-    "title": "Darkwrite",
-    "description": "A distraction-free, eye-candy note-taking and to-do app.",
-    "website": "https://darkwrite.app/",
-    "github": "https://github.com/astudentinearth/darkwrite",
-    "category": "Softwares",
-    "tags": [
-      "all"
-    ]
-  },
-  {
-    "title": "UTM",
-    "description": "Run virtual machines (Windows, Linux) on iOS and macOS.",
-    "website": "https://getutm.app",
-    "github": "https://github.com/utmapp/UTM",
-    "category": "Softwares",
-    "tags": [
-      "macos"
-    ],
-    "image": "https://github.com/utmapp.png"
-  },
-  {
-    "title": "WinApps",
-    "description": "Run Windows apps like Office and Adobe on Linux through a guided installer.",
-    "github": "https://github.com/winapps-org/winapps",
-    "category": "Softwares",
-    "tags": [
-      "linux"
-    ],
-    "image": "https://github.com/winapps-org.png"
-  },
-  {
-    "title": "EdClub",
-    "description": "Educational platform for typing, vocabulary, and more.",
-    "website": "https://www.edclub.com/sportal/",
-    "category": "Websites",
-    "tags": [
-      "all"
-    ]
-  },
-  {
-    "title": "MAS",
-    "description": "Microsoft Activation Scripts - Open source Windows/Office activator.",
-    "website": "https://massgrave.dev",
-    "github": "https://github.com/massgravel/Microsoft-Activation-Scripts",
-    "category": "Scripts",
-    "tags": [
-      "windows"
-    ],
-    "image": "https://github.com/massgravel.png"
-  },
-  {
-    "title": "niri",
-    "description": "A scrollable-tiling Wayland compositor.",
-    "website": "https://niri-wm.github.io/niri/",
-    "github": "https://github.com/YaLTeR/niri",
-    "category": "Softwares",
-    "tags": [
-      "linux"
-    ],
-    "image": "https://github.com/YaLTeR.png"
-  },
-  {
-    "title": "Spicetify CLI",
-    "description": "Command-line tool to customize the Spotify desktop app.",
-    "website": "https://spicetify.app",
-    "github": "https://github.com/spicetify/cli",
-    "category": "Softwares",
-    "tags": [
-      "macos",
-      "windows",
-      "linux"
-    ],
-    "image": "https://github.com/spicetify.png"
-  },
-  {
-    "title": "Win11Debloat",
-    "description": "Debloat and tweak Windows 11.",
-    "github": "https://github.com/Raphire/Win11Debloat",
-    "category": "Scripts",
-    "tags": [
-      "windows"
-    ],
-    "image": "https://github.com/Raphire.png"
-  },
-  {
-    "title": "DockDoor",
-    "description": "Dock alternative for macOS.",
-    "website": "https://dockdoor.net/",
-    "github": "https://github.com/ejbills/DockDoor",
-    "category": "Softwares",
-    "tags": [
-      "macos"
-    ]
-  },
-  {
-    "title": "Shine",
-    "description": "Open-source project from Blade04208.",
-    "github": "https://github.com/Blade04208/shine/",
-    "category": "Softwares",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/Blade04208.png"
-  },
-  {
-    "title": "Gemini Watermark Remover",
-    "description": "Watermark removal tool.",
-    "website": "https://pilio.ai/gemini-watermark-remover",
-    "github": "https://github.com/journey-ad/gemini-watermark-remover",
-    "category": "Softwares",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/journey-ad.png"
-  },
-  {
-    "title": "shadPS4",
-    "description": "PlayStation 4 emulator.",
-    "website": "https://shadps4.net/",
-    "github": "https://github.com/shadps4-emu/shadPS4",
-    "category": "Softwares",
-    "tags": [
-      "windows",
-      "linux"
-    ],
-    "image": "https://github.com/shadps4-emu.png"
-  },
-  {
-    "title": "Mate Engine",
-    "description": "Game engine project.",
-    "website": "https://store.steampowered.com/app/3625270/MateEngine/",
-    "github": "https://github.com/shinyflvre/Mate-Engine",
-    "category": "Softwares",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/shinyflvre.png"
-  },
-  {
-    "title": "Cline",
-    "description": "Open-source AI coding assistant.",
-    "website": "https://marketplace.visualstudio.com/items?itemName=saoudrizwan.claude-dev",
-    "github": "https://github.com/cline/cline",
-    "category": "Softwares",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/cline.png"
-  },
-  {
-    "title": "FaceFusion",
-    "description": "Face swap and enhancement toolkit.",
-    "website": "https://facefusion.io",
-    "github": "https://github.com/allenk/facefusion",
-    "category": "Softwares",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/allenk.png"
-  },
-  {
-    "title": "Droppy",
-    "description": "Self-hosted file sharing app.",
-    "github": "https://github.com/iordv/Droppy",
-    "category": "Softwares",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/iordv.png"
-  },
-  {
-    "title": "Open Researcher",
-    "description": "Automated research assistant.",
-    "github": "https://github.com/firecrawl/open-researcher",
-    "category": "Softwares",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/firecrawl.png"
-  },
-  {
-    "title": "Cloudflare Error Page",
-    "description": "Custom Cloudflare error page template.",
-    "website": "https://virt.moe/cferr/editor/",
-    "github": "https://github.com/donlon/cloudflare-error-page",
-    "category": "Scripts",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/donlon.png"
-  },
-  {
-    "title": "LM Studio",
-    "description": "Run local LLMs on your machine.",
-    "website": "https://lmstudio.ai/",
-    "github": "https://github.com/lmstudio-ai",
-    "category": "Softwares",
-    "tags": [
-      "macos",
-      "windows",
-      "linux"
-    ],
-    "image": "https://lmstudio.ai/favicon.ico"
-  },
-  {
-    "title": "Shader Gradient",
-    "description": "Generate shader-style gradients.",
-    "website": "https://shadergradient.co/",
-    "category": "Websites",
-    "tags": [
-      "all"
-    ]
-  },
-  {
-    "title": "OpenScreen",
-    "description": "Screen sharing and remote control.",
-    "website": "https://openscreen.vercel.app",
-    "github": "https://github.com/siddharthvaddem/openscreen",
-    "category": "Softwares",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/siddharthvaddem.png"
-  },
-  {
-    "title": "FineTune",
-    "description": "A macOS menu bar app for per-app volume control, multi-device output, audio routing, and 10-band EQ.",
-    "github": "https://github.com/ronitsingh10/FineTune",
-    "category": "Softwares",
-    "tags": [
-      "macos"
-    ],
-    "image": "https://github.com/ronitsingh10.png"
-  },
-  {
-    "title": "Net-Bar",
-    "description": "Network status bar app.",
-    "github": "https://github.com/iad1tya/Net-Bar",
-    "category": "Softwares",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/iad1tya.png"
-  },
-  {
-    "title": "Ear (web)",
-    "description": "Unofficial web app to control Nothing/CMF audio devices on PC/Mac.",
-    "website": "https://earweb.bttl.xyz/",
-    "github": "https://github.com/radiance-project/ear-web/issues",
-    "category": "Websites",
-    "tags": [
-      "all"
-    ],
-    "image": "https://earweb.bttl.xyz/favicon.ico"
-  },
-  {
-    "title": "Scrcpy GUI",
-    "description": "A modern, high-performance Windows GUI for scrcpy.",
-    "github": "https://github.com/kil0bit-kb/scrcpy-gui",
-    "category": "Softwares",
-    "tags": [
-      "windows"
-    ],
-    "image": "https://github.com/kil0bit-kb.png"
-  },
-  {
-    "title": "CodexBar",
-    "description": "MacOS menu bar app to track OpenAI/Claude usage quotas.",
-    "website": "https://codexbar.app",
-    "github": "https://github.com/steipete/CodexBar",
-    "category": "Softwares",
-    "tags": [
-      "macos"
-    ],
-    "image": "https://github.com/steipete.png"
-  },
-  {
-    "title": "Excalidraw",
-    "description": "Virtual collaborative whiteboard with hand-drawn feel diagrams.",
-    "website": "https://excalidraw.com",
-    "github": "https://github.com/excalidraw/excalidraw",
-    "category": "Websites",
-    "tags": [
-      "all"
-    ],
-    "image": "https://excalidraw.com/favicon.ico"
-  },
-  {
-    "title": "Corca",
-    "description": "Math formula editor with LaTeX export and live collaboration.",
-    "website": "https://corca.app",
-    "category": "Websites",
-    "tags": [
-      "all"
-    ],
-    "image": "https://corca.app/favicon.ico"
-  },
-  {
-    "title": "Quick Subtitles",
-    "description": "Generate subtitles for videos in seconds on iOS.",
-    "website": "https://apps.apple.com/us/app/quick-subtitles/id6747410609",
-    "category": "Softwares",
-    "tags": [
-      "ios"
-    ]
-  },
-  {
-    "title": "Transmission",
-    "description": "Fast, easy, and free BitTorrent client for Mac, Windows, and Linux.",
-    "website": "https://transmissionbt.com",
-    "github": "https://github.com/transmission/transmission/issues",
-    "category": "Softwares",
-    "tags": [
-      "macos",
-      "windows",
-      "linux"
-    ],
-    "image": "https://github.com/transmission.png"
-  },
-  {
-    "title": "iLovePDF",
-    "description": "Free online tools to merge, split, compress, and convert PDFs.",
-    "website": "https://www.ilovepdf.com/",
-    "category": "Websites",
-    "tags": [
-      "all"
-    ],
-    "image": "https://www.ilovepdf.com/favicon.ico"
-  },
-  {
-    "title": "Mini-Agent",
-    "description": "Open-source agent framework from MiniMax-AI.",
-    "website": "https://www.minimax.io/",
-    "github": "https://github.com/MiniMax-AI/Mini-Agent",
-    "category": "Softwares",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/MiniMax-AI.png"
-  },
-  {
-    "title": "BetterCapture",
-    "description": "The macOS screen recorder for the rest of us - always free and open source with a native look and feel.",
-    "website": "https://bettercapture.app/",
-    "github": "https://github.com/jsattler/BetterCapture",
-    "category": "Softwares",
-    "tags": [
-      "macos"
-    ],
-    "image": "https://github.com/jsattler.png"
-  },
-  {
-    "title": "Hidden",
-    "description": "An ultra-light MacOS utility that helps hide menu bar icons.",
-    "website": "https://d.foundation/opensource",
-    "github": "https://github.com/dwarvesf/hidden",
-    "category": "Softwares",
-    "tags": [
-      "macos"
-    ],
-    "image": "https://github.com/dwarvesf.png"
-  },
-  {
-    "title": "IINA",
-    "description": "The modern video player for macOS.",
-    "website": "https://iina.io",
-    "github": "https://github.com/iina/iina",
-    "category": "Softwares",
-    "tags": [
-      "macos"
-    ],
-    "image": "https://github.com/iina.png"
-  },
-  {
-    "title": "Torph",
-    "description": "Dependency-free animated text component.",
-    "website": "https://torph.lochie.me/",
-    "github": "https://github.com/lochie/torph",
-    "category": "Websites",
-    "tags": [
-      "all"
-    ],
-    "image": "https://torph.lochie.me/og.png"
-  },
-  {
-    "title": "Scrollbar",
-    "description": "Simple online scrollbar editor.",
-    "website": "https://scrollbar.app",
-    "github": "https://github.com/henripar/scrollbar",
-    "category": "Websites",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/henripar.png"
-  },
-  {
-    "title": "BentoPDF",
-    "description": "A Privacy First PDF Toolkit.",
-    "website": "https://bentopdf.com/",
-    "github": "https://github.com/alam00000/bentopdf",
-    "category": "Softwares",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/alam00000.png"
-  },
-  {
-    "title": "PS4 Game Scraper",
-    "description": "PS4 Game Scraper.",
-    "github": "https://github.com/NookieAI/PS4-Game-Scraper",
-    "category": "Softwares",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/NookieAI.png"
-  },
-  {
-    "title": "CopyCat Clipboard",
-    "description": "Clipboard history manager to search and paste recent clips across apps.",
-    "website": "https://www.entilitystudio.com/copycat-clipboard",
-    "github": "https://github.com/raj457036/CopyCat-Clipboard",
-    "category": "Softwares",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/raj457036.png"
-  },
-  {
-    "title": "Sileo",
-    "description": "Beautiful Toast Notifications for React.",
-    "website": "https://sileo.aaryan.design/",
-    "github": "https://github.com/hiaaryan/sileo",
-    "category": "Websites",
-    "tags": [
-      "all"
-    ],
-    "image": "https://sileo.aaryan.design/favicon.ico"
-  },
-  {
-    "title": "Battery-Toolkit",
-    "description": "Control the platform power state of your Apple Silicon Mac.",
-    "github": "https://github.com/mhaeuser/Battery-Toolkit",
-    "category": "Softwares",
-    "tags": [
-      "macos"
-    ],
-    "image": "https://github.com/mhaeuser.png"
-  },
-  {
-    "title": "MagicPods",
-    "description": "Battery status, ear detection, and popup indicators for AirPods on Windows.",
-    "website": "https://magicpods.app",
-    "github": "https://github.com/steam3d/MagicPods-Windows",
-    "category": "Softwares",
-    "tags": [
-      "windows"
-    ],
-    "image": "https://github.com/steam3d.png"
-  },
-  {
-    "title": "IPSW Downloads",
-    "description": "Download current and previous versions of Apple's iOS, iPadOS, macOS, watchOS, tvOS, audioOS and visionOS firmware.",
-    "website": "https://ipsw.me/",
-    "category": "Websites",
-    "tags": [
-      "all"
-    ],
-    "image": "https://ipsw.me/favicon.ico"
-  },
-  {
-    "title": "Carbon Design System",
-    "description": "IBM's open source design system for products and digital experiences.",
-    "website": "https://www.carbondesignsystem.com",
-    "github": "https://github.com/carbon-design-system/carbon",
-    "category": "Websites",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/carbon-design-system.png"
-  },
-  {
-    "title": "Poke",
-    "description": "Privacy-focused client with a YouTube front-end, translation tools, and maps.",
-    "website": "https://poketube.fun/",
-    "github": "https://github.com/TecharoHQ/anubis",
-    "category": "Websites",
-    "tags": [
-      "all"
-    ],
-    "image": "https://poketube.fun/favicon.ico"
-  },
-  {
-    "title": "NouTube Desktop",
-    "description": "Ad-free YouTube desktop application.",
-    "github": "https://github.com/nonbili/NouTube-Desktop",
-    "category": "Softwares",
-    "tags": [
-      "macos",
-      "windows",
-      "linux"
-    ],
-    "image": "https://github.com/nonbili.png"
-  },
-  {
-    "title": "NouTube",
-    "description": "Ad-free YouTube client.",
-    "github": "https://github.com/nonbili/NouTube",
-    "category": "Softwares",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/nonbili.png"
-  },
-  {
-    "title": "Lucide Animated",
-    "description": "Beautiful animated icons for Lucide.",
-    "website": "https://lucide-animated.com/",
-    "github": "https://github.com/pqoqubbw/icons",
-    "category": "Websites",
-    "tags": [
-      "all"
-    ],
-    "image": "https://lucide-animated.com/favicon.ico"
-  },
-  {
-    "title": "Scrapy",
-    "description": "A fast high-level web crawling and scraping framework for Python.",
-    "website": "https://scrapy.org",
-    "github": "https://github.com/scrapy/scrapy",
-    "category": "Scripts",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/scrapy.png"
-  },
-  {
-    "title": "The Component Gallery",
-    "description": "A collection of components from the best Design Systems.",
-    "website": "https://component.gallery/",
-    "github": "https://github.com/elastic/eui",
-    "category": "Websites",
-    "tags": [
-      "all"
-    ]
-  },
-  {
-    "title": "Metrolist",
-    "description": "A simple to-do list taking design cues from the Metro design language.",
-    "website": "https://metrolist.cc/",
-    "github": "https://github.com/MetrolistGroup/Metrolist",
-    "category": "Softwares",
-    "tags": [
-      "android"
-    ],
-    "image": "https://github.com/MetrolistGroup.png"
-  },
-  {
-    "title": "Karaoke Eternal",
-    "description": "Open karaoke party system.",
-    "website": "https://www.karaoke-eternal.com",
-    "github": "https://github.com/bhj/KaraokeEternal",
-    "category": "Softwares",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/bhj.png"
-  },
-  {
-    "title": "Shadcn Admin",
-    "description": "Admin Dashboard UI built with Shadcn and Vite.",
-    "website": "https://shadcn-admin.netlify.app/",
-    "github": "https://github.com/satnaing/shadcn-admin",
-    "category": "Websites",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/satnaing.png"
-  },
-  {
-    "title": "FlyCut Caption",
-    "description": "React component for editing subtitles with speech recognition and timeline waveforms.",
-    "website": "https://caption.flycut.co",
-    "github": "https://github.com/x007xyz/flycut-caption",
-    "category": "Softwares",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/x007xyz.png"
-  },
-  {
-    "title": "Awesome Self-Hosted",
-    "description": "A list of Free Software network services and web applications which can be hosted on your own servers.",
-    "website": "https://awesome-selfhosted.net/",
-    "github": "https://github.com/awesome-selfhosted/awesome-selfhosted",
-    "category": "Websites",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/awesome-selfhosted.png"
-  },
-  {
-    "title": "WinShot",
-    "description": "A Windows screenshot tool with annotation, crop, and export features.",
-    "website": "http://winshot.claudekit.cc/",
-    "github": "https://github.com/mrgoonie/winshot",
-    "category": "Softwares",
-    "tags": [
-      "windows"
-    ],
-    "image": "https://github.com/mrgoonie.png"
-  },
-  {
-    "title": "Stats",
-    "description": "macOS system monitor in your menu bar.",
-    "website": "https://mac-stats.com",
-    "github": "https://github.com/exelban/stats",
-    "category": "Softwares",
-    "tags": [
-      "macos"
-    ],
-    "image": "https://github.com/exelban.png"
-  },
-  {
-    "title": "API Mega List",
-    "description": "A powerhouse collection of APIs you can start using immediately to build everything from simple automations to full-scale applications.",
-    "github": "https://github.com/cporter202/API-mega-list",
-    "category": "Websites",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/cporter202.png"
-  },
-  {
-    "title": "Gopeed",
-    "description": "A modern download manager that supports all platforms. Built with Golang and Flutter.",
-    "website": "https://gopeed.com",
-    "github": "https://github.com/GopeedLab/gopeed",
-    "category": "Softwares",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/GopeedLab.png"
-  },
-  {
-    "title": "Bulk Crap Uninstaller",
-    "description": "Remove large amounts of unwanted applications quickly.",
-    "website": "https://www.bcuninstaller.com/",
-    "github": "https://github.com/Klocman/Bulk-Crap-Uninstaller",
-    "category": "Softwares",
-    "tags": [
-      "windows"
-    ],
-    "image": "https://github.com/Klocman.png"
-  },
-  {
-    "title": "Delphi Tools",
-    "description": "A collection of small, low stakes and low effort web tools including calculators, converters, and generators.",
-    "website": "https://delphi.tools/",
-    "github": "https://github.com/1612elphi/delphitools",
-    "category": "Websites",
-    "tags": [
-      "all"
-    ],
-    "image": "https://delphi.tools/favicon.ico"
-  },
-  {
-    "title": "AnythingLLM",
-    "description": "Desktop app to run, chat with, and query local LLMs on your machine.",
-    "website": "https://anythingllm.com",
-    "github": "https://github.com/Mintplex-Labs/anything-llm",
-    "category": "Softwares",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/Mintplex-Labs.png"
-  },
-  {
-    "title": "LLMFit",
-    "description": "Hundreds of models & providers. One command to find what runs on your hardware.",
-    "github": "https://github.com/AlexsJones/llmfit",
-    "category": "Softwares",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/AlexsJones.png"
-  },
-  {
-    "title": "Onyx",
-    "description": "Open-source web chat interface that connects to local and cloud LLM providers.",
-    "website": "https://www.onyx.app",
-    "github": "https://github.com/onyx-dot-app/onyx",
-    "category": "Softwares",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/onyx-dot-app.png"
-  },
-  {
-    "title": "Jan",
-    "description": "An open source alternative to ChatGPT that runs 100% offline on your computer.",
-    "website": "https://jan.ai",
-    "github": "https://github.com/janhq/jan/releases/latest",
-    "category": "Softwares",
-    "tags": [
-      "macos",
-      "windows",
-      "linux"
-    ],
-    "image": "https://github.com/janhq.png"
-  },
-  {
-    "title": "Flow",
-    "description": "Experimental tool from Google Labs for visual AI workflows.",
-    "website": "https://labs.google/fx/tools/flow",
-    "category": "Websites",
-    "tags": [
-      "all"
-    ],
-    "image": "https://labs.google/favicon.ico"
-  },
-  {
-    "title": "WorldMonitor",
-    "description": "Dashboard for live global news tracking, geopolitical events, and infrastructure monitoring.",
-    "website": "https://worldmonitor.app",
-    "category": "Softwares",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/koala73.png"
-  },
-  {
-    "title": "Penpot",
-    "description": "The open-source design tool for design and code collaboration.",
-    "website": "https://penpot.app",
-    "github": "https://github.com/penpot/penpot",
-    "category": "Websites",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/penpot.png"
-  },
-  {
-    "title": "Visual Explainer",
-    "description": "Agent skill that generates rich HTML pages or slide decks for diagrams, diff reviews, plan audits, data tables, and project recaps.",
-    "github": "https://github.com/nicobailon/visual-explainer",
-    "category": "Scripts",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/nicobailon.png"
-  },
-  {
-    "title": "FluxMarkdown",
-    "description": "Beautiful Markdown previews in macOS Finder QuickLook with Mermaid, KaTeX, GFM, charts, and export.",
-    "github": "https://github.com/xykong/flux-markdown",
-    "category": "Softwares",
-    "tags": [
-      "macos"
-    ],
-    "image": "https://github.com/xykong.png"
-  },
-  {
-    "title": "TypeWhisper",
-    "description": "Local, on-device speech-to-text for macOS, Windows, and iOS with no cloud or API keys.",
-    "website": "https://www.typewhisper.com/",
-    "github": "https://github.com/TypeWhisper",
-    "category": "Softwares",
-    "tags": [
-      "macos",
-      "windows",
-      "ios"
-    ],
-    "image": "https://github.com/TypeWhisper.png"
-  },
-  {
-    "title": "VibeUI",
-    "description": "92 layout prompts for UI generation covering auth, pricing, heroes, bento grids, and dashboards.",
-    "website": "https://vibeui.online/",
-    "category": "Websites",
-    "tags": [
-      "all"
-    ]
-  },
-  {
-    "title": "CompressO",
-    "description": "A 100% free, offline, and open-source video and image compression app. Compress any file to a tiny size without quality loss. Available for Mac, Windows, and Linux.",
-    "website": "https://compresso.codeforreal.com/",
-    "github": "https://github.com/codeforreal1/compressO",
-    "category": "Softwares",
-    "tags": [
-      "macos",
-      "windows",
-      "linux"
-    ]
-  },
-  {
-    "title": "Reclip",
-    "description": "Lightweight, self-hosted media downloader with a clean web UI. Download videos from almost any website. Easy to deploy and run on your own server.",
-    "github": "https://github.com/averygan/reclip",
-    "category": "Scripts",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/averygan.png"
-  },
-  {
-    "title": "Clicky",
-    "description": "macOS cursor companion that reads screen context and speaks explanations in real time.",
-    "website": "https://www.clicky.so/",
-    "github": "https://github.com/farzaa/clicky",
-    "category": "Softwares",
-    "tags": [
-      "macos"
-    ],
-    "image": "https://github.com/farzaa.png"
-  },
-  {
-    "title": "ytDownloader",
-    "description": "A free, open-source desktop video downloader. Download videos and audio from YouTube, TikTok, Instagram, Twitter, Twitch, and 1000+ more sites.",
-    "website": "https://aandrew-me.github.io/ytDownloader/",
-    "category": "Softwares",
-    "tags": [
-      "macos",
-      "windows",
-      "linux"
-    ]
-  },
-  {
-    "title": "VidBee",
-    "description": "Archive video, audio, and transcripts from YouTube, TikTok, and other platforms for offline search and backup.",
-    "website": "https://vidbee.org/",
-    "category": "Softwares",
-    "tags": [
-      "all"
-    ]
-  },
-  {
-    "title": "Webcam & Mic Test",
-    "description": "In-browser webcam and microphone tester to check video quality, resolution, and frame rates.",
-    "website": "https://webcammictest.com/",
-    "category": "Websites",
-    "tags": [
-      "all"
-    ]
-  },
-  {
-    "title": "Dither",
-    "description": "A vector dithering tool for the web and Adobe Illustrator. Apply stylish dithering effects to images and graphics to create retro halftone-style art. Open source.",
-    "website": "https://dither.fun/",
-    "github": "https://github.com/Shpigford/dither",
-    "category": "Scripts",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/Shpigford.png"
-  },
-  {
-    "title": "Recordly",
-    "description": "Open-source desktop screen recorder and editor for polished demos, walkthroughs, and product videos with auto-zooms, cursor polish, backgrounds, and timeline editing.",
-    "website": "https://recordly.dev/",
-    "github": "https://github.com/webadderallorg/Recordly",
-    "category": "Softwares",
-    "tags": [
-      "macos",
-      "windows",
-      "linux"
-    ],
-    "image": "https://github.com/webadderallorg.png"
-  },
-  {
-    "title": "Clop",
-    "description": "Image, video, PDF, and clipboard optimizer for macOS. Automatically compresses copied media, screen recordings, screenshots, and files so they are smaller and easier to share.",
-    "website": "https://lowtechguys.com/clop/",
-    "github": "https://github.com/FuzzyIdeas/Clop",
-    "category": "Softwares",
-    "tags": [
-      "macos"
-    ],
-    "image": "https://github.com/FuzzyIdeas.png"
-  },
-  {
-    "title": "Parcel - Delivery Tracking",
-    "description": "Delivery tracking app for iPhone, iPad, Mac, Apple Vision, and Apple Watch with carrier recognition, barcode scanning, Amazon integration, widgets, maps, and push notifications.",
-    "website": "https://apps.apple.com/gb/app/parcel-delivery-tracking/id375589283",
-    "category": "Softwares",
-    "tags": [
-      "all"
-    ],
-    "image": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/b7/34/5c/b7345cbd-843b-3679-22fc-82fe99898552/AppIcon-0-0-1x_U007epad-0-0-0-1-0-0-85-220.png/512x512bb.jpg"
-  },
-  {
-    "title": "Latest",
-    "description": "Free, open-source macOS utility that checks whether your apps are up to date, shows what changed, and helps update Mac App Store and Sparkle-based apps.",
-    "website": "https://max.codes/latest/",
-    "github": "https://github.com/mangerlahn/Latest",
-    "category": "Softwares",
-    "tags": [
-      "macos"
-    ],
-    "image": "https://github.com/mangerlahn.png"
-  },
-  {
-    "title": "Caveman",
-    "description": "Agent skill that trims verbose assistant replies to reduce token usage.",
-    "github": "https://github.com/JuliusBrussee/caveman",
-    "category": "Scripts",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/JuliusBrussee.png"
-  },
-  {
-    "title": "Dot Matrix",
-    "description": "React component library of expressive dot matrix loaders that you install via the shadcn registry and own as local code.",
-    "website": "https://dotmatrix.zzzzshawn.cloud/",
-    "github": "https://github.com/zzzzshawn/matrix",
-    "category": "Websites",
-    "tags": [
-      "all"
-    ],
-    "image": "https://dotmatrix.zzzzshawn.cloud/og.png"
-  },
-  {
-    "title": "Evil Charts",
-    "description": "Open-source chart UI website built with shadcn and Recharts, with handcrafted chart components and docs.",
-    "website": "https://evilcharts.com/docs",
-    "github": "https://github.com/legions-developer/evilcharts",
-    "category": "Websites",
-    "tags": [
-      "all"
-    ],
-    "image": "https://evilcharts.com/og/og-image.png"
-  },
-  {
-    "title": "OmniGet",
-    "description": "Open-source desktop app for studying online courses and books, with notes, flashcards, focus tools, and media downloads.",
-    "website": "https://discord.gg/jgdxyPy7Vn",
-    "github": "https://github.com/tonhowtf/omniget",
-    "category": "Softwares",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/tonhowtf.png"
-  },
-  {
-    "title": "ASCII Magic",
-    "description": "Free browser tool that turns images and videos into ASCII art in real time, with PNG and MP4 export.",
-    "website": "https://www.ascii-magic.com/",
-    "category": "Websites",
-    "tags": [
-      "all"
-    ],
-    "image": "https://ascii-magic.com/og.jpg"
-  },
-  {
-    "title": "Thide",
-    "description": "Lightweight Windows 10/11 app to hide or show the taskbar with system tray and CLI control.",
-    "github": "https://github.com/amnweb/thide",
-    "category": "Softwares",
-    "tags": [
-      "windows"
-    ],
-    "image": "https://github.com/amnweb.png"
-  },
-  {
-    "title": "mapcn",
-    "description": "Beautiful map components with zero config and one-command setup.",
-    "website": "https://mapcn.dev",
-    "github": "https://github.com/AnmolSaini16/mapcn",
-    "category": "Websites",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/AnmolSaini16.png"
-  },
-  {
-    "title": "BrewStation",
-    "description": "Homebrew GUI browser, searcher, and manager with app snapshot saving and restoring.",
-    "github": "https://github.com/hreinssondev/BrewStation",
-    "category": "Softwares",
-    "tags": [
-      "macos"
-    ],
-    "image": "https://github.com/hreinssondev.png"
-  },
-  {
-    "title": "unlumen UI",
-    "description": "Copy-ready React, TypeScript, Tailwind, Motion, and shadcn components for building polished interfaces fast.",
-    "website": "https://ui.unlumen.com/components",
-    "category": "Websites",
-    "tags": [
-      "all"
-    ],
-    "image": "https://ui.unlumen.com/favicon.ico"
-  },
-  {
-    "title": "Deck.Gallery",
-    "description": "Gallery of presentation decks, slide designs, reports, and brand guidelines.",
-    "website": "https://deck.gallery/",
-    "category": "Websites",
-    "tags": [
-      "all"
-    ],
-    "image": "https://deck.gallery/favicon.ico"
-  },
-  {
-    "title": "VirtualBuddy",
-    "description": "Virtualize macOS 12 and later on Apple Silicon with a friendly virtual machine GUI.",
-    "github": "https://github.com/insidegui/VirtualBuddy",
-    "category": "Softwares",
-    "tags": [
-      "macos"
-    ],
-    "image": "https://github.com/insidegui.png"
-  },
-  {
-    "title": "Mos",
-    "description": "Lightweight macOS utility for smooth mouse scrolling and independent scroll direction settings.",
-    "website": "http://mos.caldis.me",
-    "github": "https://github.com/Caldis/Mos",
-    "category": "Softwares",
-    "tags": [
-      "macos"
-    ],
-    "image": "https://github.com/Caldis.png"
-  },
-  {
-    "title": "RuView",
-    "description": "Detect presence, movement, and vital signs through walls using commodity WiFi signals and ESP32 sensors.",
-    "website": "https://Cognitum.One/RuView",
-    "github": "https://github.com/ruvnet/RuView",
-    "category": "Softwares",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/ruvnet.png"
-  },
-  {
-    "title": "WhatCable",
-    "description": "A macOS menu bar app to identify the charging and data transfer capabilities of your USB-C cables.",
-    "website": "https://www.whatcable.uk/",
-    "github": "https://github.com/darrylmorley/whatcable",
-    "category": "Softwares",
-    "tags": [
-      "macos"
-    ],
-    "image": "https://github.com/darrylmorley.png"
-  },
-  {
-    "title": "Free Claude Code",
-    "description": "Reverse proxy to route Claude Code commands through Gemini, DeepSeek, or local LLMs.",
-    "github": "https://github.com/Alishahryar1/free-claude-code",
-    "category": "Scripts",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/Alishahryar1.png"
-  },
-  {
-    "title": "Open Design",
-    "description": "An open-source, local-first alternative to Claude Design that turns local coding agents into design engines.",
-    "website": "https://open-design.ai",
-    "github": "https://github.com/nexu-io/open-design",
-    "category": "Softwares",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/nexu-io.png"
-  },
-  {
-    "title": "Atomic Chat",
-    "description": "Open-source app to download and run language models locally.",
-    "website": "https://atomic.chat/",
-    "github": "https://github.com/AtomicBot-ai/Atomic-Chat",
-    "category": "Softwares",
-    "tags": [
-      "macos",
-      "windows",
-      "linux"
-    ],
-    "image": "https://github.com/AtomicBot-ai.png"
-  },
-  {
-    "title": "Omi",
-    "description": "Open-source wearable device and software for capturing audio and transcripts.",
-    "website": "https://www.omi.me/",
-    "github": "https://github.com/BasedHardware/omi",
-    "category": "Softwares",
-    "tags": [
-      "all"
-    ],
-    "image": "https://github.com/BasedHardware.png"
-  },
-  {
-    "title": "FluentFlyout",
-    "description": "Modern, customizable flyouts for Windows 11 following Fluent 2 Design principles.",
-    "website": "https://fluentflyout.com/",
-    "github": "https://github.com/unchihugo/FluentFlyout",
-    "category": "Softwares",
-    "tags": [
-      "windows"
-    ],
-    "image": "https://github.com/unchihugo.png"
-  },
-  {
-    "title": "LocalSend",
-    "description": "An open-source, cross-platform alternative to AirDrop for sharing files over local networks.",
-    "website": "https://localsend.org",
-    "github": "https://github.com/localsend/localsend",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Syncthing",
-    "description": "A continuous file synchronization program that syncs files between devices securely and privately.",
-    "website": "https://syncthing.net",
-    "github": "https://github.com/syncthing/syncthing",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "KDE Connect",
-    "description": "A tool that enables secure communication and integration between your computer and mobile devices.",
-    "website": "https://kdeconnect.kde.org",
-    "github": "https://github.com/KDE/kdeconnect-kde",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "RustDesk",
-    "description": "An open-source remote desktop client and server written in Rust, serving as an alternative to TeamViewer.",
-    "website": "https://rustdesk.com",
-    "github": "https://github.com/rustdesk/rustdesk",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Zotero",
-    "description": "A free, easy-to-use tool to help you collect, organize, annotate, cite, and share research sources.",
-    "website": "https://www.zotero.org",
-    "github": "https://github.com/zotero/zotero",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "JabRef",
-    "description": "An open-source bibliography reference manager using BibTeX and BibLaTeX as its native formats.",
-    "website": "https://www.jabref.org",
-    "github": "https://github.com/JabRef/jabref",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "KeePass",
-    "description": "A free, open-source, light-weight password manager with a highly customizable and secure database.",
-    "website": "https://keepass.info",
-    "category": "Softwares",
-    "tags": ["windows"]
-  },
-  {
-    "title": "KeePassXC",
-    "description": "A community fork of KeePassX, providing a modern, cross-platform offline password manager.",
-    "website": "https://keepassxc.org",
-    "github": "https://github.com/keepassxreboot/keepassxc",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Cryptomator",
-    "description": "Multi-platform client-side encryption tool that secures your cloud storage files before they leave your device.",
-    "website": "https://cryptomator.org",
-    "github": "https://github.com/cryptomator/cryptomator",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "FreeFileSync",
-    "description": "A folder comparison and synchronization software that creates and manages backup copies of files.",
-    "website": "https://freefilesync.org",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Jitsi Meet",
-    "description": "A secure, fully featured, and completely free video conferencing service requiring no account.",
-    "website": "https://meet.jit.si",
-    "github": "https://github.com/jitsi/jitsi-meet",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Element",
-    "description": "A secure, decentralized messenger app for group chat and collaboration built on the Matrix protocol.",
-    "website": "https://element.io",
-    "github": "https://github.com/vector-im/element-web",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Firefox",
-    "description": "A free, privacy-respecting, open-source web browser developed by Mozilla.",
-    "website": "https://www.mozilla.org/firefox/",
-    "github": "https://github.com/mozilla/gecko-dev",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "LibreWolf",
-    "description": "A custom Firefox fork focused on privacy, security, and user freedom out-of-the-box.",
-    "website": "https://librewolf.net",
-    "github": "https://github.com/librewolf-community",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Waterfox",
-    "description": "A privacy-focused, high-performance web browser based on Firefox that respects user choice.",
-    "website": "https://www.waterfox.net",
-    "github": "https://github.com/WaterfoxCo/Waterfox",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Zen Browser",
-    "description": "A beautiful, modern, and highly customisable Firefox fork built for speed and privacy.",
-    "website": "https://zen-browser.app",
-    "github": "https://github.com/zen-browser/desktop",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Chromium",
-    "description": "The open-source web browser project that serves as the foundation for Google Chrome and other browsers.",
-    "website": "https://www.chromium.org",
-    "github": "https://github.com/chromium/chromium",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Mozilla Thunderbird",
-    "description": "A free, open-source email, newsroom, chat, and calendar client configured for security.",
-    "website": "https://www.thunderbird.net",
-    "github": "https://github.com/mozilla/thunderbird-bin",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Mailspring",
-    "description": "A fast, modern email client with search, translation, tracking, and dark themes.",
-    "website": "https://getmailspring.com",
-    "github": "https://github.com/Foundry376/Mailspring",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "LibreOffice",
-    "description": "Open-source office suite with word processor, spreadsheet, and presentation editors.",
-    "website": "https://www.libreoffice.org",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "OnlyOffice",
-    "description": "An open-source office suite offering secure collaborative document editors for text, spreadsheets, and slides.",
-    "website": "https://www.onlyoffice.com",
-    "github": "https://github.com/ONLYOFFICE/DocumentServer",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "OpenBoard",
-    "description": "A free, open-source interactive whiteboard software designed for schools and universities.",
-    "website": "https://openboard.ch",
-    "github": "https://github.com/OpenBoard-org/OpenBoard",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Draw.io",
-    "description": "A free, professional online diagramming tool and flowchart maker.",
-    "website": "https://app.diagrams.net",
-    "github": "https://github.com/jgraph/drawio",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Okular",
-    "description": "A universal document viewer developed by KDE, supporting PDF, EPUB, images, and markdown.",
-    "website": "https://okular.kde.org",
-    "github": "https://github.com/KDE/okular",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "PDFsam",
-    "description": "A free and open-source desktop application to split, merge, mix, rotate, and extract PDF pages.",
-    "website": "https://pdfsam.org",
-    "github": "https://github.com/torakiki/pdfsam",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Obsidian",
-    "description": "Markdown-based note-taking app that stores notes in local plain text files.",
-    "website": "https://obsidian.md",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Logseq",
-    "description": "A privacy-first, open-source outliner and knowledge base for note-taking and task management.",
-    "website": "https://logseq.com",
-    "github": "https://github.com/logseq/logseq",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Dendron",
-    "description": "A hierarchical, local-first note-taking tool that integrates directly into VS Code.",
-    "website": "https://www.dendron.so",
-    "github": "https://github.com/dendronhq/dendron",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Joplin",
-    "description": "An open-source note-taking and to-do application with end-to-end encryption and cloud sync support.",
-    "website": "https://joplinapp.org",
-    "github": "https://github.com/laurent22/joplin",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Trilium Notes",
-    "description": "A hierarchical note-taking application designed for building large personal knowledge bases.",
-    "website": "https://github.com/zadam/trilium",
-    "github": "https://github.com/zadam/trilium",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "AppFlowy",
-    "description": "An open-source Notion alternative built with Flutter and Rust for privacy and customization.",
-    "website": "https://www.appflowy.io",
-    "github": "https://github.com/AppFlowy-IO/AppFlowy",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "AFFiNE",
-    "description": "A modern workspace that fuses documentation, whiteboards, and database tables, serving as a Notion/Miro alternative.",
-    "website": "https://affine.pro",
-    "github": "https://github.com/toeverything/AFFiNE",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Super Productivity",
-    "description": "An open-source to-do list and time tracker with integrations for Jira, GitHub, and GitLab.",
-    "website": "https://super-productivity.com",
-    "github": "https://github.com/johannesjo/super-productivity",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "BreakTimer",
-    "description": "A customizable break-timer application to help you manage screen-time and avoid eye strain.",
-    "website": "https://breaktimer.app",
-    "github": "https://github.com/tom-james-watson/breaktimer-app",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "VLC Media Player",
-    "description": "A free, open-source, cross-platform multimedia player that plays almost all audio/video formats.",
-    "website": "https://www.videolan.org/vlc/",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Navidrome",
-    "description": "A self-hosted, lightweight personal music streaming server compatible with Subsonic.",
-    "website": "https://www.navidrome.org",
-    "github": "https://github.com/navidrome/navidrome",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Jellyfin",
-    "description": "A free software media system that puts you in control of managing and streaming your media files.",
-    "website": "https://jellyfin.org",
-    "github": "https://github.com/jellyfin/jellyfin",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Nora",
-    "description": "A beautiful, minimalistic, and modern open-source desktop music player for local files.",
-    "website": "https://github.com/NoraPlayer/Nora",
-    "github": "https://github.com/NoraPlayer/Nora",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Strawberry Player",
-    "description": "A high-quality music player and collection organizer geared towards audiophiles and collectors.",
-    "website": "https://www.strawberrymusicplayer.org",
-    "github": "https://github.com/strawberrymusicplayer/strawberry",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Ardour",
-    "description": "Digital audio workstation for recording, editing, mixing, and mastering audio.",
-    "website": "https://ardour.org",
-    "github": "https://github.com/Ardour/ardour",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "LMMS",
-    "description": "A free, open-source digital audio workstation for producing music by synthesising and sequencing sounds.",
-    "website": "https://lmms.io",
-    "github": "https://github.com/LMMS/lmms",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "f.lux",
-    "description": "An application that warms up your computer display color temperature to match the time of day.",
-    "website": "https://justgetflux.com",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Blanket",
-    "description": "A simple ambient noise player designed to help you focus and increase your productivity.",
-    "website": "https://github.com/rafaelmardojai/blanket",
-    "github": "https://github.com/rafaelmardojai/blanket",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "GIMP",
-    "description": "The GNU Image Manipulation Program, a professional open-source raster graphics editor.",
-    "website": "https://www.gimp.org",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Krita",
-    "description": "A professional open-source painting program designed for digital artists, concept art, and illustrators.",
-    "website": "https://krita.org",
-    "github": "https://github.com/KDE/krita",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Inkscape",
-    "description": "Open-source vector graphics editor supporting SVG, PDF, and EPS formats.",
-    "website": "https://inkscape.org",
-    "github": "https://github.com/inkscape/inkscape",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Pinta",
-    "description": "An open-source drawing and image editing program modeled after Paint.NET for simpler workflows.",
-    "website": "https://pinta-project.com",
-    "github": "https://github.com/PintaProject/Pinta",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "CopyQ",
-    "description": "An advanced clipboard manager with searchable history, formatting preservation, and scripting support.",
-    "website": "https://hluk.github.io/CopyQ/",
-    "github": "https://github.com/hluk/CopyQ",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Lap Photo Manager",
-    "description": "A local-first, privacy-respecting photo organizer for large libraries built with Tauri and Rust.",
-    "website": "https://julyx10.github.io/lap/",
-    "github": "https://github.com/julyx10/lap",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "digiKam",
-    "description": "An advanced open-source digital photo management application for importing, organizing, and editing photos.",
-    "website": "https://www.digikam.org",
-    "github": "https://github.com/KDE/digikam",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "darktable",
-    "description": "An open-source photography workflow application and raw developer that behaves like a virtual lighttable.",
-    "website": "https://www.darktable.org",
-    "github": "https://github.com/darktable-org/darktable",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "RawTherapee",
-    "description": "A high-performance raw photo processing software designed for modifying digital images.",
-    "website": "https://www.rawtherapee.com",
-    "github": "https://github.com/Beep6581/RawTherapee",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Flameshot",
-    "description": "An easy-to-use screenshot utility with built-in annotation tools and sharing features.",
-    "website": "https://flameshot.org",
-    "github": "https://github.com/flameshot-org/flameshot",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Ksnip",
-    "description": "A feature-rich screenshot tool that offers drawing tools, watermarks, and crop capabilities.",
-    "website": "https://github.com/ksnip/ksnip",
-    "github": "https://github.com/ksnip/ksnip",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "OBS Studio",
-    "description": "Free and open-source software for video recording and live streaming.",
-    "website": "https://obsproject.com",
-    "github": "https://github.com/obsproject/obs-studio",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Audacity",
-    "description": "A free, easy-to-use, multi-track audio editor and recorder.",
-    "website": "https://www.audacityteam.org",
-    "github": "https://github.com/audacity/audacity",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "HandBrake",
-    "description": "A tool for converting video from nearly any format to a selection of modern, widely supported codecs.",
-    "website": "https://handbrake.fr",
-    "github": "https://github.com/HandBrake/HandBrake",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Kdenlive",
-    "description": "A professional open-source non-linear video editor developed by the KDE community.",
-    "website": "https://kdenlive.org",
-    "github": "https://github.com/KDE/kdenlive",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "LosslessCut",
-    "description": "A lightweight cross-platform tool for extremely fast and lossless cutting of video and audio files.",
-    "website": "https://github.com/mifi/lossless-cut",
-    "github": "https://github.com/mifi/lossless-cut",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Qalculate!",
-    "description": "A multi-purpose, cross-platform desktop calculator featuring advanced unit conversions and expressions.",
-    "website": "https://qalculate.github.io",
-    "github": "https://github.com/Qalculate/qalculate-gtk",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "SpeedCrunch",
-    "description": "A fast, high-precision algebraic desktop calculator with keyboard-friendly interface.",
-    "website": "https://speedcrunch.org",
-    "github": "https://github.com/speedcrunch/SpeedCrunch",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "PeaZip",
-    "description": "A free file archiver and utility for opening zip, rar, and 7z archives with strong encryption.",
-    "website": "https://peazip.github.io",
-    "github": "https://github.com/peazip/PeaZip",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Filelight",
-    "description": "A utility to visualize disk usage by drawing a set of concentric segmented rings.",
-    "website": "https://apps.kde.org/filelight/",
-    "github": "https://github.com/KDE/filelight",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Crossdirstat",
-    "description": "A cross-platform disk usage analysis tool similar to WinDirStat showing directory trees and treemaps.",
-    "website": "https://github.com/Jelmerro/crossdirstat",
-    "github": "https://github.com/Jelmerro/crossdirstat",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Double Commander",
-    "description": "A cross-platform two-panel file manager inspired by Total Commander.",
-    "website": "https://doublecmd.sourceforge.io",
-    "github": "https://github.com/doublecmd/doublecmd",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "muCommander",
-    "description": "A lightweight, cross-platform file manager with a dual-pane interface.",
-    "website": "https://www.mucommander.com",
-    "github": "https://github.com/mucommander/mucommander",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "TagSpaces",
-    "description": "An open-source personal data manager that helps you organize and tag files locally.",
-    "website": "https://www.tagspaces.org",
-    "github": "https://github.com/tagspaces/tagspaces",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "SpaceDrive",
-    "description": "A cross-platform local-first file manager with a beautiful modern interface built on Rust.",
-    "website": "https://www.spacedrive.com",
-    "github": "https://github.com/spacedriveapp/spacedrive",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Persepolis Download Manager",
-    "description": "Desktop GUI client for the aria2 download utility.",
-    "website": "https://persepolisdm.github.io",
-    "github": "https://github.com/persepolisdm/persepolis",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Duplicati",
-    "description": "A free backup client that securely stores encrypted, incremental backups on local storage and cloud drives.",
-    "website": "https://www.duplicati.com",
-    "github": "https://github.com/duplicati/duplicati",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Glances",
-    "description": "An open-source system monitoring tool that displays system metrics in a terminal or web interface.",
-    "website": "https://nicolargo.github.io/glances/",
-    "github": "https://github.com/nicolargo/glances",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "GSmartControl",
-    "description": "A graphical user interface for smartctl, exposing SMART disk drive health status and diagnostic tests.",
-    "website": "https://gsmartcontrol.shadedlands.com",
-    "github": "https://github.com/kzsolt/gsmartcontrol",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Actiona",
-    "description": "An open-source automation utility that allows you to automate tasks on your system using a visual editor.",
-    "website": "https://actiona.tools",
-    "github": "https://github.com/Jxtkez/actiona",
-    "category": "Softwares",
-    "tags": ["windows", "linux"]
-  },
-  {
-    "title": "Lapce",
-    "description": "A lightning-fast desktop code editor written in Rust with built-in remote development support.",
-    "website": "https://lapce.dev",
-    "github": "https://github.com/lapce/lapce",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Zed",
-    "description": "A high-performance, collaborative code editor written in Rust by the creators of Atom and Tree-sitter.",
-    "website": "https://zed.dev",
-    "github": "https://github.com/zed-industries/zed",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Espanso",
-    "description": "A lightweight, cross-platform text expander written in Rust to automate typing tasks.",
-    "website": "https://espanso.org",
-    "github": "https://github.com/espanso/espanso",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Asyar",
-    "description": "A local-first, open-source productivity launcher designed as an alternative to Raycast, built with Tauri and Rust.",
-    "website": "https://asyar.org",
-    "github": "https://github.com/Xoshbin/asyar-launcher",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Ueli",
-    "description": "A customizable keystroke launcher for Windows and macOS to quickly launch apps, files, and web links.",
-    "website": "https://ueli.app",
-    "github": "https://github.com/oliverschwendener/ueli",
-    "category": "Softwares",
-    "tags": ["windows", "macos"]
-  },
-  {
-    "title": "Seafile",
-    "description": "An open-source cloud storage and file sync platform designed for high performance and reliability.",
-    "website": "https://www.seafile.com",
-    "github": "https://github.com/haiwen/seafile",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Nextcloud",
-    "description": "A self-hosted productivity platform allowing you to share files, collaborate, and manage calendar/contacts securely.",
-    "website": "https://nextcloud.com",
-    "github": "https://github.com/nextcloud/desktop",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Input Leap",
-    "description": "A software utility that allows you to share one keyboard and mouse between multiple computers on a local network.",
-    "github": "https://github.com/input-leap/input-leap",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "OpenRGB",
-    "description": "An open-source RGB lighting control software that acts as a unified hub for all your lighting hardware.",
-    "website": "https://openrgb.org",
-    "github": "https://github.com/CalcProgrammer1/OpenRGB",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Paperless-ngx",
-    "description": "A document management system that transforms your physical documents into a searchable online archive.",
-    "website": "https://docs.paperless-ngx.com",
-    "github": "https://github.com/paperless-ngx/paperless-ngx",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "LiteParse",
-    "description": "A lightweight, fast document parsing library by LlamaIndex for extracting text and structure from PDFs and other files.",
-    "website": "https://developers.llamaindex.ai/liteparse/",
-    "github": "https://github.com/run-llama/liteparse",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Motion",
-    "description": "Production-grade animation library for React, JavaScript, and Vue. The successor to Framer Motion with a tiny footprint.",
-    "website": "https://motion.dev",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Bklit UI",
-    "description": "A component library built on top of shadcn/ui to help you build charts and data visualizations more easily.",
-    "website": "https://bklit.com",
-    "github": "https://github.com/bklit/bklit-ui",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Transitions.dev",
-    "description": "A collection of the most essential copy-paste CSS transitions for web apps, ready to drop into any project.",
-    "website": "https://transitions.dev",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "termcn",
-    "description": "Beautiful, accessible, and customizable terminal UI components for React. Built on Ink and OpenTUI, distributed via shadcn.",
-    "website": "https://www.termcn.dev",
-    "github": "https://github.com/Aniket-508/termcn",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "noMeiryoUI",
-    "description": "Tool to change default system fonts on Windows 8.1, 10, and 11.",
-    "github": "https://github.com/Tatsu-syo/noMeiryoUI",
-    "category": "Softwares",
-    "tags": ["windows"]
-  },
-  {
-    "title": "Windhawk",
-    "description": "Windows desktop customization app to install taskbar, Start menu, and system tweaks.",
-    "website": "https://windhawk.net/",
-    "github": "https://github.com/ramensoftware/windhawk",
-    "category": "Softwares",
-    "tags": ["windows"]
-  },
-  {
-    "title": "Textream",
-    "description": "A free macOS teleprompter app for streamers, interviewers, and presenters that highlights your script in real-time as you speak in a Dynamic Island overlay.",
-    "website": "https://github.com/f/textream",
-    "github": "https://github.com/f/textream",
-    "category": "Softwares",
-    "tags": ["macos"],
-    "image": "https://github.com/f.png"
-  },
-  {
-    "title": "Orchard",
-    "description": "A native macOS app and GUI for Apple's container tooling to manage containers, machines, and local Kubernetes clusters.",
-    "website": "https://orchard.andon.dev/",
-    "github": "https://github.com/andrew-waters/orchard",
-    "category": "Softwares",
-    "tags": ["macos"]
-  },
-  {
-    "title": "Keyty",
-    "description": "Display keyboard shortcuts, keystrokes, and mouse clicks in real time for macOS demos, recordings, and livestreams.",
-    "website": "https://keyty.app/",
-    "github": "https://github.com/keytyapp/Keyty",
-    "category": "Softwares",
-    "tags": ["macos"]
-  },
-  {
-    "title": "Senumy",
-    "description": "A comprehensive directory and IPA library for iOS jailbreak tools, tweaks, sideloading utilities, and modded apps.",
-    "website": "https://senumy.com/",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Itsycal",
-    "description": "A tiny menu bar calendar for macOS with Mac Calendar app integration, event creation, and keyboard navigation.",
-    "website": "https://www.mowglii.com/itsycal/",
-    "github": "https://github.com/sfsam/Itsycal",
-    "category": "Softwares",
-    "tags": ["macos"]
-  },
-  {
-    "title": "KeyCastr",
-    "description": "An open-source keystroke visualizer for macOS that displays keystrokes on-screen in real time.",
-    "website": "https://github.com/keycastr/keycastr",
-    "github": "https://github.com/keycastr/keycastr",
-    "category": "Softwares",
-    "tags": ["macos"],
-    "image": "https://github.com/keycastr.png"
-  },
-  {
-    "title": "Keka",
-    "description": "The macOS file archiver — extract and compress 7Z, ZIP, TAR, GZ, RAR, and other archive formats with password protection.",
-    "website": "https://www.keka.io/en/",
-    "github": "https://github.com/aonez/Keka",
-    "category": "Softwares",
-    "tags": ["macos"]
-  },
-  {
-    "title": "Handy",
-    "description": "A free, open-source, cross-platform speech-to-text desktop app that lets you dictate anywhere with local AI.",
-    "website": "https://handy.computer/",
-    "github": "https://github.com/cjpais/Handy",
-    "category": "Softwares",
-    "tags": ["macos", "windows", "linux"]
-  },
-  {
-    "title": "ZenNotes",
-    "description": "A keyboard-first, Vim-native Markdown notes app with local files, KaTeX math, Mermaid diagrams, and cross-device sync.",
-    "website": "https://zennotes.org/",
-    "github": "https://github.com/ZenNotes/zennotes",
-    "category": "Softwares",
-    "tags": ["macos", "windows", "linux"]
-  },
-  {
-    "title": "Doppi",
-    "description": "A clean, native music player for Mac and iOS designed to play and organize your local offline music collection.",
-    "website": "https://doppi.app/mac/",
-    "category": "Softwares",
-    "tags": ["macos"]
-  },
-  {
-    "title": "PixelPlayer",
-    "description": "A privacy-first Android music player built with Material 3 Expressive featuring offline playback, synced lyrics, and equalizer presets.",
-    "website": "https://github.com/PixelPlayerHQ/PixelPlayer",
-    "github": "https://github.com/PixelPlayerHQ/PixelPlayer",
-    "category": "Softwares",
-    "tags": ["android"],
-    "image": "https://github.com/PixelPlayerHQ.png"
-  },
-  {
-    "title": "RunCatNeo",
-    "description": "A cute running cat animation on your macOS menu bar whose running speed changes according to CPU usage.",
-    "website": "https://runcat-dev.github.io/RunCatNeo/",
-    "github": "https://github.com/runcat-dev/RunCatNeo",
-    "category": "Softwares",
-    "tags": ["macos"]
-  },
-  {
-    "title": "Printed Matter",
-    "description": "The world's largest non-profit organization and archive dedicated to the dissemination, appreciation, and distribution of artists' books and publications.",
-    "website": "https://www.printedmatter.org/",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "DigiBouquet",
-    "description": "A free online tool to build and share personalized digital flower bouquets with custom greeting cards and flower meanings.",
-    "website": "https://digibouquet.net/",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Screendrop",
-    "description": "A native, free, and self-hostable macOS screenshot and screen recording app designed as an open-source Loom alternative.",
-    "website": "https://github.com/fayazara/Screendrop",
-    "github": "https://github.com/fayazara/Screendrop",
-    "category": "Softwares",
-    "tags": ["macos"],
-    "image": "https://github.com/fayazara.png"
-  },
-  {
-    "title": "Quick Image Converter",
-    "description": "Free online image converter — convert JPG, PNG, WebP, AVIF and HEIC right in your browser. Fast, private, no sign-up needed.",
-    "website": "https://quickimgconvert.com/",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Steam Market Fee Calculator",
-    "description": "An open-source calculator to estimate Steam Community Market fees, buyer costs, and seller proceeds in integer precision.",
-    "website": "https://steamvaults.org/tools/steam-market-fee-calculator",
-    "github": "https://github.com/hyunjun12312/steam-market-fee-calculator",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Flow Launcher",
-    "description": "Quick file search and keyboard application launcher for Windows with community plugins.",
-    "website": "https://www.flowlauncher.com",
-    "github": "https://github.com/Flow-Launcher/Flow.Launcher",
-    "category": "Softwares",
-    "tags": ["windows"]
-  },
-  {
-    "title": "Shottr",
-    "description": "Lightweight, pixel-perfect screenshot annotation and measurement app for macOS.",
-    "website": "https://shottr.cc",
-    "category": "Softwares",
-    "tags": ["macos"]
-  },
-  {
-    "title": "BetterDisplay",
-    "description": "Unlock HiDPI scaling, XDR/HDR brightness, virtual screens, and DDC controls on Mac displays.",
-    "website": "https://betterdisplay.pro",
-    "github": "https://github.com/waydabber/BetterDisplay",
-    "category": "Softwares",
-    "tags": ["macos"]
-  },
-  {
-    "title": "AltTab",
-    "description": "Brings Windows-style Alt+Tab application window switching with live previews to macOS.",
-    "website": "https://alt-tab-macos.netlify.app",
-    "github": "https://github.com/lwouis/alt-tab-macos",
-    "category": "Softwares",
-    "tags": ["macos"]
-  },
-  {
-    "title": "Thaw",
-    "description": "Clean menu bar manager to hide, show, and organize cluttered menu bar icons on macOS.",
-    "github": "https://github.com/stonerl/Thaw",
-    "category": "Softwares",
-    "tags": ["macos"]
-  },
-  {
-    "title": "Pika",
-    "description": "Open-source native color picker for macOS with real-time WCAG contrast ratio compliance checks.",
-    "website": "https://superhighfives.com/pika",
-    "github": "https://github.com/superhighfives/pika",
-    "category": "Softwares",
-    "tags": ["macos"]
-  },
-  {
-    "title": "AlDente",
-    "description": "macOS menu bar utility to set charging limits and prolong MacBook battery health.",
-    "website": "https://apphousekitchen.com",
-    "github": "https://github.com/AppHouseKitchen/AlDente-Battery_Care_and_Monitoring",
-    "category": "Softwares",
-    "tags": ["macos"]
-  },
-  {
-    "title": "WinDiskWriter",
-    "description": "Native macOS utility to create bootable Windows installer USB drives, bypassing TPM requirements.",
-    "github": "https://github.com/TechUnRestricted/WinDiskWriter",
-    "category": "Softwares",
-    "tags": ["macos"]
-  },
-  {
-    "title": "AudioRelay",
-    "description": "Stream PC audio to an Android device or other computers over local Wi-Fi or USB with low latency.",
-    "website": "https://audiorelay.net",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux", "android"]
-  },
-  {
-    "title": "SonoBus",
-    "description": "Open-source, high-quality peer-to-peer audio streaming over network or internet.",
-    "website": "https://www.sonobus.net",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux", "ios", "android"]
-  },
-  {
-    "title": "Thock",
-    "description": "Native macOS sound simulator that plays mechanical keyboard switch sounds while you type.",
-    "github": "https://github.com/kamillobinski/thock",
-    "category": "Softwares",
-    "tags": ["macos"]
-  },
-  {
-    "title": "Moody",
-    "description": "Floating teleprompter application designed to sit inside the MacBook camera notch.",
-    "website": "https://moody.mjarosz.com",
-    "category": "Softwares",
-    "tags": ["macos"]
-  },
-  {
-    "title": "Porting Kit",
-    "description": "One-click Wine wrapper installer for classic Windows games and applications on macOS.",
-    "website": "https://www.portingkit.com",
-    "category": "Softwares",
-    "tags": ["macos"]
-  },
-  {
-    "title": "Sikarugir",
-    "description": "Tool used to package Windows software into standalone Wine-wrapped native macOS apps.",
-    "github": "https://github.com/Sikarugir-App/Sikarugir",
-    "category": "Softwares",
-    "tags": ["macos"]
-  },
-  {
-    "title": "OneMenu",
-    "description": "Menu bar system monitor and utility to track CPU, memory, network, and battery usage on macOS.",
-    "website": "https://www.withmarko.com/one-menu",
-    "category": "Softwares",
-    "tags": ["macos"]
-  },
-  {
-    "title": "Dissent",
-    "description": "Lightweight native Discord desktop client written in Go and GTK4 with low memory consumption.",
-    "github": "https://github.com/diamondburned/dissent",
-    "category": "Softwares",
-    "tags": ["linux", "windows", "macos"]
-  },
-  {
-    "title": "Nuclear",
-    "description": "Desktop music streaming player that pulls tracks from free online sources without ads.",
-    "website": "https://nuclearplayer.com",
-    "github": "https://github.com/nukeop/nuclear",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Media Downloader",
-    "description": "Native macOS GUI app to download videos from YouTube, X, and Instagram and trim them in one pass.",
-    "github": "https://github.com/pixel-point/media-downloader",
-    "category": "Softwares",
-    "tags": ["macos"]
-  },
-  {
-    "title": "Chops",
-    "description": "macOS desktop app to browse, edit, and organize AI agent skills across Claude Code, Cursor, and Codex.",
-    "github": "https://github.com/Shpigford/chops",
-    "category": "Softwares",
-    "tags": ["macos"]
-  },
-  {
-    "title": "Deckcraft",
-    "description": "Clean-room open-source slide presentation software reimplemented in pure Rust.",
-    "website": "https://getartcraft.com/apps",
-    "github": "https://github.com/storytold/deckcraft",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Anki",
-    "description": "Intelligent spaced repetition flashcard program for memorizing facts, vocabulary, and concepts.",
-    "website": "https://apps.ankiweb.net",
-    "github": "https://github.com/ankitects/anki",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "3uTools",
-    "description": "All-in-one iOS file manager, jailbreak, flashing, and backup utility for Windows.",
-    "website": "http://www.3u.com",
-    "category": "Softwares",
-    "tags": ["windows"]
+// IDs, dates and topics are persisted: editing a title does not break saved links.
+const rawItems: Omit<Item, "image" | "isNew" | "details">[] = [
+  {
+    id: "softwares-tabby",
+    title: "Tabby",
+    description: "A terminal for a more modern age.",
+    website: "https://tabby.sh",
+    github: "https://github.com/Eugeny/tabby",
+    category: "Softwares",
+    tags: ["terminal", "all"],
+    topics: ["development", "system"],
+    addedAt: "2026-06-20T23:25:54+05:30",
+  },
+  {
+    id: "websites-react-bits",
+    title: "React Bits",
+    description: "A huge library of animated React components.",
+    website: "https://reactbits.dev",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["development", "design"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "softwares-wiztree",
+    title: "WizTree",
+    description: "Find what's eating your disk space on Windows.",
+    website: "https://diskanalyzer.com",
+    category: "Softwares",
+    tags: ["windows"],
+    topics: ["system", "files"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "softwares-raycast",
+    title: "Raycast",
+    description: "The best launcher for macOS. Replaces Spotlight.",
+    website: "https://raycast.com",
+    github: "https://github.com/raycast",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["productivity", "system"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "scripts-ffmpeg-script",
+    title: "FFmpeg conversion guide",
+    description:
+      "Official FFmpeg documentation for building video and audio conversion commands.",
+    website: "https://ffmpeg.org/ffmpeg.html",
+    category: "Scripts",
+    tags: ["macos", "windows", "linux", "cli"],
+    topics: ["video", "compression", "automation"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "scripts-chris-titus-winutil",
+    title: "Chris Titus WinUtil",
+    description:
+      "Windows utility to debloat, install apps, and adjust system settings.",
+    website: "https://christitus.com/one-tool-for-everything/",
+    category: "Scripts",
+    tags: ["windows", "cli"],
+    topics: ["system", "automation"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "softwares-playcover",
+    title: "PlayCover",
+    description:
+      "Run iOS apps and games on Apple Silicon Macs with keyboard support.",
+    website: "https://playcover.io",
+    github: "https://github.com/PlayCover/PlayCover/",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["gaming"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "websites-fmhy",
+    title: "FMHY",
+    description:
+      "The largest collection of free stuff on the internet (tools, piracy, etc).",
+    website: "https://fmhy.net/",
+    github: "https://github.com/fmhy/bookmarks",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["web"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "softwares-github-store",
+    title: "Komi Store",
+    description:
+      "Browse and install developer releases from GitHub, Codeberg and Forgejo. Formerly GitHub Store.",
+    website: "https://github.com/komi-store/komi-store",
+    github: "https://github.com/komi-store/komi-store",
+    category: "Softwares",
+    tags: ["all"],
+    topics: ["files", "downloads"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "websites-awesome-swift-apps",
+    title: "Awesome Swift Apps",
+    description: "List of open-source macOS applications built with Swift.",
+    github: "https://github.com/jaywcjlove/awesome-swift-macos-apps/",
+    category: "Websites",
+    tags: ["macos"],
+    topics: ["development"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "softwares-popcorn-time",
+    title: "Popcorn Time",
+    description: "Watch movies and TV shows instantly via torrent streaming.",
+    website: "https://popcorntime.app",
+    github: "https://github.com/popcorntime/popcorntime",
+    category: "Softwares",
+    tags: ["macos", "windows", "linux"],
+    topics: ["video", "downloads", "media"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "softwares-brisk",
+    title: "Brisk",
+    description: "An ultra-fast, modern download manager for macOS and Linux.",
+    github: "https://github.com/BrisklyDev/brisk/",
+    category: "Softwares",
+    tags: ["macos", "linux"],
+    topics: ["downloads"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "websites-cobalt",
+    title: "Cobalt",
+    description:
+      "Download media from YouTube, Twitter, and more without ads or tracking.",
+    website: "https://cobalt.tools/",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["video", "downloads", "media"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "softwares-mole",
+    title: "Mole",
+    description:
+      "A terminal tool for deep macOS cleanup and app uninstallation.",
+    website: "https://x.com/HiTw93/status/2037873590461464915",
+    github: "https://github.com/tw93/Mole",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["system", "files"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "websites-vert",
+    title: "Vert",
+    description:
+      "Securely convert files locally in your browser using WebAssembly.",
+    website: "https://vert.sh/",
+    github: "https://github.com/VERT-sh/VERT",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["compression", "privacy", "files", "web"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "softwares-mounty",
+    title: "Mounty",
+    description:
+      "A tiny tool to re-mount write-protected NTFS volumes on macOS.",
+    website: "https://mounty.app/",
+    github: "https://github.com/tuxera/ntfs-3g",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["system", "files"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "websites-isocons",
+    title: "Isocons",
+    description: "A free collection of customizable isometric icons.",
+    website: "https://www.isocons.app/",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["image", "design"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "softwares-boring-notch",
+    title: "Boring Notch",
+    description: "Turns your MacBook notch into a dynamic, functional hub.",
+    website: "https://theboring.name/",
+    github: "https://github.com/TheBoredTeam/boring.notch/?tab=readme-ov-file",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["productivity", "system"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "softwares-darkwrite",
+    title: "Darkwrite",
+    description: "A distraction-free, eye-candy note-taking and to-do app.",
+    website: "https://darkwrite.app/",
+    github: "https://github.com/astudentinearth/darkwrite",
+    category: "Softwares",
+    tags: ["all"],
+    topics: ["productivity"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "softwares-utm",
+    title: "UTM",
+    description: "Run virtual machines (Windows, Linux) on iOS and macOS.",
+    website: "https://getutm.app",
+    github: "https://github.com/utmapp/UTM",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["system"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "softwares-winapps",
+    title: "WinApps",
+    description:
+      "Run Windows apps like Office and Adobe on Linux through a guided installer.",
+    github: "https://github.com/winapps-org/winapps",
+    category: "Softwares",
+    tags: ["linux"],
+    topics: ["system"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "websites-edclub",
+    title: "EdClub",
+    description: "Educational platform for typing, vocabulary, and more.",
+    website: "https://www.edclub.com/sportal/",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["productivity", "education"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "scripts-mas",
+    title: "MAS",
+    description:
+      "Microsoft Activation Scripts - Open source Windows/Office activator.",
+    website: "https://massgrave.dev",
+    github: "https://github.com/massgravel/Microsoft-Activation-Scripts",
+    category: "Scripts",
+    tags: ["windows", "cli"],
+    topics: ["system", "automation"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "softwares-niri",
+    title: "niri",
+    description: "A scrollable-tiling Wayland compositor.",
+    website: "https://niri-wm.github.io/niri/",
+    github: "https://github.com/YaLTeR/niri",
+    category: "Softwares",
+    tags: ["linux"],
+    topics: ["system"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "softwares-spicetify-cli",
+    title: "Spicetify CLI",
+    description: "Command-line tool to customize the Spotify desktop app.",
+    website: "https://spicetify.app",
+    github: "https://github.com/spicetify/cli",
+    category: "Softwares",
+    tags: ["macos", "windows", "linux"],
+    topics: ["development", "system", "media"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "scripts-win11debloat",
+    title: "Win11Debloat",
+    description: "Debloat and tweak Windows 11.",
+    github: "https://github.com/Raphire/Win11Debloat",
+    category: "Scripts",
+    tags: ["windows", "cli"],
+    topics: ["system", "automation"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "softwares-dockdoor",
+    title: "DockDoor",
+    description: "Dock alternative for macOS.",
+    website: "https://dockdoor.net/",
+    github: "https://github.com/ejbills/DockDoor",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["productivity", "system"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "softwares-shine",
+    title: "Shine",
+    description: "Open-source project from Blade04208.",
+    github: "https://github.com/Blade04208/shine/",
+    category: "Softwares",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "softwares-gemini-watermark-remover",
+    title: "Gemini Watermark Remover",
+    description: "Watermark removal tool.",
+    website: "https://pilio.ai/gemini-watermark-remover",
+    github: "https://github.com/journey-ad/gemini-watermark-remover",
+    category: "Softwares",
+    tags: ["all"],
+    topics: ["image", "video"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "softwares-shadps4",
+    title: "shadPS4",
+    description: "PlayStation 4 emulator.",
+    website: "https://shadps4.net/",
+    github: "https://github.com/shadps4-emu/shadPS4",
+    category: "Softwares",
+    tags: ["windows", "linux"],
+    topics: ["gaming"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "softwares-mate-engine",
+    title: "Mate Engine",
+    description: "Game engine project.",
+    website: "https://store.steampowered.com/app/3625270/MateEngine/",
+    github: "https://github.com/shinyflvre/Mate-Engine",
+    category: "Softwares",
+    tags: ["all"],
+    topics: ["development", "gaming"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "softwares-cline",
+    title: "Cline",
+    description: "Open-source AI coding assistant.",
+    website: "https://cline.bot/install",
+    github: "https://github.com/cline/cline",
+    category: "Softwares",
+    tags: ["all"],
+    topics: ["ai", "development", "automation"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "softwares-facefusion",
+    title: "FaceFusion",
+    description: "Face swap and enhancement toolkit.",
+    website: "https://facefusion.io",
+    github: "https://github.com/allenk/facefusion",
+    category: "Softwares",
+    tags: ["all"],
+    topics: ["image", "video", "media"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "softwares-droppy",
+    title: "Droppy",
+    description: "Self-hosted file sharing app.",
+    github: "https://github.com/iordv/Droppy",
+    category: "Softwares",
+    tags: ["all"],
+    topics: ["privacy", "networking", "files"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "softwares-open-researcher",
+    title: "Open Researcher",
+    description: "Automated research assistant.",
+    github: "https://github.com/firecrawl/open-researcher",
+    category: "Softwares",
+    tags: ["all"],
+    topics: ["ai", "automation", "research"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "scripts-cloudflare-error-page",
+    title: "Cloudflare Error Page",
+    description: "Custom Cloudflare error page template.",
+    website: "https://virt.moe/cferr/editor/",
+    github: "https://github.com/donlon/cloudflare-error-page",
+    category: "Scripts",
+    tags: ["all"],
+    topics: ["development", "web"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "softwares-lm-studio",
+    title: "LM Studio",
+    description: "Run local LLMs on your machine.",
+    website: "https://lmstudio.ai/",
+    github: "https://github.com/lmstudio-ai",
+    category: "Softwares",
+    tags: ["macos", "windows", "linux"],
+    topics: ["ai"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "websites-shader-gradient",
+    title: "Shader Gradient",
+    description: "Generate shader-style gradients.",
+    website: "https://shadergradient.co/",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["image", "design"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "softwares-openscreen",
+    title: "OpenScreen",
+    description: "Screen sharing and remote control.",
+    website: "https://openscreen.vercel.app",
+    github: "https://github.com/siddharthvaddem/openscreen",
+    category: "Softwares",
+    tags: ["all"],
+    topics: ["networking", "communication"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+  },
+  {
+    id: "softwares-finetune",
+    title: "FineTune",
+    description:
+      "A macOS menu bar app for per-app volume control, multi-device output, audio routing, and 10-band EQ.",
+    github: "https://github.com/ronitsingh10/FineTune",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["audio", "media"],
+    addedAt: "2026-02-23T19:24:34+05:30",
+  },
+  {
+    id: "softwares-net-bar",
+    title: "Net-Bar",
+    description: "Network status bar app.",
+    github: "https://github.com/iad1tya/Net-Bar",
+    category: "Softwares",
+    tags: ["all"],
+    topics: ["system", "networking"],
+    addedAt: "2026-02-05T12:32:47+05:30",
+    linkUnavailable: true,
+  },
+  {
+    id: "websites-ear-web",
+    title: "Ear (web)",
+    description:
+      "Unofficial web app to control Nothing/CMF audio devices on PC/Mac.",
+    website: "https://earweb.bttl.xyz/",
+    github: "https://github.com/radiance-project/ear-web/issues",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["audio", "web"],
+    addedAt: "2026-02-06T20:03:34+05:30",
+  },
+  {
+    id: "softwares-scrcpy-gui",
+    title: "Scrcpy GUI",
+    description: "A modern, high-performance Windows GUI for scrcpy.",
+    github: "https://github.com/kil0bit-kb/scrcpy-gui",
+    category: "Softwares",
+    tags: ["windows"],
+    topics: ["system", "networking"],
+    addedAt: "2026-02-06T20:03:34+05:30",
+  },
+  {
+    id: "softwares-codexbar",
+    title: "CodexBar",
+    description: "MacOS menu bar app to track OpenAI/Claude usage quotas.",
+    website: "https://codexbar.app",
+    github: "https://github.com/steipete/CodexBar",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["ai", "system"],
+    addedAt: "2026-02-07T10:30:14+05:30",
+  },
+  {
+    id: "websites-excalidraw",
+    title: "Excalidraw",
+    description:
+      "Virtual collaborative whiteboard with hand-drawn feel diagrams.",
+    website: "https://excalidraw.com",
+    github: "https://github.com/excalidraw/excalidraw",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["image", "design", "communication"],
+    addedAt: "2026-02-08T13:15:48+05:30",
+  },
+  {
+    id: "websites-corca",
+    title: "Corca",
+    description:
+      "Math formula editor with LaTeX export and live collaboration.",
+    website: "https://corca.app",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["documents", "communication"],
+    addedAt: "2026-02-08T13:15:48+05:30",
+  },
+  {
+    id: "softwares-quick-subtitles",
+    title: "Quick Subtitles",
+    description: "Generate subtitles for videos in seconds on iOS.",
+    website: "https://apps.apple.com/us/app/quick-subtitles/id6747410609",
+    category: "Softwares",
+    tags: ["ios"],
+    topics: ["video", "audio", "media"],
+    addedAt: "2026-02-08T17:21:50+05:30",
+  },
+  {
+    id: "softwares-transmission",
+    title: "Transmission",
+    description:
+      "Fast, easy, and free BitTorrent client for Mac, Windows, and Linux.",
+    website: "https://transmissionbt.com",
+    github: "https://github.com/transmission/transmission/issues",
+    category: "Softwares",
+    tags: ["macos", "windows", "linux"],
+    topics: ["privacy", "networking", "downloads"],
+    addedAt: "2026-02-08T17:21:50+05:30",
+  },
+  {
+    id: "websites-ilovepdf",
+    title: "iLovePDF",
+    description:
+      "Free online tools to merge, split, compress, and convert PDFs.",
+    website: "https://www.ilovepdf.com/",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["documents", "compression", "files"],
+    addedAt: "2026-02-09T22:05:12+05:30",
+  },
+  {
+    id: "softwares-mini-agent",
+    title: "Mini-Agent",
+    description: "Open-source agent framework from MiniMax-AI.",
+    website: "https://www.minimax.io/",
+    github: "https://github.com/MiniMax-AI/Mini-Agent",
+    category: "Softwares",
+    tags: ["all"],
+    topics: ["ai", "development", "automation"],
+    addedAt: "2026-02-10T13:55:57+05:30",
+  },
+  {
+    id: "softwares-bettercapture",
+    title: "BetterCapture",
+    description:
+      "The macOS screen recorder for the rest of us - always free and open source with a native look and feel.",
+    website: "https://bettercapture.app/",
+    github: "https://github.com/jsattler/BetterCapture",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["video", "media", "capture"],
+    addedAt: "2026-02-20T01:47:40+05:30",
+  },
+  {
+    id: "softwares-hidden",
+    title: "Hidden",
+    description: "An ultra-light MacOS utility that helps hide menu bar icons.",
+    website: "https://d.foundation/opensource",
+    github: "https://github.com/dwarvesf/hidden",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["system"],
+    addedAt: "2026-02-20T01:47:40+05:30",
+  },
+  {
+    id: "softwares-iina",
+    title: "IINA",
+    description: "The modern video player for macOS.",
+    website: "https://iina.io",
+    github: "https://github.com/iina/iina",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["video", "media"],
+    addedAt: "2026-02-20T01:47:40+05:30",
+  },
+  {
+    id: "websites-torph",
+    title: "Torph",
+    description: "Dependency-free animated text component.",
+    website: "https://torph.lochie.me/",
+    github: "https://github.com/lochie/torph",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["development", "design"],
+    addedAt: "2026-02-20T01:47:40+05:30",
+  },
+  {
+    id: "websites-scrollbar",
+    title: "Scrollbar",
+    description: "Simple online scrollbar editor.",
+    website: "https://scrollbar.app",
+    github: "https://github.com/henripar/scrollbar",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["development", "design"],
+    addedAt: "2026-02-20T01:47:40+05:30",
+  },
+  {
+    id: "softwares-bentopdf",
+    title: "BentoPDF",
+    description: "A Privacy First PDF Toolkit.",
+    website: "https://bentopdf.com/",
+    github: "https://github.com/alam00000/bentopdf",
+    category: "Softwares",
+    tags: ["all"],
+    topics: ["documents", "compression", "privacy", "files"],
+    addedAt: "2026-02-20T01:47:40+05:30",
+  },
+  {
+    id: "softwares-ps4-game-scraper",
+    title: "PS4 Game Scraper",
+    description: "PS4 Game Scraper.",
+    github: "https://github.com/NookieAI/PS4-Game-Scraper",
+    category: "Softwares",
+    tags: ["all"],
+    topics: ["gaming"],
+    addedAt: "2026-02-20T01:47:40+05:30",
+  },
+  {
+    id: "softwares-copycat-clipboard",
+    title: "CopyCat Clipboard",
+    description:
+      "Clipboard history manager to search and paste recent clips across apps.",
+    website: "https://www.entilitystudio.com/copycat-clipboard",
+    github: "https://github.com/raj457036/CopyCat-Clipboard",
+    category: "Softwares",
+    tags: ["all"],
+    topics: ["documents", "productivity", "files"],
+    addedAt: "2026-02-20T01:47:40+05:30",
+  },
+  {
+    id: "websites-sileo",
+    title: "Sileo",
+    description: "Beautiful Toast Notifications for React.",
+    website: "https://sileo.aaryan.design/",
+    github: "https://github.com/hiaaryan/sileo",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["development", "design"],
+    addedAt: "2026-02-20T01:47:40+05:30",
+  },
+  {
+    id: "softwares-battery-toolkit",
+    title: "Battery-Toolkit",
+    description: "Control the platform power state of your Apple Silicon Mac.",
+    github: "https://github.com/mhaeuser/Battery-Toolkit",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["system"],
+    addedAt: "2026-02-20T01:47:40+05:30",
+  },
+  {
+    id: "softwares-magicpods",
+    title: "MagicPods",
+    description:
+      "Battery status, ear detection, and popup indicators for AirPods on Windows.",
+    website: "https://magicpods.app",
+    github: "https://github.com/steam3d/MagicPods-Windows",
+    category: "Softwares",
+    tags: ["windows"],
+    topics: ["audio", "media"],
+    addedAt: "2026-02-20T01:47:40+05:30",
+  },
+  {
+    id: "websites-ipsw-downloads",
+    title: "IPSW Downloads",
+    description:
+      "Download current and previous versions of Apple's iOS, iPadOS, macOS, watchOS, tvOS, audioOS and visionOS firmware.",
+    website: "https://ipsw.me/",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["downloads"],
+    addedAt: "2026-02-20T02:05:25+05:30",
+  },
+  {
+    id: "websites-carbon-design-system",
+    title: "Carbon Design System",
+    description:
+      "IBM's open source design system for products and digital experiences.",
+    website: "https://www.carbondesignsystem.com",
+    github: "https://github.com/carbon-design-system/carbon",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["development", "design"],
+    addedAt: "2026-02-22T16:08:13+05:30",
+  },
+  {
+    id: "websites-poke",
+    title: "Poke",
+    description:
+      "Privacy-focused client with a YouTube front-end, translation tools, and maps.",
+    website: "https://poketube.fun/",
+    github: "https://github.com/TecharoHQ/anubis",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["privacy", "web", "media"],
+    addedAt: "2026-02-22T16:08:13+05:30",
+  },
+  {
+    id: "softwares-noutube-desktop",
+    title: "NouTube Desktop",
+    description: "Ad-free YouTube desktop application.",
+    github: "https://github.com/nonbili/NouTube-Desktop",
+    category: "Softwares",
+    tags: ["macos", "windows", "linux"],
+    topics: ["video", "privacy", "downloads", "media"],
+    addedAt: "2026-03-01T13:23:11+05:30",
+  },
+  {
+    id: "softwares-noutube",
+    title: "NouTube",
+    description: "Ad-free YouTube client.",
+    github: "https://github.com/nonbili/NouTube",
+    category: "Softwares",
+    tags: ["all"],
+    topics: ["video", "privacy", "downloads", "media"],
+    addedAt: "2026-03-01T13:23:11+05:30",
+  },
+  {
+    id: "websites-lucide-animated",
+    title: "Lucide Animated",
+    description: "Beautiful animated icons for Lucide.",
+    website: "https://lucide-animated.com/",
+    github: "https://github.com/pqoqubbw/icons",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["development", "design"],
+    addedAt: "2026-03-01T13:23:11+05:30",
+  },
+  {
+    id: "scripts-scrapy",
+    title: "Scrapy",
+    description:
+      "A fast high-level web crawling and scraping framework for Python.",
+    website: "https://scrapy.org",
+    github: "https://github.com/scrapy/scrapy",
+    category: "Scripts",
+    tags: ["all", "cli"],
+    topics: ["development", "automation", "web"],
+    addedAt: "2026-03-01T13:23:11+05:30",
+  },
+  {
+    id: "websites-the-component-gallery",
+    title: "The Component Gallery",
+    description: "A collection of components from the best Design Systems.",
+    website: "https://component.gallery/",
+    github: "https://github.com/elastic/eui",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["development", "design"],
+    addedAt: "2026-03-01T13:23:11+05:30",
+  },
+  {
+    id: "softwares-metrolist",
+    title: "Metrolist",
+    description:
+      "A simple to-do list taking design cues from the Metro design language.",
+    website: "https://metrolist.cc/",
+    github: "https://github.com/MetrolistGroup/Metrolist",
+    category: "Softwares",
+    tags: ["android"],
+    topics: ["productivity"],
+    addedAt: "2026-03-01T13:30:18+05:30",
+  },
+  {
+    id: "softwares-karaoke-eternal",
+    title: "Karaoke Eternal",
+    description: "Open karaoke party system.",
+    website: "https://www.karaoke-eternal.com",
+    github: "https://github.com/bhj/KaraokeEternal",
+    category: "Softwares",
+    tags: ["all"],
+    topics: ["audio", "media"],
+    addedAt: "2026-03-03T16:51:49+05:30",
+  },
+  {
+    id: "websites-shadcn-admin",
+    title: "Shadcn Admin",
+    description: "Admin Dashboard UI built with Shadcn and Vite.",
+    website: "https://shadcn-admin.netlify.app/",
+    github: "https://github.com/satnaing/shadcn-admin",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["development", "design"],
+    addedAt: "2026-03-03T16:51:49+05:30",
+  },
+  {
+    id: "softwares-flycut-caption",
+    title: "FlyCut Caption",
+    description:
+      "React component for editing subtitles with speech recognition and timeline waveforms.",
+    website: "https://caption.flycut.co",
+    github: "https://github.com/x007xyz/flycut-caption",
+    category: "Softwares",
+    tags: ["all"],
+    topics: ["ai", "video", "audio", "media"],
+    addedAt: "2026-03-06T12:04:44+05:30",
+  },
+  {
+    id: "websites-awesome-self-hosted",
+    title: "Awesome Self-Hosted",
+    description:
+      "A list of Free Software network services and web applications which can be hosted on your own servers.",
+    website: "https://awesome-selfhosted.net/",
+    github: "https://github.com/awesome-selfhosted/awesome-selfhosted",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["networking", "web"],
+    addedAt: "2026-03-06T12:04:44+05:30",
+  },
+  {
+    id: "softwares-winshot",
+    title: "WinShot",
+    description:
+      "A Windows screenshot tool with annotation, crop, and export features.",
+    website: "http://winshot.claudekit.cc/",
+    github: "https://github.com/mrgoonie/winshot",
+    category: "Softwares",
+    tags: ["windows"],
+    topics: ["image", "capture"],
+    addedAt: "2026-03-06T12:04:44+05:30",
+  },
+  {
+    id: "softwares-stats",
+    title: "Stats",
+    description: "macOS system monitor in your menu bar.",
+    website: "https://mac-stats.com",
+    github: "https://github.com/exelban/stats",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["system"],
+    addedAt: "2026-03-06T12:04:44+05:30",
+  },
+  {
+    id: "websites-api-mega-list",
+    title: "API Mega List",
+    description:
+      "A powerhouse collection of APIs you can start using immediately to build everything from simple automations to full-scale applications.",
+    github: "https://github.com/cporter202/API-mega-list",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["development", "automation", "web"],
+    addedAt: "2026-03-06T12:04:44+05:30",
+  },
+  {
+    id: "softwares-gopeed",
+    title: "Gopeed",
+    description:
+      "A modern download manager that supports all platforms. Built with Golang and Flutter.",
+    website: "https://gopeed.com",
+    github: "https://github.com/GopeedLab/gopeed",
+    category: "Softwares",
+    tags: ["all"],
+    topics: ["downloads"],
+    addedAt: "2026-03-08T04:14:30+05:30",
+  },
+  {
+    id: "softwares-bulk-crap-uninstaller",
+    title: "Bulk Crap Uninstaller",
+    description: "Remove large amounts of unwanted applications quickly.",
+    website: "https://www.bcuninstaller.com/",
+    github: "https://github.com/Klocman/Bulk-Crap-Uninstaller",
+    category: "Softwares",
+    tags: ["windows"],
+    topics: ["system", "files"],
+    addedAt: "2026-03-08T06:53:45+05:30",
+  },
+  {
+    id: "websites-delphi-tools",
+    title: "Delphi Tools",
+    description:
+      "A collection of small, low stakes and low effort web tools including calculators, converters, and generators.",
+    website: "https://delphi.tools/",
+    github: "https://github.com/1612elphi/delphitools",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["productivity", "web"],
+    addedAt: "2026-03-08T14:55:09+05:30",
+  },
+  {
+    id: "softwares-anythingllm",
+    title: "AnythingLLM",
+    description:
+      "Desktop app to run, chat with, and query local LLMs on your machine.",
+    website: "https://anythingllm.com",
+    github: "https://github.com/Mintplex-Labs/anything-llm",
+    category: "Softwares",
+    tags: ["all"],
+    topics: ["ai", "productivity", "privacy"],
+    addedAt: "2026-04-08T15:32:45+05:30",
+  },
+  {
+    id: "softwares-llmfit",
+    title: "LLMFit",
+    description:
+      "Hundreds of models & providers. One command to find what runs on your hardware.",
+    github: "https://github.com/AlexsJones/llmfit",
+    category: "Softwares",
+    tags: ["all"],
+    topics: ["ai"],
+    addedAt: "2026-04-08T15:32:45+05:30",
+  },
+  {
+    id: "softwares-onyx",
+    title: "Onyx",
+    description:
+      "Open-source web chat interface that connects to local and cloud LLM providers.",
+    website: "https://www.onyx.app",
+    github: "https://github.com/onyx-dot-app/onyx",
+    category: "Softwares",
+    tags: ["all"],
+    topics: ["ai"],
+    addedAt: "2026-04-08T15:32:45+05:30",
+  },
+  {
+    id: "softwares-jan",
+    title: "Jan",
+    description:
+      "An open source alternative to ChatGPT that runs 100% offline on your computer.",
+    website: "https://jan.ai",
+    github: "https://github.com/janhq/jan/releases/latest",
+    category: "Softwares",
+    tags: ["macos", "windows", "linux"],
+    topics: ["ai", "privacy"],
+    addedAt: "2026-04-08T15:32:45+05:30",
+  },
+  {
+    id: "websites-flow",
+    title: "Flow",
+    description: "Experimental tool from Google Labs for visual AI workflows.",
+    website: "https://labs.google/fx/tools/flow",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["ai"],
+    addedAt: "2026-04-08T15:32:45+05:30",
+  },
+  {
+    id: "softwares-worldmonitor",
+    title: "WorldMonitor",
+    description:
+      "Dashboard for live global news tracking, geopolitical events, and infrastructure monitoring.",
+    website: "https://worldmonitor.app",
+    category: "Softwares",
+    tags: ["all"],
+    topics: ["research"],
+    addedAt: "2026-04-08T15:32:45+05:30",
+  },
+  {
+    id: "websites-penpot",
+    title: "Penpot",
+    description:
+      "The open-source design tool for design and code collaboration.",
+    website: "https://penpot.app",
+    github: "https://github.com/penpot/penpot",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["development", "design", "communication"],
+    addedAt: "2026-04-08T15:32:45+05:30",
+  },
+  {
+    id: "scripts-visual-explainer",
+    title: "Visual Explainer",
+    description:
+      "Agent skill that generates rich HTML pages or slide decks for diagrams, diff reviews, plan audits, data tables, and project recaps.",
+    github: "https://github.com/nicobailon/visual-explainer",
+    category: "Scripts",
+    tags: ["all"],
+    topics: ["development", "design", "automation", "research"],
+    addedAt: "2026-04-08T15:32:45+05:30",
+  },
+  {
+    id: "softwares-fluxmarkdown",
+    title: "FluxMarkdown",
+    description:
+      "Beautiful Markdown previews in macOS Finder QuickLook with Mermaid, KaTeX, GFM, charts, and export.",
+    github: "https://github.com/xykong/flux-markdown",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["documents"],
+    addedAt: "2026-04-24T22:46:19+05:30",
+  },
+  {
+    id: "softwares-typewhisper",
+    title: "TypeWhisper",
+    description:
+      "Local, on-device speech-to-text for macOS, Windows, and iOS with no cloud or API keys.",
+    website: "https://www.typewhisper.com/",
+    github: "https://github.com/TypeWhisper",
+    category: "Softwares",
+    tags: ["macos", "windows", "ios"],
+    topics: ["ai", "audio", "privacy"],
+    addedAt: "2026-04-24T22:46:19+05:30",
+  },
+  {
+    id: "websites-vibeui",
+    title: "VibeUI",
+    description:
+      "92 layout prompts for UI generation covering auth, pricing, heroes, bento grids, and dashboards.",
+    website: "https://vibeui.online/",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["ai", "development", "design"],
+    addedAt: "2026-04-26T12:58:08+05:30",
+  },
+  {
+    id: "softwares-compresso",
+    title: "CompressO",
+    description:
+      "A 100% free, offline, and open-source video and image compression app. Compress any file to a tiny size without quality loss. Available for Mac, Windows, and Linux.",
+    website: "https://compresso.codeforreal.com/",
+    github: "https://github.com/codeforreal1/compressO",
+    category: "Softwares",
+    tags: ["macos", "windows", "linux"],
+    topics: ["image", "video", "compression", "privacy", "files"],
+    addedAt: "2026-04-26T12:58:08+05:30",
+  },
+  {
+    id: "scripts-reclip",
+    title: "Reclip",
+    description:
+      "Lightweight, self-hosted media downloader with a clean web UI. Download videos from almost any website. Easy to deploy and run on your own server.",
+    github: "https://github.com/averygan/reclip",
+    category: "Scripts",
+    tags: ["all"],
+    topics: [
+      "video",
+      "automation",
+      "networking",
+      "downloads",
+      "media",
+      "capture",
+    ],
+    addedAt: "2026-04-26T12:58:08+05:30",
+  },
+  {
+    id: "softwares-clicky",
+    title: "Clicky",
+    description:
+      "macOS cursor companion that reads screen context and speaks explanations in real time.",
+    website: "https://www.clicky.so/",
+    github: "https://github.com/farzaa/clicky",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["productivity", "privacy", "education"],
+    addedAt: "2026-04-26T12:58:08+05:30",
+  },
+  {
+    id: "softwares-ytdownloader",
+    title: "ytDownloader",
+    description:
+      "A free, open-source desktop video downloader. Download videos and audio from YouTube, TikTok, Instagram, Twitter, Twitch, and 1000+ more sites.",
+    website: "https://aandrew-me.github.io/ytDownloader/",
+    category: "Softwares",
+    tags: ["macos", "windows", "linux"],
+    topics: ["video", "audio", "downloads", "media"],
+    addedAt: "2026-04-26T12:58:08+05:30",
+  },
+  {
+    id: "softwares-vidbee",
+    title: "VidBee",
+    description:
+      "Archive video, audio, and transcripts from YouTube, TikTok, and other platforms for offline search and backup.",
+    website: "https://vidbee.org/",
+    category: "Softwares",
+    tags: ["all"],
+    topics: [
+      "video",
+      "audio",
+      "privacy",
+      "files",
+      "downloads",
+      "research",
+      "media",
+    ],
+    addedAt: "2026-04-26T12:58:08+05:30",
+  },
+  {
+    id: "websites-webcam-mic-test",
+    title: "Webcam & Mic Test",
+    description:
+      "In-browser webcam and microphone tester to check video quality, resolution, and frame rates.",
+    website: "https://webcammictest.com/",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["video", "audio", "privacy", "communication", "web"],
+    addedAt: "2026-04-26T12:58:08+05:30",
+  },
+  {
+    id: "scripts-dither",
+    title: "Dither",
+    description:
+      "A vector dithering tool for the web and Adobe Illustrator. Apply stylish dithering effects to images and graphics to create retro halftone-style art. Open source.",
+    website: "https://dither.fun/",
+    github: "https://github.com/Shpigford/dither",
+    category: "Scripts",
+    tags: ["all"],
+    topics: ["image", "design"],
+    addedAt: "2026-04-26T12:58:08+05:30",
+  },
+  {
+    id: "softwares-recordly",
+    title: "Recordly",
+    description:
+      "Open-source desktop screen recorder and editor for polished demos, walkthroughs, and product videos with auto-zooms, cursor polish, backgrounds, and timeline editing.",
+    website: "https://recordly.dev/",
+    github: "https://github.com/webadderallorg/Recordly",
+    category: "Softwares",
+    tags: ["macos", "windows", "linux"],
+    topics: ["video", "design", "media", "capture"],
+    addedAt: "2026-04-28T01:21:10+05:30",
+  },
+  {
+    id: "softwares-clop",
+    title: "Clop",
+    description:
+      "Image, video, PDF, and clipboard optimizer for macOS. Automatically compresses copied media, screen recordings, screenshots, and files so they are smaller and easier to share.",
+    website: "https://lowtechguys.com/clop/",
+    github: "https://github.com/FuzzyIdeas/Clop",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["image", "video", "documents", "compression", "files"],
+    addedAt: "2026-04-28T14:50:44+05:30",
+  },
+  {
+    id: "softwares-parcel-delivery-tracking",
+    title: "Parcel - Delivery Tracking",
+    description:
+      "Delivery tracking app for iPhone, iPad, Mac, Apple Vision, and Apple Watch with carrier recognition, barcode scanning, Amazon integration, widgets, maps, and push notifications.",
+    website:
+      "https://apps.apple.com/gb/app/parcel-delivery-tracking/id375589283",
+    category: "Softwares",
+    tags: ["all"],
+    topics: ["productivity"],
+    addedAt: "2026-04-28T14:50:44+05:30",
+  },
+  {
+    id: "softwares-latest",
+    title: "Latest",
+    description:
+      "Free, open-source macOS utility that checks whether your apps are up to date, shows what changed, and helps update Mac App Store and Sparkle-based apps.",
+    website: "https://max.codes/latest/",
+    github: "https://github.com/mangerlahn/Latest",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["productivity", "system"],
+    addedAt: "2026-04-28T14:50:44+05:30",
+  },
+  {
+    id: "scripts-caveman",
+    title: "Caveman",
+    description:
+      "Agent skill that trims verbose assistant replies to reduce token usage.",
+    github: "https://github.com/JuliusBrussee/caveman",
+    category: "Scripts",
+    tags: ["all"],
+    topics: ["ai", "development", "automation"],
+    addedAt: "2026-04-28T18:34:34+05:30",
+  },
+  {
+    id: "websites-dot-matrix",
+    title: "Dot Matrix",
+    description:
+      "React component library of expressive dot matrix loaders that you install via the shadcn registry and own as local code.",
+    website: "https://dotmatrix.zzzzshawn.cloud/",
+    github: "https://github.com/zzzzshawn/matrix",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["development", "design"],
+    addedAt: "2026-04-28T18:34:34+05:30",
+  },
+  {
+    id: "websites-evil-charts",
+    title: "Evil Charts",
+    description:
+      "Open-source chart UI website built with shadcn and Recharts, with handcrafted chart components and docs.",
+    website: "https://evilcharts.com/docs",
+    github: "https://github.com/legions-developer/evilcharts",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["development", "design"],
+    addedAt: "2026-04-28T19:41:39+05:30",
+  },
+  {
+    id: "softwares-omniget",
+    title: "OmniGet",
+    description:
+      "A desktop media downloader powered by yt-dlp and FFmpeg. Check the official site for current downloads and supported platforms.",
+    website: "https://getomniget.com",
+    category: "Softwares",
+    tags: ["all"],
+    topics: ["productivity", "downloads", "education", "research", "media"],
+    addedAt: "2026-05-01T17:33:42+05:30",
+  },
+  {
+    id: "websites-ascii-magic",
+    title: "ASCII Magic",
+    description:
+      "Free browser tool that turns images and videos into ASCII art in real time, with PNG and MP4 export.",
+    website: "https://www.ascii-magic.com/",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["image", "video", "design"],
+    addedAt: "2026-05-03T18:45:26+05:30",
+  },
+  {
+    id: "softwares-thide",
+    title: "Thide",
+    description:
+      "Lightweight Windows 10/11 app to hide or show the taskbar with system tray and CLI control.",
+    github: "https://github.com/amnweb/thide",
+    category: "Softwares",
+    tags: ["windows"],
+    topics: ["system"],
+    addedAt: "2026-05-03T18:45:26+05:30",
+  },
+  {
+    id: "websites-mapcn",
+    title: "mapcn",
+    description:
+      "Beautiful map components with zero config and one-command setup.",
+    website: "https://mapcn.dev",
+    github: "https://github.com/AnmolSaini16/mapcn",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["development", "design", "web"],
+    addedAt: "2026-05-03T19:58:21+05:30",
+  },
+  {
+    id: "softwares-brewstation",
+    title: "BrewStation",
+    description:
+      "Homebrew GUI browser, searcher, and manager with app snapshot saving and restoring.",
+    github: "https://github.com/hreinssondev/BrewStation",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["system"],
+    addedAt: "2026-05-03T20:06:31+05:30",
+  },
+  {
+    id: "websites-unlumen-ui",
+    title: "unlumen UI",
+    description:
+      "Copy-ready React, TypeScript, Tailwind, Motion, and shadcn components for building polished interfaces fast.",
+    website: "https://ui.unlumen.com/components",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["development", "design"],
+    addedAt: "2026-05-16T09:36:13+05:30",
+  },
+  {
+    id: "websites-deck-gallery",
+    title: "Deck.Gallery",
+    description:
+      "Gallery of presentation decks, slide designs, reports, and brand guidelines.",
+    website: "https://deck.gallery/",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["documents", "design"],
+    addedAt: "2026-05-16T09:36:13+05:30",
+  },
+  {
+    id: "softwares-virtualbuddy",
+    title: "VirtualBuddy",
+    description:
+      "Virtualize macOS 12 and later on Apple Silicon with a friendly virtual machine GUI.",
+    github: "https://github.com/insidegui/VirtualBuddy",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["system"],
+    addedAt: "2026-05-17T22:51:02+05:30",
+  },
+  {
+    id: "softwares-mos",
+    title: "Mos",
+    description:
+      "Lightweight macOS utility for smooth mouse scrolling and independent scroll direction settings.",
+    website: "http://mos.caldis.me",
+    github: "https://github.com/Caldis/Mos",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["productivity", "system"],
+    addedAt: "2026-05-17T22:51:02+05:30",
+  },
+  {
+    id: "softwares-ruview",
+    title: "RuView",
+    description:
+      "Detect presence, movement, and vital signs through walls using commodity WiFi signals and ESP32 sensors.",
+    website: "https://Cognitum.One/RuView",
+    github: "https://github.com/ruvnet/RuView",
+    category: "Softwares",
+    tags: ["all"],
+    topics: ["networking"],
+    addedAt: "2026-05-21T09:30:35+05:30",
+  },
+  {
+    id: "softwares-whatcable",
+    title: "WhatCable",
+    description:
+      "A macOS menu bar app to identify the charging and data transfer capabilities of your USB-C cables.",
+    website: "https://www.whatcable.uk/",
+    github: "https://github.com/darrylmorley/whatcable",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["system"],
+    addedAt: "2026-05-28T17:39:10+05:30",
+  },
+  {
+    id: "scripts-free-claude-code",
+    title: "Free Claude Code",
+    description:
+      "Reverse proxy to route Claude Code commands through Gemini, DeepSeek, or local LLMs.",
+    github: "https://github.com/Alishahryar1/free-claude-code",
+    category: "Scripts",
+    tags: ["all"],
+    topics: ["ai", "development", "automation"],
+    addedAt: "2026-05-28T17:39:10+05:30",
+  },
+  {
+    id: "softwares-open-design",
+    title: "Open Design",
+    description:
+      "An open-source, local-first alternative to Claude Design that turns local coding agents into design engines.",
+    website: "https://open-design.ai",
+    github: "https://github.com/nexu-io/open-design",
+    category: "Softwares",
+    tags: ["all"],
+    topics: ["ai", "development", "design"],
+    addedAt: "2026-05-28T17:39:10+05:30",
+  },
+  {
+    id: "softwares-atomic-chat",
+    title: "Atomic Chat",
+    description: "Open-source app to download and run language models locally.",
+    website: "https://atomic.chat/",
+    github: "https://github.com/AtomicBot-ai/Atomic-Chat",
+    category: "Softwares",
+    tags: ["macos", "windows", "linux"],
+    topics: ["ai", "privacy"],
+    addedAt: "2026-05-28T17:39:10+05:30",
+  },
+  {
+    id: "softwares-omi",
+    title: "Omi",
+    description:
+      "Open-source wearable device and software for capturing audio and transcripts.",
+    website: "https://www.omi.me/",
+    github: "https://github.com/BasedHardware/omi",
+    category: "Softwares",
+    tags: ["all"],
+    topics: ["ai"],
+    addedAt: "2026-05-28T17:39:10+05:30",
+  },
+  {
+    id: "softwares-fluentflyout",
+    title: "FluentFlyout",
+    description:
+      "Modern, customizable flyouts for Windows 11 following Fluent 2 Design principles.",
+    website: "https://fluentflyout.com/",
+    github: "https://github.com/unchihugo/FluentFlyout",
+    category: "Softwares",
+    tags: ["windows"],
+    topics: ["system", "design"],
+    addedAt: "2026-05-28T17:39:10+05:30",
+  },
+  {
+    id: "softwares-localsend",
+    title: "LocalSend",
+    description:
+      "An open-source, cross-platform alternative to AirDrop for sharing files over local networks.",
+    website: "https://localsend.org",
+    github: "https://github.com/localsend/localsend",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["privacy", "networking", "files"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-syncthing",
+    title: "Syncthing",
+    description:
+      "A continuous file synchronization program that syncs files between devices securely and privately.",
+    website: "https://syncthing.net",
+    github: "https://github.com/syncthing/syncthing",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["privacy", "networking", "files"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-kde-connect",
+    title: "KDE Connect",
+    description:
+      "A tool that enables secure communication and integration between your computer and mobile devices.",
+    website: "https://kdeconnect.kde.org",
+    github: "https://github.com/KDE/kdeconnect-kde",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["privacy", "networking"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-rustdesk",
+    title: "RustDesk",
+    description:
+      "An open-source remote desktop client and server written in Rust, serving as an alternative to TeamViewer.",
+    website: "https://rustdesk.com",
+    github: "https://github.com/rustdesk/rustdesk",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["privacy", "networking"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-zotero",
+    title: "Zotero",
+    description:
+      "A free, easy-to-use tool to help you collect, organize, annotate, cite, and share research sources.",
+    website: "https://www.zotero.org",
+    github: "https://github.com/zotero/zotero",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["documents", "productivity", "research"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-jabref",
+    title: "JabRef",
+    description:
+      "An open-source bibliography reference manager using BibTeX and BibLaTeX as its native formats.",
+    website: "https://www.jabref.org",
+    github: "https://github.com/JabRef/jabref",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["documents", "productivity", "research"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-keepass",
+    title: "KeePass",
+    description:
+      "A free, open-source, light-weight password manager with a highly customizable and secure database.",
+    website: "https://keepass.info",
+    category: "Softwares",
+    tags: ["windows"],
+    topics: ["privacy"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-keepassxc",
+    title: "KeePassXC",
+    description:
+      "A community fork of KeePassX, providing a modern, cross-platform offline password manager.",
+    website: "https://keepassxc.org",
+    github: "https://github.com/keepassxreboot/keepassxc",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["privacy"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-cryptomator",
+    title: "Cryptomator",
+    description:
+      "Multi-platform client-side encryption tool that secures your cloud storage files before they leave your device.",
+    website: "https://cryptomator.org",
+    github: "https://github.com/cryptomator/cryptomator",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["privacy"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-freefilesync",
+    title: "FreeFileSync",
+    description:
+      "A folder comparison and synchronization software that creates and manages backup copies of files.",
+    website: "https://freefilesync.org",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["privacy", "files"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "websites-jitsi-meet",
+    title: "Jitsi Meet",
+    description:
+      "A secure, fully featured, and completely free video conferencing service requiring no account.",
+    website: "https://meet.jit.si",
+    github: "https://github.com/jitsi/jitsi-meet",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["privacy", "networking", "communication"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-element",
+    title: "Element",
+    description:
+      "A secure, decentralized messenger app for group chat and collaboration built on the Matrix protocol.",
+    website: "https://element.io",
+    github: "https://github.com/vector-im/element-web",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["privacy", "networking", "communication"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-firefox",
+    title: "Firefox",
+    description:
+      "A free, privacy-respecting, open-source web browser developed by Mozilla.",
+    website: "https://www.mozilla.org/firefox/",
+    github: "https://github.com/mozilla/gecko-dev",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["privacy", "web"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-librewolf",
+    title: "LibreWolf",
+    description:
+      "A custom Firefox fork focused on privacy, security, and user freedom out-of-the-box.",
+    website: "https://librewolf.net",
+    github: "https://github.com/librewolf-community",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["privacy", "web"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-waterfox",
+    title: "Waterfox",
+    description:
+      "A privacy-focused, high-performance web browser based on Firefox that respects user choice.",
+    website: "https://www.waterfox.net",
+    github: "https://github.com/WaterfoxCo/Waterfox",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["privacy", "web"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-zen-browser",
+    title: "Zen Browser",
+    description:
+      "A beautiful, modern, and highly customisable Firefox fork built for speed and privacy.",
+    website: "https://zen-browser.app",
+    github: "https://github.com/zen-browser/desktop",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["privacy", "web"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-chromium",
+    title: "Chromium",
+    description:
+      "The open-source web browser project that serves as the foundation for Google Chrome and other browsers.",
+    website: "https://www.chromium.org",
+    github: "https://github.com/chromium/chromium",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["web"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-mozilla-thunderbird",
+    title: "Mozilla Thunderbird",
+    description:
+      "A free, open-source email, newsroom, chat, and calendar client configured for security.",
+    website: "https://www.thunderbird.net",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["privacy", "communication"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-mailspring",
+    title: "Mailspring",
+    description:
+      "A fast, modern email client with search, translation, tracking, and dark themes.",
+    website: "https://getmailspring.com",
+    github: "https://github.com/Foundry376/Mailspring",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["communication"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-libreoffice",
+    title: "LibreOffice",
+    description:
+      "Open-source office suite with word processor, spreadsheet, and presentation editors.",
+    website: "https://www.libreoffice.org",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["documents", "productivity"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-onlyoffice",
+    title: "OnlyOffice",
+    description:
+      "An open-source office suite offering secure collaborative document editors for text, spreadsheets, and slides.",
+    website: "https://www.onlyoffice.com",
+    github: "https://github.com/ONLYOFFICE/DocumentServer",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["documents", "productivity", "privacy", "communication"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-openboard",
+    title: "OpenBoard",
+    description:
+      "A free, open-source interactive whiteboard software designed for schools and universities.",
+    website: "https://openboard.ch",
+    github: "https://github.com/OpenBoard-org/OpenBoard",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["documents", "design", "communication", "education"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "websites-draw-io",
+    title: "Draw.io",
+    description:
+      "A free, professional online diagramming tool and flowchart maker.",
+    website: "https://app.diagrams.net",
+    github: "https://github.com/jgraph/drawio",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["documents", "design"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-okular",
+    title: "Okular",
+    description:
+      "A universal document viewer developed by KDE, supporting PDF, EPUB, images, and markdown.",
+    website: "https://okular.kde.org",
+    github: "https://github.com/KDE/okular",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["documents", "files"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-pdfsam",
+    title: "PDFsam",
+    description:
+      "A free and open-source desktop application to split, merge, mix, rotate, and extract PDF pages.",
+    website: "https://pdfsam.org",
+    github: "https://github.com/torakiki/pdfsam",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["documents", "files"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-obsidian",
+    title: "Obsidian",
+    description:
+      "Markdown-based note-taking app that stores notes in local plain text files.",
+    website: "https://obsidian.md",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["documents", "productivity", "research"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-logseq",
+    title: "Logseq",
+    description:
+      "A privacy-first, open-source outliner and knowledge base for note-taking and task management.",
+    website: "https://logseq.com",
+    github: "https://github.com/logseq/logseq",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["documents", "productivity", "privacy", "research"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-dendron",
+    title: "Dendron",
+    description:
+      "A hierarchical, local-first note-taking tool that integrates directly into VS Code.",
+    website: "https://www.dendron.so",
+    github: "https://github.com/dendronhq/dendron",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["development", "documents", "productivity"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-joplin",
+    title: "Joplin",
+    description:
+      "An open-source note-taking and to-do application with end-to-end encryption and cloud sync support.",
+    website: "https://joplinapp.org",
+    github: "https://github.com/laurent22/joplin",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["documents", "productivity", "privacy"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-trilium-notes",
+    title: "Trilium Notes",
+    description:
+      "A hierarchical note-taking application designed for building large personal knowledge bases.",
+    website: "https://github.com/zadam/trilium",
+    github: "https://github.com/zadam/trilium",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["documents", "productivity", "research"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-appflowy",
+    title: "AppFlowy",
+    description:
+      "An open-source Notion alternative built with Flutter and Rust for privacy and customization.",
+    website: "https://www.appflowy.io",
+    github: "https://github.com/AppFlowy-IO/AppFlowy",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["documents", "productivity", "privacy"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-affine",
+    title: "AFFiNE",
+    description:
+      "A modern workspace that fuses documentation, whiteboards, and database tables, serving as a Notion/Miro alternative.",
+    website: "https://affine.pro",
+    github: "https://github.com/toeverything/AFFiNE",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["documents", "productivity", "communication"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-super-productivity",
+    title: "Super Productivity",
+    description:
+      "An open-source to-do list and time tracker with integrations for Jira, GitHub, and GitLab.",
+    website: "https://super-productivity.com",
+    github: "https://github.com/johannesjo/super-productivity",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["productivity"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-breaktimer",
+    title: "BreakTimer",
+    description:
+      "A customizable break-timer application to help you manage screen-time and avoid eye strain.",
+    website: "https://breaktimer.app",
+    github: "https://github.com/tom-james-watson/breaktimer-app",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["productivity"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-vlc-media-player",
+    title: "VLC Media Player",
+    description:
+      "A free, open-source, cross-platform multimedia player that plays almost all audio/video formats.",
+    website: "https://www.videolan.org/vlc/",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["video", "audio", "media"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-navidrome",
+    title: "Navidrome",
+    description:
+      "A self-hosted, lightweight personal music streaming server compatible with Subsonic.",
+    website: "https://www.navidrome.org",
+    github: "https://github.com/navidrome/navidrome",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["audio", "networking", "media"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-jellyfin",
+    title: "Jellyfin",
+    description:
+      "A free software media system that puts you in control of managing and streaming your media files.",
+    website: "https://jellyfin.org",
+    github: "https://github.com/jellyfin/jellyfin",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["video", "audio", "networking", "media"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-nora",
+    title: "Nora",
+    description:
+      "A beautiful, minimalistic, and modern open-source desktop music player for local files.",
+    website: "https://github.com/Sandakan/Nora",
+    github: "https://github.com/Sandakan/Nora",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["audio", "media"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-strawberry-player",
+    title: "Strawberry Player",
+    description:
+      "A high-quality music player and collection organizer geared towards audiophiles and collectors.",
+    website: "https://www.strawberrymusicplayer.org",
+    github: "https://github.com/strawberrymusicplayer/strawberry",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["audio", "media"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-ardour",
+    title: "Ardour",
+    description:
+      "Digital audio workstation for recording, editing, mixing, and mastering audio.",
+    website: "https://ardour.org",
+    github: "https://github.com/Ardour/ardour",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["audio", "media"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-lmms",
+    title: "LMMS",
+    description:
+      "A free, open-source digital audio workstation for producing music by synthesising and sequencing sounds.",
+    website: "https://lmms.io",
+    github: "https://github.com/LMMS/lmms",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["audio", "media"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-f-lux",
+    title: "f.lux",
+    description:
+      "An application that warms up your computer display color temperature to match the time of day.",
+    website: "https://justgetflux.com",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["system"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-blanket",
+    title: "Blanket",
+    description:
+      "A simple ambient noise player designed to help you focus and increase your productivity.",
+    website: "https://github.com/rafaelmardojai/blanket",
+    github: "https://github.com/rafaelmardojai/blanket",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["audio", "productivity"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-gimp",
+    title: "GIMP",
+    description:
+      "The GNU Image Manipulation Program, a professional open-source raster graphics editor.",
+    website: "https://www.gimp.org",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["image", "design"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-krita",
+    title: "Krita",
+    description:
+      "A professional open-source painting program designed for digital artists, concept art, and illustrators.",
+    website: "https://krita.org",
+    github: "https://github.com/KDE/krita",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["image", "design"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-inkscape",
+    title: "Inkscape",
+    description:
+      "Open-source vector graphics editor supporting SVG, PDF, and EPS formats.",
+    website: "https://inkscape.org",
+    github: "https://github.com/inkscape/inkscape",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["image", "design"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-pinta",
+    title: "Pinta",
+    description:
+      "An open-source drawing and image editing program modeled after Paint.NET for simpler workflows.",
+    website: "https://pinta-project.com",
+    github: "https://github.com/PintaProject/Pinta",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["image", "design"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-copyq",
+    title: "CopyQ",
+    description:
+      "An advanced clipboard manager with searchable history, formatting preservation, and scripting support.",
+    website: "https://hluk.github.io/CopyQ/",
+    github: "https://github.com/hluk/CopyQ",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["productivity", "files"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-lap-photo-manager",
+    title: "Lap Photo Manager",
+    description:
+      "A local-first, privacy-respecting photo organizer for large libraries built with Tauri and Rust.",
+    website: "https://julyx10.github.io/lap/",
+    github: "https://github.com/julyx10/lap",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["image", "files"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-digikam",
+    title: "digiKam",
+    description:
+      "An advanced open-source digital photo management application for importing, organizing, and editing photos.",
+    website: "https://www.digikam.org",
+    github: "https://github.com/KDE/digikam",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["image", "files"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-darktable",
+    title: "darktable",
+    description:
+      "An open-source photography workflow application and raw developer that behaves like a virtual lighttable.",
+    website: "https://www.darktable.org",
+    github: "https://github.com/darktable-org/darktable",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["image"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-rawtherapee",
+    title: "RawTherapee",
+    description:
+      "A high-performance raw photo processing software designed for modifying digital images.",
+    website: "https://www.rawtherapee.com",
+    github: "https://github.com/Beep6581/RawTherapee",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["image"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-flameshot",
+    title: "Flameshot",
+    description:
+      "An easy-to-use screenshot utility with built-in annotation tools and sharing features.",
+    website: "https://flameshot.org",
+    github: "https://github.com/flameshot-org/flameshot",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["image", "capture"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-ksnip",
+    title: "Ksnip",
+    description:
+      "A feature-rich screenshot tool that offers drawing tools, watermarks, and crop capabilities.",
+    website: "https://github.com/ksnip/ksnip",
+    github: "https://github.com/ksnip/ksnip",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["image", "capture"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-obs-studio",
+    title: "OBS Studio",
+    description:
+      "Free and open-source software for video recording and live streaming.",
+    website: "https://obsproject.com",
+    github: "https://github.com/obsproject/obs-studio",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["video", "audio", "media", "capture"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-audacity",
+    title: "Audacity",
+    description: "A free, easy-to-use, multi-track audio editor and recorder.",
+    website: "https://www.audacityteam.org",
+    github: "https://github.com/audacity/audacity",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["audio", "media"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-handbrake",
+    title: "HandBrake",
+    description:
+      "A tool for converting video from nearly any format to a selection of modern, widely supported codecs.",
+    website: "https://handbrake.fr",
+    github: "https://github.com/HandBrake/HandBrake",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["video", "compression", "media"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-kdenlive",
+    title: "Kdenlive",
+    description:
+      "A professional open-source non-linear video editor developed by the KDE community.",
+    website: "https://kdenlive.org",
+    github: "https://github.com/KDE/kdenlive",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["video", "media"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-losslesscut",
+    title: "LosslessCut",
+    description:
+      "A lightweight cross-platform tool for extremely fast and lossless cutting of video and audio files.",
+    website: "https://github.com/mifi/lossless-cut",
+    github: "https://github.com/mifi/lossless-cut",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["video", "audio", "compression", "media"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-qalculate",
+    title: "Qalculate!",
+    description:
+      "A multi-purpose, cross-platform desktop calculator featuring advanced unit conversions and expressions.",
+    website: "https://qalculate.github.io",
+    github: "https://github.com/Qalculate/qalculate-gtk",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["productivity"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-speedcrunch",
+    title: "SpeedCrunch",
+    description:
+      "A fast, high-precision algebraic desktop calculator with keyboard-friendly interface.",
+    website: "https://speedcrunch.org",
+    github: "https://github.com/speedcrunch/SpeedCrunch",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["productivity"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-peazip",
+    title: "PeaZip",
+    description:
+      "A free file archiver and utility for opening zip, rar, and 7z archives with strong encryption.",
+    website: "https://peazip.github.io",
+    github: "https://github.com/peazip/PeaZip",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["compression", "files"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-filelight",
+    title: "Filelight",
+    description:
+      "A utility to visualize disk usage by drawing a set of concentric segmented rings.",
+    website: "https://apps.kde.org/filelight/",
+    github: "https://github.com/KDE/filelight",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["system", "files"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-crossdirstat",
+    title: "Crossdirstat",
+    description:
+      "A cross-platform disk usage analysis tool similar to WinDirStat showing directory trees and treemaps.",
+    website: "https://github.com/Jelmerro/crossdirstat",
+    github: "https://github.com/Jelmerro/crossdirstat",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["system", "files"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-double-commander",
+    title: "Double Commander",
+    description:
+      "A cross-platform two-panel file manager inspired by Total Commander.",
+    website: "https://doublecmd.sourceforge.io",
+    github: "https://github.com/doublecmd/doublecmd",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["files"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-mucommander",
+    title: "muCommander",
+    description:
+      "A lightweight, cross-platform file manager with a dual-pane interface.",
+    website: "https://www.mucommander.com",
+    github: "https://github.com/mucommander/mucommander",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["files"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-tagspaces",
+    title: "TagSpaces",
+    description:
+      "An open-source personal data manager that helps you organize and tag files locally.",
+    website: "https://www.tagspaces.org",
+    github: "https://github.com/tagspaces/tagspaces",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["productivity", "files"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-spacedrive",
+    title: "SpaceDrive",
+    description:
+      "A cross-platform local-first file manager with a beautiful modern interface built on Rust.",
+    website: "https://www.spacedrive.com",
+    github: "https://github.com/spacedriveapp/spacedrive",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["files"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-persepolis-download-manager",
+    title: "Persepolis Download Manager",
+    description: "Desktop GUI client for the aria2 download utility.",
+    website: "https://persepolisdm.github.io",
+    github: "https://github.com/persepolisdm/persepolis",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["downloads"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-duplicati",
+    title: "Duplicati",
+    description:
+      "A free backup client that securely stores encrypted, incremental backups on local storage and cloud drives.",
+    website: "https://www.duplicati.com",
+    github: "https://github.com/duplicati/duplicati",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["privacy", "files"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-glances",
+    title: "Glances",
+    description:
+      "An open-source system monitoring tool that displays system metrics in a terminal or web interface.",
+    website: "https://nicolargo.github.io/glances/",
+    github: "https://github.com/nicolargo/glances",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["system"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-gsmartcontrol",
+    title: "GSmartControl",
+    description:
+      "A graphical user interface for smartctl, exposing SMART disk drive health status and diagnostic tests.",
+    website: "https://gsmartcontrol.shaduri.dev",
+    github: "https://github.com/ashaduri/gsmartcontrol",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["system"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-actiona",
+    title: "Actiona",
+    description:
+      "An open-source automation utility that allows you to automate tasks on your system using a visual editor.",
+    website: "https://actiona.tools",
+    github: "https://github.com/Jmgr/actiona",
+    category: "Softwares",
+    tags: ["windows", "linux"],
+    topics: ["productivity", "automation"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-lapce",
+    title: "Lapce",
+    description:
+      "A lightning-fast desktop code editor written in Rust with built-in remote development support.",
+    website: "https://lapce.dev",
+    github: "https://github.com/lapce/lapce",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["development"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-zed",
+    title: "Zed",
+    description:
+      "A high-performance, collaborative code editor written in Rust by the creators of Atom and Tree-sitter.",
+    website: "https://zed.dev",
+    github: "https://github.com/zed-industries/zed",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["development", "communication"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-espanso",
+    title: "Espanso",
+    description:
+      "A lightweight, cross-platform text expander written in Rust to automate typing tasks.",
+    website: "https://espanso.org",
+    github: "https://github.com/espanso/espanso",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["productivity", "automation"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-asyar",
+    title: "Asyar",
+    description:
+      "A local-first, open-source productivity launcher designed as an alternative to Raycast, built with Tauri and Rust.",
+    website: "https://asyar.org",
+    github: "https://github.com/Xoshbin/asyar-launcher",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["productivity", "system"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-ueli",
+    title: "Ueli",
+    description:
+      "A customizable keystroke launcher for Windows and macOS to quickly launch apps, files, and web links.",
+    website: "https://ueli.app",
+    github: "https://github.com/oliverschwendener/ueli",
+    category: "Softwares",
+    tags: ["windows", "macos"],
+    topics: ["productivity", "system"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-seafile",
+    title: "Seafile",
+    description:
+      "An open-source cloud storage and file sync platform designed for high performance and reliability.",
+    website: "https://www.seafile.com",
+    github: "https://github.com/haiwen/seafile",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["privacy", "networking", "files"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-nextcloud",
+    title: "Nextcloud",
+    description:
+      "A self-hosted productivity platform allowing you to share files, collaborate, and manage calendar/contacts securely.",
+    website: "https://nextcloud.com",
+    github: "https://github.com/nextcloud/desktop",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["productivity", "privacy", "networking", "files", "communication"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-input-leap",
+    title: "Input Leap",
+    description:
+      "A software utility that allows you to share one keyboard and mouse between multiple computers on a local network.",
+    github: "https://github.com/input-leap/input-leap",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["system", "networking"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-openrgb",
+    title: "OpenRGB",
+    description:
+      "An open-source RGB lighting control software that acts as a unified hub for all your lighting hardware.",
+    website: "https://openrgb.org",
+    github: "https://github.com/CalcProgrammer1/OpenRGB",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["system"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "softwares-paperless-ngx",
+    title: "Paperless-ngx",
+    description:
+      "A document management system that transforms your physical documents into a searchable online archive.",
+    website: "https://docs.paperless-ngx.com",
+    github: "https://github.com/paperless-ngx/paperless-ngx",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["documents", "files", "research"],
+    addedAt: "2026-06-12T17:29:06+05:30",
+  },
+  {
+    id: "websites-liteparse",
+    title: "LiteParse",
+    description:
+      "A lightweight, fast document parsing library by LlamaIndex for extracting text and structure from PDFs and other files.",
+    website: "https://developers.llamaindex.ai/liteparse/",
+    github: "https://github.com/run-llama/liteparse",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["documents", "files", "research"],
+    addedAt: "2026-06-19T22:01:27+05:30",
+  },
+  {
+    id: "websites-motion",
+    title: "Motion",
+    description:
+      "Production-grade animation library for React, JavaScript, and Vue. The successor to Framer Motion with a tiny footprint.",
+    website: "https://motion.dev",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["development", "design", "web"],
+    addedAt: "2026-06-19T22:01:27+05:30",
+  },
+  {
+    id: "websites-bklit-ui",
+    title: "Bklit UI",
+    description:
+      "A component library built on top of shadcn/ui to help you build charts and data visualizations more easily.",
+    website: "https://bklit.com",
+    github: "https://github.com/bklit/bklit-ui",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["development", "design"],
+    addedAt: "2026-06-19T22:01:27+05:30",
+  },
+  {
+    id: "websites-transitions-dev",
+    title: "Transitions.dev",
+    description:
+      "A collection of the most essential copy-paste CSS transitions for web apps, ready to drop into any project.",
+    website: "https://transitions.dev",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["development", "design", "web"],
+    addedAt: "2026-06-19T22:01:27+05:30",
+  },
+  {
+    id: "websites-termcn",
+    title: "termcn",
+    description:
+      "Beautiful, accessible, and customizable terminal UI components for React. Built on Ink and OpenTUI, distributed via shadcn.",
+    website: "https://www.termcn.dev",
+    github: "https://github.com/Aniket-508/termcn",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["development", "design"],
+    addedAt: "2026-06-19T22:01:27+05:30",
+  },
+  {
+    id: "softwares-nomeiryoui",
+    title: "noMeiryoUI",
+    description:
+      "Tool to change default system fonts on Windows 8.1, 10, and 11.",
+    github: "https://github.com/Tatsu-syo/noMeiryoUI",
+    category: "Softwares",
+    tags: ["windows"],
+    topics: ["system", "design"],
+    addedAt: "2026-07-20T11:06:04+05:30",
+  },
+  {
+    id: "softwares-windhawk",
+    title: "Windhawk",
+    description:
+      "Windows desktop customization app to install taskbar, Start menu, and system tweaks.",
+    website: "https://windhawk.net/",
+    github: "https://github.com/ramensoftware/windhawk",
+    category: "Softwares",
+    tags: ["windows"],
+    topics: ["system"],
+    addedAt: "2026-07-20T11:06:04+05:30",
+  },
+  {
+    id: "softwares-textream",
+    title: "Textream",
+    description:
+      "A free macOS teleprompter app for streamers, interviewers, and presenters that highlights your script in real-time as you speak in a Dynamic Island overlay.",
+    website: "https://github.com/f/textream",
+    github: "https://github.com/f/textream",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["video", "audio", "productivity"],
+    addedAt: "2026-07-26T12:02:02+05:30",
+  },
+  {
+    id: "softwares-orchard",
+    title: "Orchard",
+    description:
+      "A native macOS app and GUI for Apple's container tooling to manage containers, machines, and local Kubernetes clusters.",
+    website: "https://orchard.andon.dev/",
+    github: "https://github.com/andrew-waters/orchard",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["development", "system"],
+    addedAt: "2026-09-02T18:51:53+05:30",
+  },
+  {
+    id: "softwares-keyty",
+    title: "Keyty",
+    description:
+      "Display keyboard shortcuts, keystrokes, and mouse clicks in real time for macOS demos, recordings, and livestreams.",
+    website: "https://keyty.app/",
+    github: "https://github.com/keytyapp/Keyty",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["video", "productivity"],
+    addedAt: "2026-09-02T18:51:53+05:30",
+  },
+  {
+    id: "websites-senumy",
+    title: "Senumy",
+    description:
+      "A comprehensive directory and IPA library for iOS jailbreak tools, tweaks, sideloading utilities, and modded apps.",
+    website: "https://senumy.com/",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system", "downloads"],
+    addedAt: "2026-09-02T18:51:53+05:30",
+  },
+  {
+    id: "softwares-itsycal",
+    title: "Itsycal",
+    description:
+      "A tiny menu bar calendar for macOS with Mac Calendar app integration, event creation, and keyboard navigation.",
+    website: "https://www.mowglii.com/itsycal/",
+    github: "https://github.com/sfsam/Itsycal",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["productivity", "system"],
+    addedAt: "2026-09-02T18:51:53+05:30",
+  },
+  {
+    id: "softwares-keycastr",
+    title: "KeyCastr",
+    description:
+      "An open-source keystroke visualizer for macOS that displays keystrokes on-screen in real time.",
+    website: "https://github.com/keycastr/keycastr",
+    github: "https://github.com/keycastr/keycastr",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["video", "productivity"],
+    addedAt: "2026-09-02T18:51:53+05:30",
+  },
+  {
+    id: "softwares-keka",
+    title: "Keka",
+    description:
+      "The macOS file archiver — extract and compress 7Z, ZIP, TAR, GZ, RAR, and other archive formats with password protection.",
+    website: "https://www.keka.io/en/",
+    github: "https://github.com/aonez/Keka",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["compression", "files"],
+    addedAt: "2026-09-02T18:51:53+05:30",
+  },
+  {
+    id: "softwares-handy",
+    title: "Handy",
+    description:
+      "A free, open-source, cross-platform speech-to-text desktop app that lets you dictate anywhere with local AI.",
+    website: "https://handy.computer/",
+    github: "https://github.com/cjpais/Handy",
+    category: "Softwares",
+    tags: ["macos", "windows", "linux"],
+    topics: ["ai", "audio", "productivity"],
+    addedAt: "2026-09-02T18:51:53+05:30",
+  },
+  {
+    id: "softwares-zennotes",
+    title: "ZenNotes",
+    description:
+      "A keyboard-first, Vim-native Markdown notes app with local files, KaTeX math, Mermaid diagrams, and cross-device sync.",
+    website: "https://zennotes.org/",
+    github: "https://github.com/ZenNotes/zennotes",
+    category: "Softwares",
+    tags: ["macos", "windows", "linux"],
+    topics: ["documents", "productivity"],
+    addedAt: "2026-09-02T18:51:53+05:30",
+  },
+  {
+    id: "softwares-doppi",
+    title: "Doppi",
+    description:
+      "A clean, native music player for Mac and iOS designed to play and organize your local offline music collection.",
+    website: "https://doppi.app/mac/",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["audio", "media"],
+    addedAt: "2026-09-02T18:51:53+05:30",
+  },
+  {
+    id: "softwares-pixelplayer",
+    title: "PixelPlayer",
+    description:
+      "A privacy-first Android music player built with Material 3 Expressive featuring offline playback, synced lyrics, and equalizer presets.",
+    website: "https://github.com/PixelPlayerHQ/PixelPlayer",
+    github: "https://github.com/PixelPlayerHQ/PixelPlayer",
+    category: "Softwares",
+    tags: ["android"],
+    topics: ["audio", "media"],
+    addedAt: "2026-09-02T18:51:53+05:30",
+  },
+  {
+    id: "softwares-runcatneo",
+    title: "RunCatNeo",
+    description:
+      "A cute running cat animation on your macOS menu bar whose running speed changes according to CPU usage.",
+    website: "https://runcat-dev.github.io/RunCatNeo/",
+    github: "https://github.com/runcat-dev/RunCatNeo",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["system"],
+    addedAt: "2026-09-02T18:51:53+05:30",
+  },
+  {
+    id: "websites-printed-matter",
+    title: "Printed Matter",
+    description:
+      "The world's largest non-profit organization and archive dedicated to the dissemination, appreciation, and distribution of artists' books and publications.",
+    website: "https://www.printedmatter.org/",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["documents", "design", "education"],
+    addedAt: "2026-09-02T18:51:53+05:30",
+  },
+  {
+    id: "websites-digibouquet",
+    title: "DigiBouquet",
+    description:
+      "A free online tool to build and share personalized digital flower bouquets with custom greeting cards and flower meanings.",
+    website: "https://digibouquet.net/",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["productivity", "design", "web"],
+    addedAt: "2026-09-02T18:51:53+05:30",
+  },
+  {
+    id: "softwares-screendrop",
+    title: "Screendrop",
+    description:
+      "A native, free, and self-hostable macOS screenshot and screen recording app designed as an open-source Loom alternative.",
+    website: "https://github.com/fayazara/Screendrop",
+    github: "https://github.com/fayazara/Screendrop",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["image", "video", "productivity", "capture"],
+    addedAt: "2026-09-02T18:51:53+05:30",
+  },
+  {
+    id: "websites-quick-image-converter",
+    title: "Quick Image Converter",
+    description:
+      "Free online image converter — convert JPG, PNG, WebP, AVIF and HEIC right in your browser. Fast, private, no sign-up needed.",
+    website: "https://quickimgconvert.com/",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["image", "privacy", "files", "web"],
+    addedAt: "2026-10-04T18:23:20+05:30",
+  },
+  {
+    id: "websites-steam-market-fee-calculator",
+    title: "Steam Market Fee Calculator",
+    description:
+      "An open-source calculator to estimate Steam Community Market fees, buyer costs, and seller proceeds in integer precision.",
+    website: "https://steamvaults.org/tools/steam-market-fee-calculator",
+    github: "https://github.com/hyunjun12312/steam-market-fee-calculator",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["productivity", "gaming", "web"],
+    addedAt: "2026-10-04T18:23:20+05:30",
+  },
+  {
+    id: "softwares-flow-launcher",
+    title: "Flow Launcher",
+    description:
+      "Quick file search and keyboard application launcher for Windows with community plugins.",
+    website: "https://www.flowlauncher.com",
+    github: "https://github.com/Flow-Launcher/Flow.Launcher",
+    category: "Softwares",
+    tags: ["windows"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "softwares-shottr",
+    title: "Shottr",
+    description:
+      "Lightweight, pixel-perfect screenshot annotation and measurement app for macOS.",
+    website: "https://shottr.cc",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["capture"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "softwares-betterdisplay",
+    title: "BetterDisplay",
+    description:
+      "Unlock HiDPI scaling, XDR/HDR brightness, virtual screens, and DDC controls on Mac displays.",
+    website: "https://betterdisplay.pro",
+    github: "https://github.com/waydabber/BetterDisplay",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "softwares-alttab",
+    title: "AltTab",
+    description:
+      "Brings Windows-style Alt+Tab application window switching with live previews to macOS.",
+    website: "https://alt-tab-macos.netlify.app",
+    github: "https://github.com/lwouis/alt-tab-macos",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "softwares-thaw",
+    title: "Thaw",
+    description:
+      "Clean menu bar manager to hide, show, and organize cluttered menu bar icons on macOS.",
+    github: "https://github.com/stonerl/Thaw",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "softwares-pika",
+    title: "Pika",
+    description:
+      "Open-source native color picker for macOS with real-time WCAG contrast ratio compliance checks.",
+    website: "https://superhighfives.com/pika",
+    github: "https://github.com/superhighfives/pika",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "softwares-aldente",
+    title: "AlDente",
+    description:
+      "macOS menu bar utility to set charging limits and prolong MacBook battery health.",
+    website: "https://apphousekitchen.com",
+    github:
+      "https://github.com/AppHouseKitchen/AlDente-Battery_Care_and_Monitoring",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "softwares-windiskwriter",
+    title: "WinDiskWriter",
+    description:
+      "Native macOS utility to create bootable Windows installer USB drives, bypassing TPM requirements.",
+    github: "https://github.com/TechUnRestricted/WinDiskWriter",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "softwares-audiorelay",
+    title: "AudioRelay",
+    description:
+      "Stream PC audio to an Android device or other computers over local Wi-Fi or USB with low latency.",
+    website: "https://audiorelay.net",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux", "android"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "softwares-sonobus",
+    title: "SonoBus",
+    description:
+      "Open-source, high-quality peer-to-peer audio streaming over network or internet.",
+    website: "https://www.sonobus.net",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux", "ios", "android"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "softwares-thock",
+    title: "Thock",
+    description:
+      "Native macOS sound simulator that plays mechanical keyboard switch sounds while you type.",
+    github: "https://github.com/kamillobinski/thock",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "softwares-moody",
+    title: "Moody",
+    description:
+      "Floating teleprompter application designed to sit inside the MacBook camera notch.",
+    website: "https://moody.mjarosz.com",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "softwares-porting-kit",
+    title: "Porting Kit",
+    description:
+      "One-click Wine wrapper installer for classic Windows games and applications on macOS.",
+    website: "https://www.portingkit.com",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "softwares-sikarugir",
+    title: "Sikarugir",
+    description:
+      "Tool used to package Windows software into standalone Wine-wrapped native macOS apps.",
+    github: "https://github.com/Sikarugir-App/Sikarugir",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "softwares-onemenu",
+    title: "OneMenu",
+    description:
+      "Menu bar system monitor and utility to track CPU, memory, network, and battery usage on macOS.",
+    website: "https://www.withmarko.com/one-menu",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "softwares-dissent",
+    title: "Dissent",
+    description:
+      "Lightweight native Discord desktop client written in Go and GTK4 with low memory consumption.",
+    github: "https://github.com/diamondburned/dissent",
+    category: "Softwares",
+    tags: ["linux", "windows", "macos"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "softwares-nuclear",
+    title: "Nuclear",
+    description:
+      "Desktop music streaming player that pulls tracks from free online sources without ads.",
+    website: "https://nuclearplayer.com",
+    github: "https://github.com/nukeop/nuclear",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "softwares-media-downloader",
+    title: "Media Downloader",
+    description:
+      "Native macOS GUI app to download videos from YouTube, X, and Instagram and trim them in one pass.",
+    github: "https://github.com/pixel-point/media-downloader",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "softwares-chops",
+    title: "Chops",
+    description:
+      "macOS desktop app to browse, edit, and organize AI agent skills across Claude Code, Cursor, and Codex.",
+    github: "https://github.com/Shpigford/chops",
+    category: "Softwares",
+    tags: ["macos"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "softwares-deckcraft",
+    title: "Deckcraft",
+    description:
+      "Clean-room open-source slide presentation software reimplemented in pure Rust.",
+    website: "https://getartcraft.com/apps",
+    github: "https://github.com/storytold/deckcraft",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "softwares-anki",
+    title: "Anki",
+    description:
+      "Intelligent spaced repetition flashcard program for memorizing facts, vocabulary, and concepts.",
+    website: "https://apps.ankiweb.net",
+    github: "https://github.com/ankitects/anki",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "softwares-3utools",
+    title: "3uTools",
+    description:
+      "All-in-one iOS file manager, jailbreak, flashing, and backup utility for Windows.",
+    website: "http://www.3u.com",
+    category: "Softwares",
+    tags: ["windows"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "softwares-cowabunga",
+    title: "Cowabunga",
+    description:
+      "Customization tool utilizing MacDirtyCow to tweak iOS system settings without a full jailbreak.",
+    website: "https://cowabun.ga",
+    category: "Softwares",
+    tags: ["macos", "windows", "ios"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "softwares-devtoys",
+    title: "DevToys",
+    description:
+      "Offline Swiss Army knife for developers with JSON formatters, regex testers, JWT inspectors, and decoders.",
+    website: "https://devtoys.app",
+    github: "https://github.com/DevToys-app/DevToys",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "softwares-universal-android-debloater",
+    title: "Universal Android Debloater",
+    description:
+      "Cross-platform GUI written in Rust using ADB to safely uninstall system bloatware from Android devices.",
+    github: "https://github.com/0x192/universal-android-debloater",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux", "android"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "softwares-youtube-music-desktop",
+    title: "YouTube Music Desktop",
+    description:
+      "Open-source desktop player for YouTube Music with built-in ad blocker, Discord Rich Presence, and plugins.",
+    github: "https://github.com/th-ch/youtube-music",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "softwares-livecontainer",
+    title: "LiveContainer",
+    description:
+      "Run iOS applications without actually installing them, bypassing Apple's 3-app sideloading certificate limit.",
+    github: "https://github.com/LiveContainer/LiveContainer",
+    category: "Softwares",
+    tags: ["ios"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "softwares-openlogi",
+    title: "OpenLogi",
+    description:
+      "Native, local-first Rust alternative to Logitech Options+ to configure DPI, gestures, and button mapping with no telemetry.",
+    website: "https://openlogi.org/en",
+    github: "https://github.com/AprilNEA/OpenLogi",
+    category: "Softwares",
+    tags: ["macos", "windows"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "softwares-local",
+    title: "Local",
+    description:
+      "Fast, one-click local WordPress development environment for macOS, Windows, and Linux.",
+    website: "https://localwp.com",
+    category: "Softwares",
+    tags: ["macos", "windows", "linux"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "softwares-trae",
+    title: "Trae",
+    description:
+      "Adaptive AI coding IDE featuring Claude 3.5 Sonnet, workspace indexing, and intelligent builder mode.",
+    website: "https://www.trae.ai",
+    category: "Softwares",
+    tags: ["macos", "windows"],
+    topics: ["ai"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "softwares-invokeai",
+    title: "InvokeAI",
+    description:
+      "Creative engine and WebUI for Stable Diffusion models, empowering artists to generate visual media locally.",
+    github: "https://github.com/invoke-ai/InvokeAI",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["ai"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "softwares-clipgrab",
+    title: "ClipGrab",
+    description:
+      "Simple, open-source video downloader and converter for YouTube, Vimeo, and other streaming websites.",
+    website: "https://clipgrab.org",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "softwares-koboldcpp",
+    title: "Koboldcpp",
+    description:
+      "Single-file zero-install executable to run quantized GGUF models locally with an integrated web UI.",
+    github: "https://github.com/LostRuins/koboldcpp",
+    category: "Softwares",
+    tags: ["windows", "macos", "linux"],
+    topics: ["ai"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-pairdrop",
+    title: "PairDrop",
+    description:
+      "Local cross-platform file transfer directly in your browser without signup or setup.",
+    website: "https://pairdrop.net",
+    github: "https://github.com/schlagmichdoch/pairdrop",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-revpdf",
+    title: "RevPDF",
+    description:
+      "Offline, in-browser PDF editor to sign, fill, split, and merge documents without uploading files to servers.",
+    website: "https://revpdf.com",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-unicorn-studio",
+    title: "Unicorn Studio",
+    description:
+      "Interactive no-code WebGL shader, fluid simulation, and animation builder with embeddable code.",
+    website: "https://www.unicorn.studio",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-siggif",
+    title: "SigGif",
+    description:
+      "Converts mouse or stylus signatures into smooth animated stroke GIFs and SVGs.",
+    website: "https://sig-gif.vercel.app",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-font-stealer",
+    title: "Font Stealer",
+    description:
+      "Inspects any public website URL and extracts active font files and CSS font faces.",
+    website: "https://font-stealer.vercel.app",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-fish-audio",
+    title: "Fish Audio",
+    description:
+      "Lightning-fast AI voice generator, text-to-speech engine, and zero-shot voice cloning platform.",
+    website: "https://fish.audio",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["ai"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-gamepad-tester",
+    title: "Gamepad Tester",
+    description:
+      "Online controller diagnostic tool to test joystick drift, trigger axis, and button response.",
+    website: "https://hardwaretester.com/gamepad",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-resizepixel",
+    title: "ResizePixel",
+    description:
+      "Free web utility to crop, resize, convert, and compress images with clean controls.",
+    website: "https://www.resizepixel.com",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-yourascii",
+    title: "YourASCII",
+    description:
+      "Convert images and videos into customizable ASCII art with export controls.",
+    website: "https://yourascii.vercel.app",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-webhaptics",
+    title: "WebHaptics",
+    description:
+      "JavaScript library and testing sandbox providing tactile haptic vibration feedback for mobile web apps.",
+    website: "https://haptics.lochie.me",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-openui",
+    title: "OpenUI",
+    description:
+      "Open standard and real-time generation environment for AI-generated user interfaces.",
+    website: "https://www.openui.com",
+    github: "https://github.com/thesysdev/openui",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["ai"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-prompts-chat",
+    title: "prompts.chat",
+    description:
+      "Searchable open-source repository of role-based system prompts and personas for ChatGPT and LLMs.",
+    website: "https://prompts.chat",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-drawdb",
+    title: "drawDB",
+    description:
+      "Free, intuitive online relational database diagram editor and SQL schema generator in browser.",
+    website: "https://www.drawdb.app",
+    github: "https://github.com/drawdb-io/drawdb",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-tldraw",
+    title: "tldraw",
+    description:
+      "Ultra-fast, minimal infinite canvas whiteboard with real-time collaboration and SVG export.",
+    website: "https://www.tldraw.com",
+    github: "https://github.com/tldraw/tldraw",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-star-history",
+    title: "Star History",
+    description:
+      "Visualizes and compares historical GitHub repository star growth charts over time.",
+    website: "https://star-history.com",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-simple-icons",
+    title: "Simple Icons",
+    description:
+      "Over 3,000 clean, official SVG icons and brand guidelines for popular technology services.",
+    website: "https://simple-icons.org",
+    github: "https://github.com/simple-icons/simple-icons",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-paper-shaders",
+    title: "Paper Shaders",
+    description:
+      "Ultra-fast, zero-dependency WebGL canvas background shaders designed for modern web apps.",
+    website: "https://shaders.paper.design",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-photogradient",
+    title: "PhotoGradient",
+    description:
+      "Generates vibrant multi-point CSS mesh gradients directly from uploaded photographs.",
+    website: "https://photogradient.com",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-design-systems-surf",
+    title: "Design Systems Surf",
+    description:
+      "Curated database and gallery of production design systems from tech organizations worldwide.",
+    website: "https://designsystems.surf",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-screenshot-studio",
+    title: "Screenshot Studio",
+    description:
+      "Browser-based mockup maker to render screenshots inside customizable 3D angles, backgrounds, and shadows.",
+    website: "https://www.screenshot-studio.com",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["capture"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-svg-repo",
+    title: "SVG Repo",
+    description:
+      "Collection of over 500,000 free, open-licensed SVG vectors, icons, and graphics.",
+    website: "https://www.svgrepo.com",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-public-apis",
+    title: "Public APIs",
+    description:
+      "Massive collective list of free REST, GraphQL, and webhook APIs for software development.",
+    website: "https://publicapis.io",
+    github: "https://github.com/public-apis/public-apis",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-free-for-dev",
+    title: "Free for Dev",
+    description:
+      "Exhaustive directory of SaaS, PaaS, and IaaS offerings with generous free tiers for developers.",
+    github: "https://github.com/ripienaar/free-for-dev",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-checklist-design",
+    title: "Checklist Design",
+    description:
+      "Collection of best-practice UI and UX checklists covering essential elements for standard pages.",
+    website: "https://www.checklist.design",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-emailcn",
+    title: "emailcn",
+    description:
+      "Clean, responsive email component templates and layouts built for modern transactional email.",
+    website: "https://www.emailcn.run",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-square-ui",
+    title: "Square UI",
+    description:
+      "Open-source layouts and production dashboards built on top of Tailwind CSS and shadcn/ui.",
+    github: "https://github.com/ln-dev7/square-ui",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-velvet-ui",
+    title: "Velvet UI",
+    description:
+      "Interactive sound design library demonstrating tactile audio feedback for web interfaces.",
+    website: "https://velvet-ui-eight.vercel.app",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-its-hover",
+    title: "Its Hover",
+    description:
+      "Curated collection of micro-interactions, CSS hover states, and button transition effects.",
+    website: "https://www.itshover.com",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-notebooklm",
+    title: "NotebookLM",
+    description:
+      "Google's AI research notebook that grounds answers in your documents and generates Audio Overviews.",
+    website: "https://notebook.google.com",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["ai"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-google-ai-studio",
+    title: "Google AI Studio",
+    description:
+      "Fast web-based playground for prompt engineering and experimenting with Google Gemini models.",
+    website: "https://aistudio.google.com",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["ai"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-quillbot",
+    title: "QuillBot",
+    description:
+      "AI writing assistant offering sentence paraphrasing, grammar checking, and text summarization.",
+    website: "https://quillbot.com",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["ai"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-vocal-remover",
+    title: "Vocal Remover",
+    description:
+      "AI-powered audio splitter to isolate vocals and instrumental accompaniment tracks from audio files.",
+    website: "https://vocalremover.org",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-diffchecker",
+    title: "Diffchecker",
+    description:
+      "Online comparison tool to diff text, code, images, spreadsheets, and PDFs side-by-side.",
+    website: "https://www.diffchecker.com",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-whatthefont",
+    title: "WhatTheFont",
+    description:
+      "Instant font identifier that finds matching typography styles from uploaded raster screenshots.",
+    website: "https://www.myfonts.com/pages/whatthefont",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-ezgif",
+    title: "Ezgif",
+    description:
+      "Quick web editor for animated GIFs: convert videos, crop, reverse, resize, and optimize file size.",
+    website: "https://ezgif.com",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-remove-bg",
+    title: "Remove.bg",
+    description:
+      "Automatic image background removal tool producing transparent PNGs in seconds.",
+    website: "https://www.remove.bg",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["ai"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-text-behind-image",
+    title: "Text Behind Image",
+    description:
+      "Web tool that isolates foreground subjects to place bold typography layered behind them.",
+    website: "https://textbehindimage.rexanwong.xyz",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-lottielab",
+    title: "Lottielab",
+    description:
+      "Vector animation platform in the browser to create, edit, and export interactive Lottie animations.",
+    website: "https://www.lottielab.com",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-public-work",
+    title: "Public Work",
+    description:
+      "Search engine for public domain art, historical engravings, and vintage photography for creative projects.",
+    website: "https://public.work",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-roadmap-sh",
+    title: "Roadmap.sh",
+    description:
+      "Community-curated interactive roadmaps and structured study guides for developer career paths.",
+    website: "https://roadmap.sh",
+    github: "https://github.com/kamranahmedse/developer-roadmap",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-keybr",
+    title: "Keybr",
+    description:
+      "Touch typing tutor that teaches keyboard layout muscle memory using phonetic accuracy rules.",
+    website: "https://www.keybr.com",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-omni-calculator",
+    title: "Omni Calculator",
+    description:
+      "Over 3,000 free specialized calculators covering everyday finance, physics, math, and construction equations.",
+    website: "https://www.omnicalculator.com",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-savee",
+    title: "Savee",
+    description:
+      "Visual bookmarking and inspiration board designed for designers, photographers, and creatives.",
+    website: "https://savee.com",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "websites-fonts-in-use",
+    title: "Fonts In Use",
+    description:
+      "Public archive and index of typography categorized by typeface, publishing format, and aesthetic style.",
+    website: "https://fontsinuse.com",
+    category: "Websites",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "scripts-removewindowsai",
+    title: "RemoveWindowsAI",
+    description:
+      "PowerShell script to remove Copilot, Recall, and AI telemetry bloatware from Windows 11.",
+    github: "https://github.com/zoicware/RemoveWindowsAI",
+    category: "Scripts",
+    tags: ["windows", "cli"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "scripts-winhance",
+    title: "Winhance",
+    description:
+      "Windows enhancement toolkit to optimize privacy, speed up performance, and strip pre-installed bloat.",
+    website: "https://winhance.net",
+    category: "Scripts",
+    tags: ["windows", "cli"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "scripts-pake",
+    title: "Pake",
+    description:
+      "Turn any webpage into a tiny desktop application with a single CLI command using Rust and Tauri.",
+    github: "https://github.com/tw93/Pake",
+    category: "Scripts",
+    tags: ["macos", "windows", "linux", "cli"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "scripts-airllm",
+    title: "AirLLM",
+    description:
+      "Run 70B parameter LLM inference on a single 4GB GPU using layered memory paging.",
+    github: "https://github.com/lyogavin/airllm",
+    category: "Scripts",
+    tags: ["all", "cli"],
+    topics: ["ai"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "scripts-tiny11",
+    title: "Tiny11",
+    description:
+      "Scripts and lightweight installation images of Windows 11 stripped of telemetry and bloatware.",
+    website: "https://ntdotdev.wordpress.com",
+    category: "Scripts",
+    tags: ["windows", "cli"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "scripts-morphicons",
+    title: "Morphicons",
+    description:
+      "Zero-dependency spring-physics animation library that smoothly morphs any stroke-based SVG icon into another.",
+    github: "https://github.com/guillermolg00/morphicons",
+    category: "Scripts",
+    tags: ["all"],
+    topics: ["system"],
+    addedAt: "2026-10-11T14:24:18+05:30",
+  },
+  {
+    id: "scripts-stable-diffusion-webui",
+    title: "Stable Diffusion WebUI",
+    description:
+      "The quintessential open-source browser interface for Stable Diffusion image generation and fine-tuning.",
+    github: "https://github.com/AUTOMATIC1111/stable-diffusion-webui",
+    category: "Scripts",
+    tags: ["windows", "linux"],
+    topics: ["ai"],
+    addedAt: "2026-10-11T14:24:18+05:30",
   },
-  {
-    "title": "Cowabunga",
-    "description": "Customization tool utilizing MacDirtyCow to tweak iOS system settings without a full jailbreak.",
-    "website": "https://cowabun.ga",
-    "category": "Softwares",
-    "tags": ["macos", "windows", "ios"]
-  },
-  {
-    "title": "DevToys",
-    "description": "Offline Swiss Army knife for developers with JSON formatters, regex testers, JWT inspectors, and decoders.",
-    "website": "https://devtoys.app",
-    "github": "https://github.com/DevToys-app/DevToys",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Universal Android Debloater",
-    "description": "Cross-platform GUI written in Rust using ADB to safely uninstall system bloatware from Android devices.",
-    "github": "https://github.com/0x192/universal-android-debloater",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux", "android"]
-  },
-  {
-    "title": "YouTube Music Desktop",
-    "description": "Open-source desktop player for YouTube Music with built-in ad blocker, Discord Rich Presence, and plugins.",
-    "github": "https://github.com/th-ch/youtube-music",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "LiveContainer",
-    "description": "Run iOS applications without actually installing them, bypassing Apple's 3-app sideloading certificate limit.",
-    "github": "https://github.com/LiveContainer/LiveContainer",
-    "category": "Softwares",
-    "tags": ["ios"]
-  },
-  {
-    "title": "OpenLogi",
-    "description": "Native, local-first Rust alternative to Logitech Options+ to configure DPI, gestures, and button mapping with no telemetry.",
-    "website": "https://openlogi.org/en",
-    "github": "https://github.com/AprilNEA/OpenLogi",
-    "category": "Softwares",
-    "tags": ["macos", "windows"]
-  },
-  {
-    "title": "Local",
-    "description": "Fast, one-click local WordPress development environment for macOS, Windows, and Linux.",
-    "website": "https://localwp.com",
-    "category": "Softwares",
-    "tags": ["macos", "windows", "linux"]
-  },
-  {
-    "title": "Trae",
-    "description": "Adaptive AI coding IDE featuring Claude 3.5 Sonnet, workspace indexing, and intelligent builder mode.",
-    "website": "https://www.trae.ai",
-    "category": "Softwares",
-    "tags": ["macos", "windows"]
-  },
-  {
-    "title": "InvokeAI",
-    "description": "Creative engine and WebUI for Stable Diffusion models, empowering artists to generate visual media locally.",
-    "github": "https://github.com/invoke-ai/InvokeAI",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "ClipGrab",
-    "description": "Simple, open-source video downloader and converter for YouTube, Vimeo, and other streaming websites.",
-    "website": "https://clipgrab.org",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "Koboldcpp",
-    "description": "Single-file zero-install executable to run quantized GGUF models locally with an integrated web UI.",
-    "github": "https://github.com/LostRuins/koboldcpp",
-    "category": "Softwares",
-    "tags": ["windows", "macos", "linux"]
-  },
-  {
-    "title": "PairDrop",
-    "description": "Local cross-platform file transfer directly in your browser without signup or setup.",
-    "website": "https://pairdrop.net",
-    "github": "https://github.com/schlagmichdoch/pairdrop",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "RevPDF",
-    "description": "Offline, in-browser PDF editor to sign, fill, split, and merge documents without uploading files to servers.",
-    "website": "https://revpdf.com",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Unicorn Studio",
-    "description": "Interactive no-code WebGL shader, fluid simulation, and animation builder with embeddable code.",
-    "website": "https://www.unicorn.studio",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "SigGif",
-    "description": "Converts mouse or stylus signatures into smooth animated stroke GIFs and SVGs.",
-    "website": "https://sig-gif.vercel.app",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Font Stealer",
-    "description": "Inspects any public website URL and extracts active font files and CSS font faces.",
-    "website": "https://font-stealer.vercel.app",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Fish Audio",
-    "description": "Lightning-fast AI voice generator, text-to-speech engine, and zero-shot voice cloning platform.",
-    "website": "https://fish.audio",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Gamepad Tester",
-    "description": "Online controller diagnostic tool to test joystick drift, trigger axis, and button response.",
-    "website": "https://hardwaretester.com/gamepad",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "ResizePixel",
-    "description": "Free web utility to crop, resize, convert, and compress images with clean controls.",
-    "website": "https://www.resizepixel.com",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "YourASCII",
-    "description": "Convert images and videos into customizable ASCII art with export controls.",
-    "website": "https://yourascii.vercel.app",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "WebHaptics",
-    "description": "JavaScript library and testing sandbox providing tactile haptic vibration feedback for mobile web apps.",
-    "website": "https://haptics.lochie.me",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "OpenUI",
-    "description": "Open standard and real-time generation environment for AI-generated user interfaces.",
-    "website": "https://www.openui.com",
-    "github": "https://github.com/thesysdev/openui",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "prompts.chat",
-    "description": "Searchable open-source repository of role-based system prompts and personas for ChatGPT and LLMs.",
-    "website": "https://prompts.chat",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "drawDB",
-    "description": "Free, intuitive online relational database diagram editor and SQL schema generator in browser.",
-    "website": "https://www.drawdb.app",
-    "github": "https://github.com/drawdb-io/drawdb",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "tldraw",
-    "description": "Ultra-fast, minimal infinite canvas whiteboard with real-time collaboration and SVG export.",
-    "website": "https://www.tldraw.com",
-    "github": "https://github.com/tldraw/tldraw",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Star History",
-    "description": "Visualizes and compares historical GitHub repository star growth charts over time.",
-    "website": "https://star-history.com",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Simple Icons",
-    "description": "Over 3,000 clean, official SVG icons and brand guidelines for popular technology services.",
-    "website": "https://simple-icons.org",
-    "github": "https://github.com/simple-icons/simple-icons",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Paper Shaders",
-    "description": "Ultra-fast, zero-dependency WebGL canvas background shaders designed for modern web apps.",
-    "website": "https://shaders.paper.design",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "PhotoGradient",
-    "description": "Generates vibrant multi-point CSS mesh gradients directly from uploaded photographs.",
-    "website": "https://photogradient.com",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Design Systems Surf",
-    "description": "Curated database and gallery of production design systems from tech organizations worldwide.",
-    "website": "https://designsystems.surf",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Screenshot Studio",
-    "description": "Browser-based mockup maker to render screenshots inside customizable 3D angles, backgrounds, and shadows.",
-    "website": "https://www.screenshot-studio.com",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "SVG Repo",
-    "description": "Collection of over 500,000 free, open-licensed SVG vectors, icons, and graphics.",
-    "website": "https://www.svgrepo.com",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Public APIs",
-    "description": "Massive collective list of free REST, GraphQL, and webhook APIs for software development.",
-    "website": "https://publicapis.io",
-    "github": "https://github.com/public-apis/public-apis",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Free for Dev",
-    "description": "Exhaustive directory of SaaS, PaaS, and IaaS offerings with generous free tiers for developers.",
-    "github": "https://github.com/ripienaar/free-for-dev",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Checklist Design",
-    "description": "Collection of best-practice UI and UX checklists covering essential elements for standard pages.",
-    "website": "https://www.checklist.design",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "emailcn",
-    "description": "Clean, responsive email component templates and layouts built for modern transactional email.",
-    "website": "https://www.emailcn.run",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Square UI",
-    "description": "Open-source layouts and production dashboards built on top of Tailwind CSS and shadcn/ui.",
-    "github": "https://github.com/ln-dev7/square-ui",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Velvet UI",
-    "description": "Interactive sound design library demonstrating tactile audio feedback for web interfaces.",
-    "website": "https://velvet-ui-eight.vercel.app",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Its Hover",
-    "description": "Curated collection of micro-interactions, CSS hover states, and button transition effects.",
-    "website": "https://www.itshover.com",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "NotebookLM",
-    "description": "Google's AI research notebook that grounds answers in your documents and generates Audio Overviews.",
-    "website": "https://notebook.google.com",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Google AI Studio",
-    "description": "Fast web-based playground for prompt engineering and experimenting with Google Gemini models.",
-    "website": "https://aistudio.google.com",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "QuillBot",
-    "description": "AI writing assistant offering sentence paraphrasing, grammar checking, and text summarization.",
-    "website": "https://quillbot.com",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Vocal Remover",
-    "description": "AI-powered audio splitter to isolate vocals and instrumental accompaniment tracks from audio files.",
-    "website": "https://vocalremover.org",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Diffchecker",
-    "description": "Online comparison tool to diff text, code, images, spreadsheets, and PDFs side-by-side.",
-    "website": "https://www.diffchecker.com",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "WhatTheFont",
-    "description": "Instant font identifier that finds matching typography styles from uploaded raster screenshots.",
-    "website": "https://www.myfonts.com/pages/whatthefont",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Ezgif",
-    "description": "Quick web editor for animated GIFs: convert videos, crop, reverse, resize, and optimize file size.",
-    "website": "https://ezgif.com",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Remove.bg",
-    "description": "Automatic image background removal tool producing transparent PNGs in seconds.",
-    "website": "https://www.remove.bg",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Text Behind Image",
-    "description": "Web tool that isolates foreground subjects to place bold typography layered behind them.",
-    "website": "https://textbehindimage.rexanwong.xyz",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Lottielab",
-    "description": "Vector animation platform in the browser to create, edit, and export interactive Lottie animations.",
-    "website": "https://www.lottielab.com",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Public Work",
-    "description": "Search engine for public domain art, historical engravings, and vintage photography for creative projects.",
-    "website": "https://public.work",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Roadmap.sh",
-    "description": "Community-curated interactive roadmaps and structured study guides for developer career paths.",
-    "website": "https://roadmap.sh",
-    "github": "https://github.com/kamranahmedse/developer-roadmap",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Keybr",
-    "description": "Touch typing tutor that teaches keyboard layout muscle memory using phonetic accuracy rules.",
-    "website": "https://www.keybr.com",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Omni Calculator",
-    "description": "Over 3,000 free specialized calculators covering everyday finance, physics, math, and construction equations.",
-    "website": "https://www.omnicalculator.com",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Savee",
-    "description": "Visual bookmarking and inspiration board designed for designers, photographers, and creatives.",
-    "website": "https://savee.com",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "Fonts In Use",
-    "description": "Public archive and index of typography categorized by typeface, publishing format, and aesthetic style.",
-    "website": "https://fontsinuse.com",
-    "category": "Websites",
-    "tags": ["all"]
-  },
-  {
-    "title": "RemoveWindowsAI",
-    "description": "PowerShell script to remove Copilot, Recall, and AI telemetry bloatware from Windows 11.",
-    "github": "https://github.com/zoicware/RemoveWindowsAI",
-    "category": "Scripts",
-    "tags": ["windows", "cli"]
-  },
-  {
-    "title": "Winhance",
-    "description": "Windows enhancement toolkit to optimize privacy, speed up performance, and strip pre-installed bloat.",
-    "website": "https://winhance.net",
-    "category": "Scripts",
-    "tags": ["windows"]
-  },
-  {
-    "title": "Pake",
-    "description": "Turn any webpage into a tiny desktop application with a single CLI command using Rust and Tauri.",
-    "github": "https://github.com/tw93/Pake",
-    "category": "Scripts",
-    "tags": ["macos", "windows", "linux", "cli"]
-  },
-  {
-    "title": "AirLLM",
-    "description": "Run 70B parameter LLM inference on a single 4GB GPU using layered memory paging.",
-    "github": "https://github.com/lyogavin/airllm",
-    "category": "Scripts",
-    "tags": ["all", "cli"]
-  },
-  {
-    "title": "Tiny11",
-    "description": "Scripts and lightweight installation images of Windows 11 stripped of telemetry and bloatware.",
-    "website": "https://ntdotdev.wordpress.com",
-    "category": "Scripts",
-    "tags": ["windows"]
-  },
-  {
-    "title": "Morphicons",
-    "description": "Zero-dependency spring-physics animation library that smoothly morphs any stroke-based SVG icon into another.",
-    "github": "https://github.com/guillermolg00/morphicons",
-    "category": "Scripts",
-    "tags": ["all"]
-  },
-  {
-    "title": "Stable Diffusion WebUI",
-    "description": "The quintessential open-source browser interface for Stable Diffusion image generation and fine-tuning.",
-    "github": "https://github.com/AUTOMATIC1111/stable-diffusion-webui",
-    "category": "Scripts",
-    "tags": ["windows", "linux"]
-  }
 ];
 
-function slugify(value: string) {
-  return value
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
-
-const idCounts = new Map<string, number>();
-
-export const items: Item[] = rawItems.map((item) => {
-  const baseId = `${slugify(item.category) || "category"}-${slugify(item.title) || "item"}`;
-  const count = idCounts.get(baseId) ?? 0;
-  idCounts.set(baseId, count + 1);
-
-  // Auto-populate image from website favicon if missing
-  const image = item.image || getFaviconUrl(item.website) || getFaviconUrl(item.github);
-  const addedAt = item.addedAt ?? CATALOG_ADDED_AT[`${item.category}:${item.title.toLowerCase().trim()}`];
-  const id = count === 0 ? baseId : `${baseId}-${count + 1}`;
-
-  return {
-    ...item,
-    topics: getTopicsForItem(item.title),
-    image,
-    addedAt,
-    details: item.details ?? COMPARISON_DETAILS[id],
-    isNew: isRecentlyAdded(addedAt),
-    id,
-  };
-});
-
-/** Helper to get category accent color */
-export const CATEGORY_COLORS: Record<string, { accent: string; accentBg: string; accentBorder: string }> = {
-  Websites: { accent: "#a3e635", accentBg: "rgba(163,230,53,0.08)", accentBorder: "rgba(163,230,53,0.3)" },
-  Softwares: { accent: "#38bdf8", accentBg: "rgba(56,189,248,0.08)", accentBorder: "rgba(56,189,248,0.3)" },
-  Scripts: { accent: "#fbbf24", accentBg: "rgba(251,191,36,0.08)", accentBorder: "rgba(251,191,36,0.3)" },
-};
+export const items: Item[] = rawItems.map((item) => ({
+  ...item,
+  image: `/tool-icons/${item.id}.svg`,
+  details: COMPARISON_DETAILS[item.id],
+  isNew: isRecentlyAdded(item.addedAt),
+}));

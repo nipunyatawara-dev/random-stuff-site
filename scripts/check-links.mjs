@@ -25,7 +25,7 @@ export async function checkLink(url, fetcher = fetch) {
 async function main() {
   const items = readCatalog(readFileSync(new URL("../src/data/items.ts", import.meta.url), "utf8"));
   const owners = new Map();
-  for (const item of items) for (const url of [item.website, item.github]) {
+  for (const item of items) for (const url of item.linkUnavailable ? [] : [item.website, item.github]) {
     if (!url) continue;
     try {
       if (!["https:", "http:"].includes(new URL(url).protocol)) continue;
@@ -45,7 +45,7 @@ async function main() {
   results.sort((a, b) => a.url.localeCompare(b.url));
   const summary = Object.fromEntries(["ok", "broken", "review"].map((kind) => [kind, results.filter((entry) => entry.result === kind).length]));
   mkdirSync("reports", { recursive: true });
-  writeFileSync("reports/catalog-links.json", JSON.stringify({ checkedAt: new Date().toISOString(), summary, results }, null, 2) + "\n");
+  writeFileSync("reports/catalog-links.json", JSON.stringify({ checkedAt: new Date().toISOString(), summary, disabled: items.filter(item => item.linkUnavailable).map(item => ({ id: item.id, title: item.title, reason: "No active official destination verified" })), results }, null, 2) + "\n");
   console.log(summary);
   console.log("Review report: reports/catalog-links.json. No catalog records were modified.");
   if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, `## Catalog link check\n\n${summary.ok} reachable, ${summary.broken} broken, ${summary.review} need review.\n\nSee the catalog-links artifact. Entries are preserved.\n`);

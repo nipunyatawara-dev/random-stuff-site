@@ -1,0 +1,10 @@
+{
+  "name": "minimatch",
+  "version": "11.0.3",
+  "private": true,
+  "description": "Legacy callable CommonJS API backed by the patched minimatch engine",
+  "main": "index.cjs",
+  "dependencies": {
+    "minimatch-engine": "npm:minimatch@^11.0.3"
+  }
+}

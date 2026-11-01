@@ -24,9 +24,36 @@ type QueryConcept =
   | { kind: "text"; term: string };
 
 const STOP_WORDS = new Set([
-  "a", "an", "and", "app", "apps", "application", "applications", "for", "me", "of",
-  "find", "need", "or", "please", "related", "show", "something", "stuff", "that", "the",
-  "thing", "things", "tool", "tools", "to", "use", "uses", "using", "want", "with",
+  "a",
+  "an",
+  "and",
+  "app",
+  "apps",
+  "application",
+  "applications",
+  "for",
+  "me",
+  "of",
+  "find",
+  "need",
+  "or",
+  "please",
+  "related",
+  "show",
+  "something",
+  "stuff",
+  "that",
+  "the",
+  "thing",
+  "things",
+  "tool",
+  "tools",
+  "to",
+  "use",
+  "uses",
+  "using",
+  "want",
+  "with",
 ]);
 
 const indexCache = new WeakMap<readonly Item[], IndexedItem[]>();
@@ -78,18 +105,32 @@ function getIndex(items: readonly Item[]) {
   return index;
 }
 
-const aliasEntries = (Object.entries(SEARCH_TOPICS) as [SearchTopic, readonly string[]][])
-  .flatMap(([topic, aliases]) => aliases.map((alias) => ({
-    topic,
-    alias: normalizeSearchText(alias),
-    tokens: tokenize(alias),
-  })))
-  .sort((a, b) => b.tokens.length - a.tokens.length || b.alias.length - a.alias.length);
+const aliasEntries = (
+  Object.entries(SEARCH_TOPICS) as [SearchTopic, readonly string[]][]
+)
+  .flatMap(([topic, aliases]) =>
+    aliases.map((alias) => ({
+      topic,
+      alias: normalizeSearchText(alias),
+      tokens: tokenize(alias),
+    })),
+  )
+  .sort(
+    (a, b) =>
+      b.tokens.length - a.tokens.length || b.alias.length - a.alias.length,
+  );
 
-const singleTokenAliases = aliasEntries.filter((entry) => entry.tokens.length === 1);
-const multiTokenAliases = aliasEntries.filter((entry) => entry.tokens.length > 1);
+const singleTokenAliases = aliasEntries.filter(
+  (entry) => entry.tokens.length === 1,
+);
+const multiTokenAliases = aliasEntries.filter(
+  (entry) => entry.tokens.length > 1,
+);
 const normalizedTopicAliases = Object.fromEntries(
-  Object.entries(SEARCH_TOPICS).map(([topic, aliases]) => [topic, aliases.map(normalizeSearchText)]),
+  Object.entries(SEARCH_TOPICS).map(([topic, aliases]) => [
+    topic,
+    aliases.map(normalizeSearchText),
+  ]),
 ) as Record<SearchTopic, string[]>;
 
 function editDistance(a: string, b: string) {
@@ -139,7 +180,9 @@ function resolveFuzzyTopic(term: string): SearchTopic | null {
     }
   }
 
-  return bestDistance <= threshold && bestTopics.size === 1 ? [...bestTopics][0] : null;
+  return bestDistance <= threshold && bestTopics.size === 1
+    ? [...bestTopics][0]
+    : null;
 }
 
 function parseQuery(query: string): QueryConcept[] {
@@ -148,10 +191,17 @@ function parseQuery(query: string): QueryConcept[] {
   const concepts: QueryConcept[] = [];
 
   for (const entry of multiTokenAliases) {
-    for (let start = 0; start <= tokens.length - entry.tokens.length; start += 1) {
+    for (
+      let start = 0;
+      start <= tokens.length - entry.tokens.length;
+      start += 1
+    ) {
       const indexes = entry.tokens.map((_, offset) => start + offset);
       if (indexes.some((index) => consumed.has(index))) continue;
-      if (!entry.tokens.every((token, offset) => tokens[start + offset] === token)) continue;
+      if (
+        !entry.tokens.every((token, offset) => tokens[start + offset] === token)
+      )
+        continue;
 
       indexes.forEach((index) => consumed.add(index));
       concepts.push({ kind: "topic", topic: entry.topic, source: entry.alias });
@@ -162,10 +212,16 @@ function parseQuery(query: string): QueryConcept[] {
     if (consumed.has(index)) return;
 
     const exactTopics = new Set(
-      singleTokenAliases.filter((entry) => entry.alias === term).map((entry) => entry.topic),
+      singleTokenAliases
+        .filter((entry) => entry.alias === term)
+        .map((entry) => entry.topic),
     );
     if (exactTopics.size === 1) {
-      concepts.push({ kind: "topic", topic: [...exactTopics][0], source: term });
+      concepts.push({
+        kind: "topic",
+        topic: [...exactTopics][0],
+        source: term,
+      });
       return;
     }
 
@@ -180,7 +236,10 @@ function parseQuery(query: string): QueryConcept[] {
 
   const seen = new Set<string>();
   return concepts.filter((concept) => {
-    const key = concept.kind === "topic" ? `topic:${concept.topic}` : `text:${concept.term}`;
+    const key =
+      concept.kind === "topic"
+        ? `topic:${concept.topic}`
+        : `text:${concept.term}`;
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
@@ -188,7 +247,7 @@ function parseQuery(query: string): QueryConcept[] {
 }
 
 function hasWord(text: string, term: string) {
-  return (` ${text} `).includes(` ${term} `);
+  return ` ${text} `.includes(` ${term} `);
 }
 
 function hasTokenPrefix(tokens: string[], term: string) {
@@ -198,9 +257,11 @@ function hasTokenPrefix(tokens: string[], term: string) {
 function fuzzyTokenMatch(tokens: string[], term: string) {
   const threshold = allowedDistance(term);
   if (!threshold) return false;
-  return tokens.some((token) => (
-    Math.abs(token.length - term.length) <= threshold && editDistance(token, term) <= threshold
-  ));
+  return tokens.some(
+    (token) =>
+      Math.abs(token.length - term.length) <= threshold &&
+      editDistance(token, term) <= threshold,
+  );
 }
 
 function scoreTopic(indexed: IndexedItem, topic: SearchTopic, source: string) {
@@ -209,10 +270,17 @@ function scoreTopic(indexed: IndexedItem, topic: SearchTopic, source: string) {
   const aliases = normalizedTopicAliases[topic];
   let score = 60;
 
-  if (hasWord(indexed.title, source)) score += 55;
+  if (hasWord(indexed.title, source)) score += 100;
+  if (hasWord(indexed.description, source)) score += 75;
+  if (indexed.searchTerms.some((term) => hasWord(term, source))) score += 65;
   else if (aliases.some((alias) => hasWord(indexed.title, alias))) score += 35;
 
-  if (indexed.searchTerms.some((term) => term === source || aliases.includes(term))) score += 30;
+  if (
+    indexed.searchTerms.some(
+      (term) => term === source || aliases.includes(term),
+    )
+  )
+    score += 30;
   if (aliases.some((alias) => hasWord(indexed.description, alias))) score += 18;
 
   return score;
@@ -225,20 +293,29 @@ function scoreText(indexed: IndexedItem, term: string) {
   if (hasTokenPrefix(indexed.searchTermTokens, term)) return 56;
   if (hasWord(indexed.description, term)) return 42;
   if (hasTokenPrefix(indexed.descriptionTokens, term)) return 34;
-  if (hasWord(indexed.category, term) || indexed.tags.some((tag) => hasWord(tag, term))) return 22;
+  if (
+    hasWord(indexed.category, term) ||
+    indexed.tags.some((tag) => hasWord(tag, term))
+  )
+    return 22;
   if (fuzzyTokenMatch(indexed.titleTokens, term)) return 25;
   if (fuzzyTokenMatch(indexed.searchTermTokens, term)) return 18;
   if (fuzzyTokenMatch(indexed.descriptionTokens, term)) return 12;
   return null;
 }
 
-function scoreItem(indexed: IndexedItem, concepts: QueryConcept[], normalizedQuery: string) {
+function scoreItem(
+  indexed: IndexedItem,
+  concepts: QueryConcept[],
+  normalizedQuery: string,
+) {
   let score = indexed.title === normalizedQuery ? 250 : 0;
 
   for (const concept of concepts) {
-    const conceptScore = concept.kind === "topic"
-      ? scoreTopic(indexed, concept.topic, concept.source)
-      : scoreText(indexed, concept.term);
+    const conceptScore =
+      concept.kind === "topic"
+        ? scoreTopic(indexed, concept.topic, concept.source)
+        : scoreText(indexed, concept.term);
 
     if (conceptScore === null) return null;
     score += conceptScore;
@@ -257,17 +334,30 @@ export function searchItems(
   const concepts = parseQuery(query);
 
   const candidates = getIndex(items).filter(({ item }) => {
-    if (!isSearching && browseCategory && item.category !== browseCategory) return false;
+    if (!isSearching && browseCategory && item.category !== browseCategory)
+      return false;
     return itemMatchesPlatformTag(item, platformTag);
   });
 
   if (!isSearching || concepts.length === 0) {
-    return candidates.map(({ item }) => item).sort((a, b) => a.title.localeCompare(b.title));
+    return candidates
+      .map(({ item }) => item)
+      .sort((a, b) => a.title.localeCompare(b.title));
   }
 
   return candidates
-    .map((indexed) => ({ indexed, score: scoreItem(indexed, concepts, normalizedQuery) }))
-    .filter((result): result is { indexed: IndexedItem; score: number } => result.score !== null)
-    .sort((a, b) => b.score - a.score || a.indexed.item.title.localeCompare(b.indexed.item.title))
+    .map((indexed) => ({
+      indexed,
+      score: scoreItem(indexed, concepts, normalizedQuery),
+    }))
+    .filter(
+      (result): result is { indexed: IndexedItem; score: number } =>
+        result.score !== null,
+    )
+    .sort(
+      (a, b) =>
+        b.score - a.score ||
+        a.indexed.item.title.localeCompare(b.indexed.item.title),
+    )
     .map(({ indexed }) => indexed.item);
 }

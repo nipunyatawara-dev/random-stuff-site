@@ -2,7 +2,10 @@ import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { describe, expect, it, vi } from "vitest";
 
-const source = readFileSync(new URL("../../public/sw.js", import.meta.url), "utf8");
+const source = readFileSync(
+  new URL("../../public/sw.js", import.meta.url),
+  "utf8",
+);
 
 function setup() {
   const handlers: Record<string, (event: unknown) => void> = {};
@@ -11,23 +14,35 @@ function setup() {
     match: vi.fn().mockResolvedValue(undefined),
     put: vi.fn().mockResolvedValue(undefined),
     addAll: vi.fn().mockResolvedValue(undefined),
+    keys: vi.fn().mockResolvedValue([]),
+    delete: vi.fn().mockResolvedValue(true),
   };
   const fetch = vi.fn().mockResolvedValue(response);
   const caches = {
     open: vi.fn().mockResolvedValue(cache),
-    keys: vi.fn().mockResolvedValue(["random-stuff-v2", "random-stuff-v3", "other-app"]),
+    keys: vi
+      .fn()
+      .mockResolvedValue(["random-stuff-v2", "random-stuff-v3", "other-app"]),
     delete: vi.fn().mockResolvedValue(true),
   };
   runInNewContext(source, {
     self: {
       location: { origin: "https://randomstuff.test" },
-      addEventListener: (name: string, handler: (event: unknown) => void) => { handlers[name] = handler; },
+      addEventListener: (name: string, handler: (event: unknown) => void) => {
+        handlers[name] = handler;
+      },
       clients: { claim: vi.fn() },
       skipWaiting: vi.fn(),
     },
-    caches, fetch, URL, Response,
+    caches,
+    fetch,
+    URL,
+    Response,
   });
-  function dispatch(path: string, options: { mode?: string; headers?: Record<string, string> } = {}) {
+  function dispatch(
+    path: string,
+    options: { mode?: string; headers?: Record<string, string> } = {},
+  ) {
     const event = {
       request: {
         url: new URL(path, "https://randomstuff.test").href,
@@ -72,7 +87,7 @@ describe("offline caching", () => {
   it("falls back to the offline homepage for an uncached filtered URL", async () => {
     const { cache, fetch, response, dispatch } = setup();
     fetch.mockRejectedValue(new Error("offline"));
-    cache.match.mockResolvedValueOnce(undefined).mockResolvedValueOnce(response);
+    cache.match.mockResolvedValue(response);
     const event = dispatch("/?category=Scripts", { mode: "navigate" });
     expect(await event.respondWith.mock.calls[0][0]).toBe(response);
     expect(cache.match).toHaveBeenLastCalledWith("/");
@@ -95,10 +110,13 @@ describe("offline caching", () => {
   it("leaves API, external, and React server-component requests alone", () => {
     const { dispatch, fetch } = setup();
     for (const event of [
-      dispatch("/api/items"), dispatch("/api/metadata?url=test"),
+      dispatch("/api/items"),
+      dispatch("/api/metadata?url=test"),
       dispatch("https://www.google.com/s2/favicons"),
-      dispatch("/?_rsc=abc"), dispatch("/", { headers: { RSC: "1" } }),
-    ]) expect(event.respondWith).not.toHaveBeenCalled();
+      dispatch("/?_rsc=abc"),
+      dispatch("/", { headers: { RSC: "1" } }),
+    ])
+      expect(event.respondWith).not.toHaveBeenCalled();
     expect(fetch).not.toHaveBeenCalled();
   });
 
@@ -116,6 +134,27 @@ describe("offline caching", () => {
     const event = { waitUntil: vi.fn() };
     handlers.activate(event);
     await event.waitUntil.mock.calls[0][0];
-    expect(caches.delete).toHaveBeenCalledExactlyOnceWith("random-stuff-v2");
+    expect(caches.delete).toHaveBeenCalledWith("random-stuff-v2");
+    expect(caches.delete).toHaveBeenCalledWith("random-stuff-v3");
+    expect(caches.delete).not.toHaveBeenCalledWith("other-app");
   });
+  it("uses an explicit offline page for an uncached non-catalog path", async () => {
+    const { cache, fetch, response, dispatch } = setup();
+    fetch.mockRejectedValue(new Error("offline"));
+    cache.match
+      .mockResolvedValueOnce(undefined)
+      .mockResolvedValueOnce(response);
+    const event = dispatch("/submit", { mode: "navigate" });
+    expect(await event.respondWith.mock.calls[0][0]).toBe(response);
+    expect(cache.match).toHaveBeenLastCalledWith("/offline");
+  });
+  it("evicts excess cached entries without removing the offline shell", async () => {
+    const {cache,dispatch}=setup();
+    cache.keys.mockResolvedValue([{url:"https://randomstuff.test/"},...Array.from({length:161},(_,i)=>({url:`https://randomstuff.test/tool-icons/${i}.svg`}))]);
+    const event=dispatch("/_next/static/chunks/new.js");
+    await event.respondWith.mock.calls[0][0];
+    expect(cache.delete).toHaveBeenCalledTimes(2);
+    expect(cache.delete).not.toHaveBeenCalledWith({url:"https://randomstuff.test/"});
+  });
+
 });

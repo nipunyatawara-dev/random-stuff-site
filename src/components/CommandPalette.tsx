@@ -1,42 +1,20 @@
 "use client";
-
-import React, { useState, useEffect, useRef, useMemo, useDeferredValue } from "react";
-import {
-  Search,
-  Sparkles,
-  Scale,
-  Download,
-  X,
-  Compass,
-  CornerDownLeft,
-} from "lucide-react";
-import Modal from "./Modal";
+import { useDeferredValue, useEffect, useRef, useState } from "react";
+import { X, Search } from "lucide-react";
 import type { Item } from "@/data/items";
 import { searchItems } from "@/lib/item-search";
-import { playClickSound } from "@/lib/sound-fx";
-
-interface CommandPaletteProps {
+import Modal from "./Modal";
+interface Props {
   isOpen: boolean;
   onClose: () => void;
   items: Item[];
   onSelectItem: (item: Item) => void;
   onOpenRandom: () => void;
   onOpenFavorites: () => void;
-  onOpenSandbox?: () => void;
   onOpenCompare: () => void;
   onExportFavorites: () => void;
+  onOpenSandbox?: () => void;
 }
-
-interface ActionItem {
-  id: string;
-  type: "action";
-  title: string;
-  subtitle: string;
-  icon: React.ReactNode;
-  handler: () => void;
-  category: "Actions";
-}
-
 export default function CommandPalette({
   isOpen,
   onClose,
@@ -46,247 +24,137 @@ export default function CommandPalette({
   onOpenFavorites,
   onOpenCompare,
   onExportFavorites,
-}: CommandPaletteProps) {
+}: Props) {
   const [query, setQuery] = useState("");
-  const deferredQuery = useDeferredValue(query);
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const listRef = useRef<HTMLDivElement>(null);
-
-  const actions: ActionItem[] = useMemo(
-    () => [
-      {
-        id: "action-random",
-        type: "action",
-        title: "Random Roulette",
-        subtitle: "Let destiny pick a random tool for you",
-        icon: <Sparkles className="w-4 h-4 text-amber-500" />,
-        handler: () => {
-          onClose();
-          onOpenRandom();
-        },
-        category: "Actions",
-      },
-      {
-        id: "action-favorites",
-        type: "action",
-        title: "View Favorites",
-        subtitle: "Browse your saved bookmarks and tools",
-        icon: <Compass className="w-4 h-4 text-studio-blue" />,
-        handler: () => {
-          onClose();
-          onOpenFavorites();
-        },
-        category: "Actions",
-      },
-      {
-        id: "action-compare",
-        type: "action",
-        title: "Compare Tools",
-        subtitle: "Side-by-side comparison of tools",
-        icon: <Scale className="w-4 h-4 text-emerald-500" />,
-        handler: () => {
-          onClose();
-          onOpenCompare();
-        },
-        category: "Actions",
-      },
-      {
-        id: "action-export",
-        type: "action",
-        title: "Export Favorites",
-        subtitle: "Download favorites as Markdown, JSON or HTML",
-        icon: <Download className="w-4 h-4 text-studio-slate" />,
-        handler: () => {
-          onClose();
-          onExportFavorites();
-        },
-        category: "Actions",
-      },
-    ],
-    [onClose, onOpenRandom, onOpenFavorites, onOpenCompare, onExportFavorites]
+  const deferred = useDeferredValue(query);
+  const [index, setIndex] = useState(0);
+  const input = useRef<HTMLInputElement>(null);
+  const actions = [
+    { id: "random", title: "Discover a random tool", run: onOpenRandom },
+    { id: "favorites", title: "Open saved tools", run: onOpenFavorites },
+    { id: "compare", title: "Compare tools", run: onOpenCompare },
+    { id: "export", title: "Export JSON backup", run: onExportFavorites },
+  ].filter(
+    (a) => !query.trim() || a.title.toLowerCase().includes(query.toLowerCase()),
   );
-
-  const filteredItems = useMemo(() => {
-    if (!deferredQuery.trim()) return [];
-    return searchItems(items, deferredQuery).slice(0, 8);
-  }, [items, deferredQuery]);
-
-  const filteredActions = useMemo(() => {
-    if (!query.trim()) return actions;
-    const q = query.toLowerCase().trim();
-    return actions.filter(
-      (a) =>
-        a.title.toLowerCase().includes(q) || a.subtitle.toLowerCase().includes(q)
-    );
-  }, [actions, query]);
-
-  const totalResults = useMemo(
-    () => [...filteredActions, ...filteredItems],
-    [filteredActions, filteredItems]
-  );
-
+  const results = [
+    ...actions.map((a) => ({
+      id: a.id,
+      title: a.title,
+      description: "Action",
+      run: a.run,
+    })),
+    ...(deferred.trim()
+      ? searchItems(items, deferred)
+          .slice(0, 8)
+          .map((item) => ({
+            id: item.id,
+            title: item.title,
+            description: item.description,
+            run: () => onSelectItem(item),
+          }))
+      : []),
+  ];
   useEffect(() => {
-    setSelectedIndex(0);
-  }, [query, deferredQuery]);
-
+    input.current?.focus();
+  }, []);
+  const activeId = results[index]?.id;
   useEffect(() => {
-    if (isOpen) {
-      setQuery("");
-      setSelectedIndex(0);
-      const timer = setTimeout(() => inputRef.current?.focus(), 50);
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen]);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isOpen || e.target !== inputRef.current) return;
-
-      if (e.key === "ArrowDown") {
-        e.preventDefault();
-        setSelectedIndex((prev) =>
-          prev < totalResults.length - 1 ? prev + 1 : 0
-        );
-      } else if (e.key === "ArrowUp") {
-        e.preventDefault();
-        setSelectedIndex((prev) =>
-          prev > 0 ? prev - 1 : totalResults.length - 1
-        );
-      } else if (e.key === "Enter") {
-        e.preventDefault();
-        const selected = totalResults[selectedIndex];
-        if (!selected) return;
-        if ("handler" in selected) {
-          selected.handler();
-        } else {
-          onSelectItem(selected);
-          onClose();
-        }
-      } else if (e.key === "Escape") {
-        e.preventDefault();
-        onClose();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, selectedIndex, totalResults, onSelectItem, onClose]);
-
+    document
+      .getElementById(`command-${activeId}`)
+      ?.scrollIntoView({ block: "nearest" });
+  }, [activeId]);
   if (!isOpen) return null;
-
+  const activate = (i: number) => {
+    const result = results[i];
+    if (result) {
+      onClose();
+      result.run();
+    }
+  };
   return (
     <Modal
-      label="Command Palette"
+      label="Search tools and commands"
       onClose={onClose}
-      className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 p-4 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-200 select-none"    >
-      <div
-        className="w-full max-w-xl bg-surface rounded-[28px] shadow-studio-card border border-studio-neutral-200 overflow-hidden flex flex-col"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Search Input Bar */}
-        <div className="flex items-center gap-3 px-5 py-3.5 border-b border-studio-neutral-100 bg-surface-soft">
-          <Search className="w-5 h-5 text-studio-blue" />
+      className="modal-overlay"
+    >
+      <div className="dialog-panel command-panel">
+        <div className="dialog-heading">
+          <h2>Find something useful</h2>
+          <button
+            className="icon-button"
+            onClick={onClose}
+            aria-label="Close command palette"
+          >
+            <X />
+          </button>
+        </div>
+        <div className="command-search">
+          <Search size={20} />
           <input
-            ref={inputRef}
+            ref={input}
             role="combobox"
             aria-label="Search tools and commands"
             aria-expanded="true"
             aria-autocomplete="list"
             aria-controls="command-results"
-            aria-activedescendant={totalResults[selectedIndex] ? `command-${totalResults[selectedIndex].id}` : undefined}
-            type="text"
-            placeholder="Type a tool name, category (#macos, #cli), or command..."
+            aria-activedescendant={
+              results[index] ? `command-${results[index].id}` : undefined
+            }
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="flex-1 bg-transparent text-sm text-studio-navy font-medium placeholder-studio-neutral-400 focus:outline-hidden"
+            placeholder="Search tools or actions"
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setIndex(0);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "ArrowDown") {
+                e.preventDefault();
+                setIndex((i) =>
+                  results.length ? (i + 1) % results.length : 0,
+                );
+              }
+              if (e.key === "ArrowUp") {
+                e.preventDefault();
+                setIndex((i) =>
+                  results.length
+                    ? (i + results.length - 1) % results.length
+                    : 0,
+                );
+              }
+              if (e.key === "Enter") {
+                e.preventDefault();
+                activate(index);
+              }
+            }}
           />
-          <button
-            type="button"
-            aria-label="Close command palette"
-            onClick={onClose}
-            className="p-1 rounded-full text-studio-neutral-400 hover:text-studio-neutral-600 hover:bg-studio-neutral-200 transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
         </div>
-
-        {/* Results List */}
-        <div ref={listRef} id="command-results" role="listbox" aria-label="Tools and commands" className="max-h-96 overflow-y-auto p-3 space-y-1">
-          {totalResults.length === 0 ? (
-            <div className="py-12 text-center text-xs text-studio-neutral-400 font-mono">
-              No matching tools or commands found
+        <div
+          id="command-results"
+          role="listbox"
+          aria-label="Tools and actions"
+          className="command-results"
+        >
+          {results.map((r, i) => (
+            <div
+              role="option"
+              id={`command-${r.id}`}
+              aria-selected={i === index}
+              key={r.id}
+              onMouseEnter={() => setIndex(i)}
+              onClick={() => activate(i)}
+            >
+              <strong>{r.title}</strong>
+              <span>{r.description}</span>
             </div>
-          ) : (
-            totalResults.map((entry, idx) => {
-              const isSelected = idx === selectedIndex;
-              const isAction = "handler" in entry;
-
-              return (
-                <div
-                  key={entry.id}
-                  id={`command-${entry.id}`}
-                  role="option"
-                  aria-selected={isSelected}
-                  onMouseEnter={() => setSelectedIndex(idx)}
-                  onClick={() => {
-                    playClickSound();
-                    if (isAction) {
-                      entry.handler();
-                    } else {
-                      onSelectItem(entry);
-                      onClose();
-                    }
-                  }}
-                  className={`w-full flex items-center justify-between p-3 rounded-2xl cursor-pointer transition-all ${
-                    isSelected
-                      ? "bg-canvas shadow-xs text-studio-navy"
-                      : "text-studio-muted hover:bg-studio-neutral-50"
-                  }`}
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-8 h-8 rounded-xl bg-surface border border-studio-neutral-200/80 flex items-center justify-center shrink-0 shadow-xs">
-                      {isAction ? (
-                        entry.icon
-                      ) : (
-                        <span className="font-phudu font-bold text-xs text-studio-blue">
-                          {entry.title.charAt(0).toUpperCase()}
-                        </span>
-                      )}
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-sm font-bold text-studio-navy truncate flex items-center gap-2">
-                        <span>{entry.title}</span>
-                        {!isAction && (
-                          <span className="text-[9px] font-mono uppercase px-2 py-0.5 rounded-full bg-studio-neutral-200 text-studio-slate">
-                            {entry.category}
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-xs text-studio-neutral-400 truncate">
-                        {isAction ? entry.subtitle : entry.description}
-                      </div>
-                    </div>
-                  </div>
-
-                  {isSelected && (
-                    <CornerDownLeft className="w-4 h-4 text-studio-blue shrink-0 ml-2" />
-                  )}
-                </div>
-              );
-            })
+          ))}
+          {!results.length && (
+            <p role="status">No matching tools or actions.</p>
           )}
         </div>
-
-        {/* Footer shortcuts */}
-        <div className="px-5 py-2.5 border-t border-studio-neutral-100 bg-surface-soft flex items-center justify-between text-[11px] text-studio-neutral-400 font-mono">
-          <div className="flex items-center gap-3">
-            <span>↑↓ Navigate</span>
-            <span>↵ Select</span>
-            <span>ESC Close</span>
-          </div>
-          <span className="text-studio-blue font-bold">Random Stuff</span>
-        </div>
+        <p className="field-hint">
+          ↑ ↓ to navigate · Enter to choose · Escape to close
+        </p>
       </div>
     </Modal>
   );

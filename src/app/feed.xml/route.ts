@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/lib/site";
 import { NextResponse } from "next/server";
 import { getItems } from "@/lib/items-server";
 import { newestItems } from "@/lib/catalog-dates";
@@ -6,7 +7,7 @@ export const dynamic = "force-static";
 
 export async function GET() {
   const items = await getItems();
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://randomstuff.shocka.site";
+  const siteUrl = SITE_URL;
 
   const feedItems = newestItems(items).slice(0, 50);
 
@@ -21,7 +22,7 @@ export async function GET() {
 
   const xmlItems = feedItems
     .map((item) => {
-      const link = item.website || item.github || `${siteUrl}/#${item.id}`;
+      const link = `${siteUrl}/tools/${item.id}`;
       return `
     <item>
       <title>${escapeXml(item.title)}</title>
@@ -38,10 +39,10 @@ export async function GET() {
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Random Stuff - Curated Web Tools &amp; Resources</title>
-    <link>${siteUrl}</link>
+    <link>${escapeXml(siteUrl)}</link>
     <description>A curated, high-voltage index of unusual, powerful, and delightfully designed developer tools, libraries, software, and digital oddities.</description>
     <language>en-us</language>
-    <atom:link href="${siteUrl}/feed.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="${escapeXml(siteUrl)}/feed.xml" rel="self" type="application/rss+xml" />
     ${xmlItems}
   </channel>
 </rss>`;

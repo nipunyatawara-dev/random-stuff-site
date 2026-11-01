@@ -2,13 +2,16 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 
+import { CATALOG_IDS } from "@/data/catalog-ids";
+const knownIds = new Set<string>(CATALOG_IDS);
+
 const STORAGE_KEY = "random-stuff-favorites";
 const SYNC_EVENT = "random-stuff-favorites-sync";
 
 function parseStoredFavorites(value: string | null): string[] {
     const parsed: unknown = value ? JSON.parse(value) : [];
     return Array.isArray(parsed)
-        ? [...new Set(parsed.filter((id): id is string => typeof id === "string"))]
+        ? [...new Set(parsed.filter((id): id is string => typeof id === "string" && knownIds.has(id)))]
         : [];
 }
 
@@ -78,19 +81,19 @@ export function useFavorites() {
 
     const updateAndPersist = useCallback(
         (updater: (current: string[]) => string[]) => {
-            const next = updater(favoritesRef.current);
+            const next = [...new Set(updater(favoritesRef.current).filter(id => knownIds.has(id)))];
             if (next === favoritesRef.current) return;
             favoritesRef.current = next;
             setFavorites(next);
 
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-                window.dispatchEvent(
-                    new CustomEvent(SYNC_EVENT, { detail: next })
-                );
+
             } catch (error) {
                 console.error("Failed to save favorites:", error);
+                window.dispatchEvent(new CustomEvent("favorites-notice", { detail: "Changes are kept for this visit, but browser storage is unavailable. Export a backup before leaving." }));
             }
+            window.dispatchEvent(new CustomEvent(SYNC_EVENT, { detail: next }));
         },
         []
     );

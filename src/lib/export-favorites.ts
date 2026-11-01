@@ -1,4 +1,16 @@
+import { CATALOG_IDS } from "@/data/catalog-ids";
 import type { Item } from "@/data/items";
+
+/** Names, catalog descriptions and unique related links, without extra metadata. */
+export function exportFavoritesText(items: Item[]): string {
+  const entries = items.map((item) => {
+    const links = [...new Set([item.website, item.github].filter(Boolean))];
+    return [item.title, item.description.trim().replace(/\s+/g, " "), ...links]
+      .filter(Boolean)
+      .join("\n");
+  });
+  return entries.length ? `${entries.join("\n\n")}\n` : "";
+}
 
 /**
  * Generates a clean Markdown export of favorite tools.
@@ -6,15 +18,19 @@ import type { Item } from "@/data/items";
 export function exportFavoritesMarkdown(items: Item[]): string {
   const date = new Date().toISOString().split("T")[0];
   let md = `# My Curated Tools & Bookmarks\n\n`;
-  md += `Exported from [Random Stuff](${typeof window !== "undefined" ? window.location.origin : "https://random-stuff-site.vercel.app"}) on ${date}\n\n`;
+  md += `Exported from [Random Stuff](${typeof window !== "undefined" ? window.location.origin : "https://randomstuff.shocka.site"}) on ${date}\n\n`;
   md += `Total Items: ${items.length}\n\n---\n\n`;
 
   // Group by category
-  const categories = Array.from(new Set(items.map((i) => i.category || "Uncategorized")));
+  const categories = Array.from(
+    new Set(items.map((i) => i.category || "Uncategorized")),
+  );
 
   for (const cat of categories) {
     md += `## ${cat}\n\n`;
-    const catItems = items.filter((i) => (i.category || "Uncategorized") === cat);
+    const catItems = items.filter(
+      (i) => (i.category || "Uncategorized") === cat,
+    );
     for (const item of catItems) {
       const link = item.website || item.github || "#";
       md += `### [${item.title}](${link})\n`;
@@ -70,14 +86,14 @@ export function exportFavoritesHtml(items: Item[]): string {
       const tagsHtml = (item.tags || [])
         .map(
           (t) =>
-            `<span style="display:inline-block;padding:2px 8px;font-size:11px;border-radius:4px;background:#1e293b;color:#94a3b8;margin-right:4px;">#${t}</span>`
+            `<span style="display:inline-block;padding:2px 8px;font-size:11px;border-radius:4px;background:#1e293b;color:#94a3b8;margin-right:4px;">#${escapeHtml(t)}</span>`,
         )
         .join("");
 
       return `
       <div style="background:#0f172a;border:1px solid #334155;border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:8px;">
         <div style="display:flex;justify-content:space-between;align-items:baseline;">
-          <a href="${link}" target="_blank" rel="noopener noreferrer" style="color:#a3e635;font-weight:700;font-size:18px;text-decoration:none;">
+          <a href="${escapeHtml(safeLink(link))}" target="_blank" rel="noopener noreferrer" style="color:#a3e635;font-weight:700;font-size:18px;text-decoration:none;">
             ${escapeHtml(item.title)} &rarr;
           </a>
           <span style="font-size:12px;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;">${escapeHtml(item.category)}</span>
@@ -147,7 +163,11 @@ function escapeHtml(text: string): string {
 /**
  * Triggers a browser file download for text content.
  */
-export function triggerFileDownload(filename: string, content: string, mimeType: string) {
+export function triggerFileDownload(
+  filename: string,
+  content: string,
+  mimeType: string,
+) {
   if (typeof window === "undefined") return;
   const blob = new Blob([content], { type: mimeType });
   const url = URL.createObjectURL(blob);
@@ -163,25 +183,63 @@ export function triggerFileDownload(filename: string, content: string, mimeType:
 /**
  * Parses and validates an imported JSON favorites file.
  */
-export function parseFavoritesImport(jsonText: string): { ids: string[]; count: number } {
+export function parseFavoritesImport(jsonText: string): {
+  ids: string[];
+  count: number;
+  unknownCount: number;
+  duplicateCount: number;
+} {
+  if (new TextEncoder().encode(jsonText).length > 1_000_000)
+    throw new Error("Choose a JSON backup smaller than 1 MB.");
+  let data: unknown;
   try {
-    const data = JSON.parse(jsonText);
-    if (Array.isArray(data.itemIds)) {
-      const validIds = data.itemIds.filter((id: unknown) => typeof id === "string");
-      return { ids: validIds, count: validIds.length };
-    }
-    if (Array.isArray(data.items)) {
-      const validIds = data.items
-        .map((i: { id?: string }) => i.id)
-        .filter((id: unknown): id is string => typeof id === "string");
-      return { ids: validIds, count: validIds.length };
-    }
-    if (Array.isArray(data)) {
-      const validIds = data.filter((id: unknown): id is string => typeof id === "string");
-      return { ids: validIds, count: validIds.length };
-    }
-    throw new Error("Invalid format: could not locate array of tool IDs.");
-  } catch (err: unknown) {
-    throw new Error(err instanceof Error ? err.message : "Failed to parse JSON file.");
+    data = JSON.parse(jsonText);
+  } catch {
+    throw new Error("Choose a valid JSON favorites backup.");
+  }
+  let values: unknown[];
+  if (Array.isArray(data)) values = data;
+  else if (
+    data &&
+    typeof data === "object" &&
+    "itemIds" in data &&
+    Array.isArray(data.itemIds)
+  )
+    values = data.itemIds;
+  else if (
+    data &&
+    typeof data === "object" &&
+    "items" in data &&
+    Array.isArray(data.items)
+  )
+    values = data.items.map((item) =>
+      item && typeof item === "object" && "id" in item ? item.id : null,
+    );
+  else throw new Error("This backup does not contain tool IDs.");
+  if (
+    values.length > 5000 ||
+    values.some((id) => typeof id !== "string" || id.length > 150)
+  )
+    throw new Error("Backup must contain at most 5,000 valid tool IDs.");
+  const known = new Set<string>(CATALOG_IDS),
+    unique = [...new Set(values as string[])];
+  const ids = unique.filter((id) => known.has(id));
+  return {
+    ids,
+    count: ids.length,
+    unknownCount: unique.length - ids.length,
+    duplicateCount: values.length - unique.length,
+  };
+}
+function safeLink(value: string) {
+  try {
+    const url = new URL(value);
+    return ["https:", "http:"].includes(url.protocol) &&
+      !url.username &&
+      !url.password
+      ? url.href
+      : "#";
+  } catch {
+    return "#";
   }
 }

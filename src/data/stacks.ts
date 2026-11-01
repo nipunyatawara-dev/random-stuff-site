@@ -6,77 +6,107 @@ export interface CuratedStack {
   badge: string;
   iconName: "terminal" | "globe" | "monitor" | "sparkles";
   itemIds: string[];
+  roles: Record<string, string>;
 }
-
 export const CURATED_STACKS: CuratedStack[] = [
   {
     id: "mac-powerpack",
-    title: "Minimalist Mac Powerpack",
-    tagline: "High-productivity essentials for macOS powerusers",
-    description: "The ultimate curated collection of lightweight, blazing-fast window managers, launchers, and utilities.",
-    badge: "macOS • 8 Tools",
+    title: "A calmer Mac setup",
+    tagline: "Launch, switch and organize",
+    description:
+      "Four focused utilities for launching apps, switching windows and managing your Mac's everyday details.",
+    badge: "macOS",
     iconName: "monitor",
     itemIds: [
       "softwares-raycast",
-      "softwares-playcover",
-      "softwares-popcorn-time",
-      "softwares-brisk",
-      "softwares-mole",
+      "softwares-alttab",
       "softwares-mounty",
       "softwares-boring-notch",
-      "softwares-utm",
     ],
+    roles: {
+      "softwares-raycast":
+        "Launch apps and run everyday commands. Core features have a free tier; paid features are separate.",
+      "softwares-alttab": "Switch between windows with visual previews.",
+      "softwares-mounty":
+        "Work with NTFS drives; check current macOS compatibility before installing.",
+      "softwares-boring-notch":
+        "Add quick controls around the MacBook notch; check supported hardware.",
+    },
   },
   {
     id: "web-studio",
-    title: "Web Design & Frontend Studio",
-    tagline: "World-class design assets, palettes, and components",
-    description: "Everything you need to craft high-converting, Awwwards-quality web experiences and micro-interactions.",
-    badge: "Design • 8 Tools",
+    title: "Design a web interface",
+    tagline: "From the first sketch to components",
+    description:
+      "Sketch a flow, design the interface and choose real components and visual assets for the build.",
+    badge: "Design",
     iconName: "sparkles",
     itemIds: [
+      "websites-excalidraw",
+      "websites-penpot",
       "websites-react-bits",
-      "websites-fmhy",
-      "websites-awesome-swift-apps",
-      "websites-cobalt",
-      "websites-vert",
       "websites-isocons",
       "websites-shader-gradient",
-      "websites-excalidraw",
     ],
+    roles: {
+      "websites-excalidraw":
+        "Sketch the structure and user flow before polishing the interface.",
+      "websites-penpot":
+        "Create layouts and interface designs collaboratively.",
+      "websites-react-bits":
+        "Choose React interactions; check the component's license before reuse.",
+      "websites-isocons": "Find icons with a consistent visual treatment.",
+      "websites-shader-gradient":
+        "Explore a background treatment when it supports the design.",
+    },
   },
   {
     id: "cli-hacker",
-    title: "Terminal & CLI Hacker",
-    tagline: "Modern command-line scripts and multiplexers",
-    description: "Supercharge your shell with modern terminal emulators, fuzzy finders, debloaters, and system scripts.",
-    badge: "CLI • 8 Tools",
+    title: "A practical terminal kit",
+    tagline: "One terminal, useful tasks",
+    description:
+      "A terminal alongside tools for web-to-desktop packaging, media conversion and data extraction. Platform requirements differ by tool.",
+    badge: "CLI",
     iconName: "terminal",
     itemIds: [
       "softwares-tabby",
+      "scripts-pake",
       "scripts-ffmpeg-script",
-      "scripts-chris-titus-winutil",
-      "scripts-mas",
-      "scripts-win11debloat",
-      "scripts-cloudflare-error-page",
       "scripts-scrapy",
-      "scripts-dither",
     ],
+    roles: {
+      "softwares-tabby": "Use a terminal to run the tools in this kit.",
+      "scripts-pake":
+        "Package a web app as a desktop app with Rust and Tauri; check the build prerequisites.",
+      "scripts-ffmpeg-script":
+        "Read FFmpeg's documentation to build a conversion command for your media.",
+      "scripts-scrapy":
+        "Build a Python data extraction workflow; respect the target site's access rules.",
+    },
   },
   {
     id: "ai-lab",
-    title: "Local AI & Automation Lab",
-    tagline: "Run local models, autonomous agents, and AI vision",
-    description: "Curated collection of offline local LLM runtimes, AI code assistants, and generative pipelines.",
-    badge: "AI • 6 Tools",
+    title: "Explore local AI",
+    tagline: "Run, organize and transcribe",
+    description:
+      "Tools for running local models, working with your documents and transcribing audio. Model downloads and hardware requirements vary.",
+    badge: "Local AI",
     iconName: "globe",
     itemIds: [
-      "softwares-cline",
       "softwares-lm-studio",
-      "softwares-facefusion",
-      "softwares-droppy",
-      "softwares-open-researcher",
-      "softwares-gemini-watermark-remover",
+      "softwares-jan",
+      "softwares-anythingllm",
+      "softwares-handy",
     ],
+    roles: {
+      "softwares-lm-studio":
+        "Download a model that fits your machine and try local inference.",
+      "softwares-jan":
+        "Explore another local model interface; review model licenses separately.",
+      "softwares-anythingllm":
+        "Connect your documents and a chosen model backend; local operation depends on configuration.",
+      "softwares-handy":
+        "Try local speech transcription after downloading the required model.",
+    },
   },
 ];

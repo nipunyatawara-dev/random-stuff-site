@@ -1,42 +1,24 @@
 import type { Metadata } from "next";
-import { Inter, Phudu, Caveat, JetBrains_Mono } from "next/font/google";
+import { Hanken_Grotesk } from "next/font/google";
 import "./globals.css";
+import StorageNotice from "@/components/StorageNotice";
 import ColorModeController from "@/components/ColorModeController";
 import { COLOR_MODE_INIT_SCRIPT } from "@/lib/color-mode";
 import { items } from "@/data/items";
 
-import { SpeedInsights } from "@vercel/speed-insights/next";
-import { Analytics } from "@vercel/analytics/next";
+import { SITE_URL } from "@/lib/site";
+import PrivacySpeedInsights from "@/components/PrivacySpeedInsights";
 
-const inter = Inter({
+const hanken = Hanken_Grotesk({
   subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-});
-
-const phudu = Phudu({
-  subsets: ["latin"],
-  variable: "--font-phudu",
-  display: "swap",
-  weight: ["400", "500", "600", "700", "800", "900"],
-});
-
-const caveat = Caveat({
-  subsets: ["latin"],
-  variable: "--font-caveat",
-  display: "swap",
-});
-
-const mono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
+  variable: "--font-hanken",
   display: "swap",
 });
 
 const catalogDescription = `Directory of ${items.length} handpicked websites, desktop apps, and CLI scripts for builders and creators.`;
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://randomstuff.shocka.site"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Random Stuff - Curated Tools & Scripts Directory",
     template: "%s | Random Stuff",
@@ -45,7 +27,7 @@ export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
   icons: {
     icon: "/icon.png",
-    apple: "/icon.png",
+    apple: "/apple-touch-icon.png",
   },
   alternates: {
     canonical: "/",
@@ -56,7 +38,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Random Stuff - Curated Directory for Builders",
     description: catalogDescription,
-    url: "https://randomstuff.shocka.site",
+    url: SITE_URL,
     siteName: "Random Stuff",
     locale: "en_US",
     type: "website",
@@ -78,19 +60,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={`${inter.variable} ${phudu.variable} ${caveat.variable} ${mono.variable}`}
-    >
+    <html lang="en" suppressHydrationWarning className={hanken.variable}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: COLOR_MODE_INIT_SCRIPT }} />
       </head>
       <body className="font-sans antialiased bg-canvas text-studio-navy min-h-screen selection:bg-[#9DF71F] selection:text-studio-ink">
         <ColorModeController />
+        <StorageNotice />
+        <a className="skip-link" href="#main-content">
+          Skip to main content
+        </a>
         {children}
-        {shouldRenderVercelInsights ? <SpeedInsights /> : null}
-        {shouldRenderVercelInsights ? <Analytics /> : null}
+        {shouldRenderVercelInsights ? <PrivacySpeedInsights /> : null}
       </body>
     </html>
   );

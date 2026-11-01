@@ -1,8 +1,16 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type Lenis from "lenis";
-import { clearLenisInstance, lockPageScroll, setLenisInstance, startLenis } from "./lenis";
+type Lenis = Parameters<typeof setLenisInstance>[0];
+import {
+  clearLenisInstance,
+  lockPageScroll,
+  setLenisInstance,
+  startLenis,
+} from "./lenis";
 
-afterEach(() => { clearLenisInstance(); vi.unstubAllGlobals(); });
+afterEach(() => {
+  clearLenisInstance();
+  vi.unstubAllGlobals();
+});
 
 describe("shared modal scroll locking", () => {
   it("keeps scroll locked until every dialog releases it and restores the prior style", () => {
